@@ -1,71 +1,62 @@
-import { NextApiRequest, NextApiResponse } from 'next';
-import { Collection } from 'mongodb';
-import { connectToDb } from '../../../../db';
-import data from "@/travel_distances_grid.json";
-import { point, polygon } from '@turf/turf';
+import { NextApiRequest, NextApiResponse } from "next";
+import { Collection } from "mongodb";
+import { connectToDb } from "../../../../db";
+import data from "@/data/travel_distances_grid_geojson_170m.json";
 
-import fs from 'fs';
-import path from 'path';
+type Coordinate = { lat: number; lng: number };
+type GeoTravelTime = {
+  0: Coordinate;
+  1: Coordinate;
+  2: Coordinate;
+  3: Coordinate;
+  fastestTime: number;
+};
 
 export async function GET(request: Request) {
-    try {
-        console.log(data);
-        console.log("HEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEEJ")
-        const geoJsonData = convertToGeoJson(data);
-  
-        const { client, collection } = await connectToDb();
-        await collection.insertOne(geoJsonData);
-  
-        client.close();
-        return new Response('Data uploaded successfully')
-      } catch (error) {
-        return new Response("Error uploading data")
-      }
+  try {
+    const geoJsonData = convertToGeoJson(data);
+
+    const { client, collection } = await connectToDb();
+    await collection.insertMany(geoJsonData);
+
+    client.close();
+    return new Response("Data uploaded successfully");
+  } catch (error) {
+    return new Response("Error uploading data");
+  }
 }
 
-function midpoint(coord1: [number, number], coord2: [number, number]): [number, number] {
-    const midLng = (coord1[0] + coord2[0]) / 2;
-    const midLat = (coord1[1] + coord2[1]) / 2;
-    return [midLng, midLat];
-  }
+function convertToGeoJson(data: any[]) {
+  return data.map((entry) => {
+    const coordinates = [
+      [entry["0"].lng, entry["0"].lat],
+      [entry["1"].lng, entry["1"].lat],
+      [entry["2"].lng, entry["2"].lat],
+      [entry["3"].lng, entry["3"].lat],
+      [entry["0"].lng, entry["0"].lat], // Close the polygon by repeating the first coordinate
+    ];
 
-
-function convertToGeoJson(data: { lat: number; lng: number; fastestTime: number }[], expansionFactor: number = 0.5) {
-    const geoJsonFeatures = data.map((entry, index) => {
-      const currentCoordinates = [entry.lng, entry.lat];
-      const nextCoordinates = index < data.length - 1
-        ? [data[index + 1].lng, data[index + 1].lat]
-        : [entry.lng, entry.lat];
-  
-      const midPoint = midpoint(currentCoordinates, nextCoordinates);
-      const currentPoint = point(currentCoordinates);
-      const midPointObj = point(midPoint);
-  
-      const bufferedPolygon = polygon(
-        midPointObj.geometry.coordinates.map(coords =>
-          currentPoint.geometry.coordinates.map(coord => [
-            coord[0] + (coords[0] - coord[0]) * expansionFactor,
-            coord[1] + (coords[1] - coord[1]) * expansionFactor
-          ])
-        )
-      );
-  
-      return {
-        type: 'Feature',
-        geometry: bufferedPolygon.geometry,
-        properties: {
-          travelTime: entry.fastestTime
-        }
-      };
-    });
-  
-    return geoJsonFeatures;
-  }
-  
-async function readJsonData(filename : string) {
-    const rawData = await fs.promises.readFile('./travel_distances_grid.json', 'utf-8');
-    const jsonData = JSON.parse(rawData);
-    return jsonData;
+    return {
+      type: "Feature",
+      geometry: {
+        type: "Polygon",
+        coordinates: [coordinates],
+      },
+      properties: {
+        travelTime: entry.fastestTime,
+      },
+    };
+  });
 }
-    
-  
+
+function convertToGeoTravelTime(data: any[]): GeoTravelTime[] {
+  return data.map((entry) => {
+    return {
+      0: { lat: entry["0"].lat, lng: entry["0"].lng },
+      1: { lat: entry["1"].lat, lng: entry["1"].lng },
+      2: { lat: entry["2"].lat, lng: entry["2"].lng },
+      3: { lat: entry["3"].lat, lng: entry["3"].lng },
+      fastestTime: entry.fastestTime,
+    };
+  });
+}
