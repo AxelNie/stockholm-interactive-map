@@ -17,6 +17,8 @@ export async function GET(request: Request) {
     const geoJsonData = convertToGeoJson(data);
 
     const { client, collection } = await connectToDb();
+    await collection.deleteMany({});
+    await collection.createIndex({ geometry: "2dsphere" });
     await collection.insertMany(geoJsonData);
 
     client.close();
