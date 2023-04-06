@@ -1,21 +1,33 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectToDb } from "../../../../db";
 
-export async function GET(request: Request) {
+interface Position {
+  lat: number;
+  lng: number;
+}
+
+interface PositionsRequest {
+  positions: Position[];
+}
+
+interface TravelTimeResponse {
+  travelTimes: number[];
+}
+
+export async function GET(req: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const positions = searchParams.get("positions");
+    const data = await req.json();
+    console.log(data);
 
     // If no positions are provided, use a default position
     const defaultPosition = [{ lat: 59.522565, lng: 17.965865 }];
 
-    // Parse the positions and convert them to an array of coordinates
-    const coordinatesList = positions
-      ? JSON.parse(positions as string).map(
-          (coord: { lat: number; lng: number }) => [coord.lng, coord.lat]
-        )
-      : defaultPosition.map((coord) => [coord.lng, coord.lat]);
+    // Convert the positions to an array of coordinates
+    const coordinatesList = data.map((coord: { lat: number; lng: number }) => [
+      coord.lng,
+      coord.lat,
+    ]);
 
     const { client, collection } = await connectToDb();
 
@@ -37,10 +49,8 @@ export async function GET(request: Request) {
 
     client.close();
 
-    return NextResponse.json(
-      travelTimes.map((doc) => doc.properties.travelTime)
-    );
-  } catch (error) {
-    return NextResponse.json({ error: error.message });
-  }
+    return NextResponse.json({
+      travelTimes: travelTimes.map((doc) => doc.properties.travelTime),
+    });
+  } catch (error) {}
 }

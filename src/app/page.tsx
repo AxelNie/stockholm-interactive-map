@@ -1,6 +1,7 @@
 import Image from "next/image";
 import { Lato } from "next/font/google";
 import styles from "./page.module.css";
+import Map from "./components/map/map";
 
 const lato = Lato({
   subsets: ["latin"],
@@ -11,8 +12,7 @@ export default function Home() {
   return (
     <main className={lato.className}>
       <main className={styles.main}>
-        <h1>Rubrik</h1>
-        <p>Lite text</p>
+        <Map />
       </main>
     </main>
   );
