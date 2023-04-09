@@ -9,7 +9,7 @@ This project aims to build a web application that visualizes the travel time fro
 
 # Technologies and APIs
 
-- Next.js 13
+- Next.js 13 (Frontend and backend)
 - TypeScript
 - MongoDB
 - SL API
