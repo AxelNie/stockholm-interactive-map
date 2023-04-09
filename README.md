@@ -18,13 +18,19 @@ This project aims to build a web application that visualizes the travel time fro
 
 # Functionalities
 
-- Visualize travel time with dynamic colored overlays on the map
-- Display detailed travel time information when clicking on a location
-- Retrieve and show housing prices from a specific API for the selected location
+- Visualize travel time: Users can visualize the travel time from various locations in Stockholm to T-Centralen using dynamic colored overlays on the map.
+- Detailed travel time information: When clicking on a location on the map, users can view detailed travel time information, including the mode of transportation, distance, and estimated travel time.
+- Housing prices: The application will fetch and display housing price data from a specific API for the selected location, providing users with an idea of the cost of living in the area.
+
+Might be implemented:
+
+- Amenities and facilities: Users can view nearby amenities such as grocery stores, schools, parks, and healthcare facilities, providing a comprehensive overview of the area's livability.
+- Crime rates: The application will incorporate crime rate data for the selected location, allowing users to assess the safety of the area.
+- Demographics: Users can access demographic information, such as the average age, income, and education levels of residents, to gain insights into the neighborhood's profile.
 
 # Travel time data
 
-In this project, I am building a web application using Next.js 13 and MongoDB to visualize the travel time from various locations in Stockholm to T-Centralen (central Stockholm). The travel times have been precalculated using an API provided by SL (Stockholm Public Transport). Due to speed constraints and limitations on the number of API calls, I have precalculated the travel times from approximately 5000 stations to T-Centralen.
+In this project, I am building a web application using Next.js 13 and MongoDB to visualize the travel time from various locations in Stockholm to T-Centralen (central Stockholm). The travel times have been precalculated using an API provided by SL (Stockholm Public Transport). Due to speed constraints and limitations on the number of API calls, I have precalculated the travel times from all stations (approximately 5000) to T-Centralen.
 
 To cover the entire area of Stockholm, I have also precalculated the travel times from fixed positions, iterating over the area with a step of around 170 meters. I have approximated the walking distance and time based on the Euclidean distance and, considering the travel time from each station, identified the stations with the fastest total travel distance to T-centralen. I then assign the travel time to the area surrounding the coordinate.
 
