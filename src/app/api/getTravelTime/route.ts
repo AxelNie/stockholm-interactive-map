@@ -15,7 +15,14 @@ interface TravelTimeResponse {
   travelTimes: number[];
 }
 
-export async function GET(req: NextRequest) {
+interface coordinate{
+  lat: number;
+  lng: number;
+}
+
+
+
+export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
     console.log(data);
@@ -23,8 +30,13 @@ export async function GET(req: NextRequest) {
     // If no positions are provided, use a default position
     const defaultPosition = [{ lat: 59.522565, lng: 17.965865 }];
 
+    // Make sure the 'positions' property exists in the data object and is an array
+    if (!Array.isArray(data.positions)) {
+      data.positions = defaultPosition;
+    }
+
     // Convert the positions to an array of coordinates
-    const coordinatesList = data.map((coord: { lat: number; lng: number }) => [
+    const coordinatesList = data.positions.map((coord: coordinate) => [
       coord.lng,
       coord.lat,
     ]);
@@ -32,7 +44,7 @@ export async function GET(req: NextRequest) {
     const { client, collection } = await connectToDb();
 
     // Execute a $geoWithin query for each coordinate and retrieve the travel times
-    const travelTimesPromises = coordinatesList.map((coordinates) =>
+    const travelTimesPromises = coordinatesList.map((coordinates : coordinate[]) =>
       collection.findOne({
         geometry: {
           $geoIntersects: {
@@ -52,5 +64,14 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({
       travelTimes: travelTimes.map((doc) => doc.properties.travelTime),
     });
-  } catch (error) {}
+  } catch (error : any) {
+    console.error(error);
+    const sanitizedError = new Error("Failed to process the request");
+    sanitizedError.name = error.name;
+    sanitizedError.message = error.message;
+    return NextResponse.json({
+      error: sanitizedError
+    });
+
+  }
 }
