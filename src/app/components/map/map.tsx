@@ -78,17 +78,18 @@ async function drawOverlay(map: L.Map | null) {
     const rectangles = [];
 
     // Set the size of each rectangle to cover X pixels
-    const rectSize = 80;
+    const rectSize = 40;
 
     console.log("RENDERING POINTS...");
     let rendered_points = 0;
 
     var list_of_points: Coordinate[] = [];
 
-    // Get the points
+    // Add all points that we want to render to the list_of_points array
     for (let x = 0; x < width + rectSize / 2; x += rectSize) {
       for (let y = 0; y < height + rectSize / 2; y += rectSize) {
         rendered_points++;
+
         const point = map.layerPointToLatLng(
           map.containerPointToLayerPoint(L.point(x, y))
         );
@@ -107,15 +108,28 @@ async function drawOverlay(map: L.Map | null) {
       }
     }
 
+    console.log(
+      "Övre hörnet:",
+      list_of_points[0].lat + ", " + list_of_points[0].lng
+    );
+
     let travel_time_for_points = await getTravelTimes(list_of_points);
     travel_time_for_points = travel_time_for_points.travelTimes;
-    console.log("size: ", travel_time_for_points.length);
 
     for (var i = 0; i < travel_time_for_points.length; i++) {
-      console.log("llop");
       const fill = getColorForTravelTime(travel_time_for_points[i]);
-      const x = list_of_points[i].lat;
-      const y = list_of_points[i].lng;
+
+      var latlng = L.latLng(list_of_points[i]);
+      const pos = map.layerPointToContainerPoint(
+        map.latLngToLayerPoint(latlng)
+      );
+
+      if (i === 0) {
+        console.log(pos);
+      }
+
+      const x = pos.x;
+      const y = pos.y;
       rectangles.push(
         <rect
           key={`${x}-${y}`}
