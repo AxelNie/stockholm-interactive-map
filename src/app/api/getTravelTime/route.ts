@@ -1,34 +1,25 @@
-import { NextApiRequest, NextApiResponse } from "next";
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDb } from "../../../../db";
 
-interface Position {
+interface Coordinate {
   lat: number;
   lng: number;
 }
 
 interface PositionsRequest {
-  positions: Position[];
+  positions: Coordinate[];
 }
 
 interface TravelTimeResponse {
   travelTimes: number[];
 }
 
-interface coordinate{
-  lat: number;
-  lng: number;
-}
-
-
-
 export async function POST(req: NextRequest) {
   try {
-    const data = await req.json();
-    console.log(data);
+    const data: PositionsRequest = await req.json();
 
     // If no positions are provided, use a default position
-    const defaultPosition = [{ lat: 59.522565, lng: 17.965865 }];
+    const defaultPosition: Coordinate[] = [{ lat: 59.522565, lng: 17.965865 }];
 
     // Make sure the 'positions' property exists in the data object and is an array
     if (!Array.isArray(data.positions)) {
@@ -36,42 +27,44 @@ export async function POST(req: NextRequest) {
     }
 
     // Convert the positions to an array of coordinates
-    const coordinatesList = data.positions.map((coord: coordinate) => [
-      coord.lng,
-      coord.lat,
-    ]);
+    const coordinatesList: Coordinate[] = data.positions;
 
     const { client, collection } = await connectToDb();
 
-    // Execute a $geoWithin query for each coordinate and retrieve the travel times
-    const travelTimesPromises = coordinatesList.map((coordinates : coordinate[]) =>
-      collection.findOne({
-        geometry: {
-          $geoIntersects: {
-            $geometry: {
-              type: "Point",
-              coordinates,
-            },
+    // Build an array of $geoIntersects conditions for each coordinate
+    const geoIntersectsConditions = coordinatesList.map((coordinates: Coordinate) => ({
+      geometry: {
+        $geoIntersects: {
+          $geometry: {
+            type: "Point",
+            coordinates: [coordinates.lng, coordinates.lat],
           },
         },
-      })
-    );
+      },
+    }));
 
-    const travelTimes = await Promise.all(travelTimesPromises);
+    // Execute a single query to find all matching points
+    const travelTimesDocs = await collection.find({
+      $or: geoIntersectsConditions,
+    }).toArray();
+
 
     client.close();
 
+    const travelTimes: number[] = travelTimesDocs.map((doc: any) => doc.properties.travelTime);
+
+
     return NextResponse.json({
-      travelTimes: travelTimes.map((doc) => doc.properties.travelTime),
+      travelTimes,
     });
-  } catch (error : any) {
+  } catch (error: any) {
     console.error(error);
     const sanitizedError = new Error("Failed to process the request");
     sanitizedError.name = error.name;
     sanitizedError.message = error.message;
     return NextResponse.json({
-      error: sanitizedError
+      error: sanitizedError,
     });
-
   }
 }
+

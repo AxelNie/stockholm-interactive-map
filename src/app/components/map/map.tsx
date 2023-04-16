@@ -1,17 +1,14 @@
-"use client";
-
-import React, { useEffect, useState, useCallback, useRef } from "react";
+import React, { useEffect, useState, useCallback } from "react";
 import {
   MapContainer,
-  SVGOverlay,
-  TileLayer,
-  useMap,
   Marker,
   Popup,
-  useMapEvent,
+  TileLayer,
+  useMap,
+  SVGOverlay,
 } from "react-leaflet";
 import L from "leaflet";
-import "./map.css";
+import "leaflet/dist/leaflet.css";
 
 interface MapOverlayProps {
   travelDistancesGrid: any;
@@ -29,19 +26,31 @@ interface Coordinate {
 }
 
 async function getTravelTimes(coordinates: Coordinate[]): Promise<number[]> {
-  const url = "http://localhost:3000/api/gettraveltime";
+  const url = "http://localhost:3000/api/getTravelTime";
   const data = { positions: coordinates };
 
-  const response = await fetch(url, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify(data),
-  });
+  try {
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(data),
+    });
 
-  const travelTimes = await response.json();
-  return travelTimes;
+    if (!response.ok) {
+      throw new Error(`An error occurred: ${response.statusText}`);
+    }
+
+    const travelTimes = await response.json();
+
+    return travelTimes;
+  } catch (error: any) {
+    console.error(`An error occurred: ${error.message}`);
+    // You may want to return an appropriate fallback value or rethrow the error
+    // depending on how you want to handle errors in your application.
+    return [];
+  }
 }
 
 // Function to get the color for a given travel time
@@ -68,8 +77,8 @@ async function drawOverlay(map: L.Map | null) {
     // Create an array to store the rectangles
     const rectangles = [];
 
-    // Set the size of each rectangle to cover 10 pixels
-    const rectSize = 10;
+    // Set the size of each rectangle to cover X pixels
+    const rectSize = 80;
 
     console.log("RENDERING POINTS...");
     let rendered_points = 0;
@@ -98,9 +107,12 @@ async function drawOverlay(map: L.Map | null) {
       }
     }
 
-    const travel_time_for_points = await getTravelTimes(list_of_points);
+    let travel_time_for_points = await getTravelTimes(list_of_points);
+    travel_time_for_points = travel_time_for_points.travelTimes;
+    console.log("size: ", travel_time_for_points.length);
 
     for (var i = 0; i < travel_time_for_points.length; i++) {
+      console.log("llop");
       const fill = getColorForTravelTime(travel_time_for_points[i]);
       const x = list_of_points[i].lat;
       const y = list_of_points[i].lng;
@@ -115,6 +127,7 @@ async function drawOverlay(map: L.Map | null) {
         />
       );
     }
+    console.log(rectangles);
 
     console.log("rendered_points: ", rendered_points);
 
@@ -138,7 +151,7 @@ async function drawOverlay(map: L.Map | null) {
   }
 }
 
-function MapOverlay(props: MapOverlayProps) {
+function MapOverlay() {
   const parentMap = useMap();
   const [rectangles, setRectangles] = useState<any>(null);
 
@@ -146,7 +159,6 @@ function MapOverlay(props: MapOverlayProps) {
     const fetchData = async () => {
       const data = await drawOverlay(parentMap);
       setRectangles(data);
-      props.setLoadingStateRender(true);
       console.log("DONE RENDERING!");
     };
     fetchData();
@@ -155,7 +167,7 @@ function MapOverlay(props: MapOverlayProps) {
   const onChange = useCallback(() => {
     drawOverlay(parentMap).then((data) => {
       setRectangles(data);
-      props.setLoadingStateRender(true);
+
       console.log("DONE RENDERING!");
     });
   }, [parentMap]);
@@ -168,10 +180,6 @@ function MapOverlay(props: MapOverlayProps) {
   }, [parentMap, onChange]);
 
   return <SVGOverlay bounds={parentMap.getBounds()}>{rectangles}</SVGOverlay>;
-}
-
-interface MapProps {
-  getProgressOfDownload: () => number;
 }
 
 function Map() {
@@ -189,10 +197,8 @@ function Map() {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
           attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
         />
-
         <MapOverlay className="overlay" />
       </MapContainer>
-      <div className="test">Hej</div>
     </div>
   );
 }
