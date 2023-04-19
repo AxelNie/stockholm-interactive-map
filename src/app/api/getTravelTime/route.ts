@@ -1,46 +1,74 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { connectToDb } from "../../../../db";
 
-export async function GET(request: Request) {
+interface Coordinate {
+  lat: number;
+  lng: number;
+}
+
+interface PositionsRequest {
+  positions: Coordinate[];
+}
+
+interface TravelTimeResponse {
+  travelTimes: number[];
+}
+
+async function findClosestLocation(coordinate: Coordinate, collection: any) {
+  const query = [
+    {
+      $geoNear: {
+        near: { type: "Point", coordinates: [coordinate.lng, coordinate.lat] },
+        distanceField: "distance",
+        spherical: true,
+        num: 1,
+      },
+    },
+  ];
+
+  const result = await collection.aggregate(query).toArray();
+  return result[0];
+}
+
+export async function POST(req: NextRequest) {
   try {
-    const { searchParams } = new URL(request.url);
-    const positions = searchParams.get("positions");
+    const data: PositionsRequest = await req.json();
 
     // If no positions are provided, use a default position
-    const defaultPosition = [{ lat: 59.522565, lng: 17.965865 }];
+    const defaultPosition: Coordinate[] = [{ lat: 59.522565, lng: 17.965865 }];
 
-    // Parse the positions and convert them to an array of coordinates
-    const coordinatesList = positions
-      ? JSON.parse(positions as string).map(
-          (coord: { lat: number; lng: number }) => [coord.lng, coord.lat]
-        )
-      : defaultPosition.map((coord) => [coord.lng, coord.lat]);
+    // Make sure the 'positions' property exists in the data object and is an array
+    if (!Array.isArray(data.positions)) {
+      data.positions = defaultPosition;
+    }
+
+    // Convert the positions to an array of coordinates
+    const coordinatesList: Coordinate[] = data.positions;
 
     const { client, collection } = await connectToDb();
 
-    // Execute a $geoWithin query for each coordinate and retrieve the travel times
-    const travelTimesPromises = coordinatesList.map((coordinates) =>
-      collection.findOne({
-        geometry: {
-          $geoIntersects: {
-            $geometry: {
-              type: "Point",
-              coordinates,
-            },
-          },
-        },
-      })
+    // Find the closest location for each coordinate
+    const closestLocationsPromises = coordinatesList.map((coordinate) =>
+      findClosestLocation(coordinate, collection)
     );
-
-    const travelTimes = await Promise.all(travelTimesPromises);
+    const closestLocations = await Promise.all(closestLocationsPromises);
 
     client.close();
 
-    return NextResponse.json(
-      travelTimes.map((doc) => doc.properties.travelTime)
+    const travelTimes: number[] = closestLocations.map(
+      (location: any) => location.properties.travelTime
     );
-  } catch (error) {
-    return NextResponse.json({ error: error.message });
+
+    return NextResponse.json({
+      travelTimes,
+    });
+  } catch (error: any) {
+    console.error(error);
+    const sanitizedError = new Error("Failed to process the request");
+    sanitizedError.name = error.name;
+    sanitizedError.message = error.message;
+    return NextResponse.json({
+      error: sanitizedError,
+    });
   }
 }
