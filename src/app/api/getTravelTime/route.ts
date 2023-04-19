@@ -14,6 +14,22 @@ interface TravelTimeResponse {
   travelTimes: number[];
 }
 
+async function findClosestLocation(coordinate: Coordinate, collection: any) {
+  const query = [
+    {
+      $geoNear: {
+        near: { type: "Point", coordinates: [coordinate.lng, coordinate.lat] },
+        distanceField: "distance",
+        spherical: true,
+        num: 1,
+      },
+    },
+  ];
+
+  const result = await collection.aggregate(query).toArray();
+  return result[0];
+}
+
 export async function POST(req: NextRequest) {
   try {
     const data: PositionsRequest = await req.json();
@@ -31,28 +47,17 @@ export async function POST(req: NextRequest) {
 
     const { client, collection } = await connectToDb();
 
-    // Build an array of $geoIntersects conditions for each coordinate
-    const geoIntersectsConditions = coordinatesList.map((coordinates: Coordinate) => ({
-      geometry: {
-        $geoIntersects: {
-          $geometry: {
-            type: "Point",
-            coordinates: [coordinates.lng, coordinates.lat],
-          },
-        },
-      },
-    }));
-
-    // Execute a single query to find all matching points
-    const travelTimesDocs = await collection.find({
-      $or: geoIntersectsConditions,
-    }).toArray();
-
+    // Find the closest location for each coordinate
+    const closestLocationsPromises = coordinatesList.map((coordinate) =>
+      findClosestLocation(coordinate, collection)
+    );
+    const closestLocations = await Promise.all(closestLocationsPromises);
 
     client.close();
 
-    const travelTimes: number[] = travelTimesDocs.map((doc: any) => doc.properties.travelTime);
-
+    const travelTimes: number[] = closestLocations.map(
+      (location: any) => location.properties.travelTime
+    );
 
     return NextResponse.json({
       travelTimes,
@@ -67,4 +72,3 @@ export async function POST(req: NextRequest) {
     });
   }
 }
-

@@ -1,16 +1,7 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { Collection } from "mongodb";
 import { connectToDb } from "../../../../db";
-import data from "@/data/travel_distances_grid_geojson_170m.json";
-
-type Coordinate = { lat: number; lng: number };
-type GeoTravelTime = {
-  0: Coordinate;
-  1: Coordinate;
-  2: Coordinate;
-  3: Coordinate;
-  fastestTime: number;
-};
+import data from "@/data/travel_distances_grid_geojson_250m_point.json";
 
 export async function GET(request: Request) {
   try {
@@ -18,7 +9,7 @@ export async function GET(request: Request) {
 
     const { client, collection } = await connectToDb();
     await collection.deleteMany({});
-    await collection.createIndex({ geometry: "2dsphere" });
+    await collection.createIndex({ location: "2dsphere" });
     await collection.insertMany(geoJsonData);
 
     client.close();
@@ -29,36 +20,14 @@ export async function GET(request: Request) {
 }
 
 function convertToGeoJson(data: any[]) {
-  return data.map((entry) => {
-    const coordinates = [
-      [entry["0"].lng, entry["0"].lat],
-      [entry["1"].lng, entry["1"].lat],
-      [entry["2"].lng, entry["2"].lat],
-      [entry["3"].lng, entry["3"].lat],
-      [entry["0"].lng, entry["0"].lat], // Close the polygon by repeating the first coordinate
-    ];
-
+  return data.map((position) => {
     return {
-      type: "Feature",
-      geometry: {
-        type: "Polygon",
-        coordinates: [coordinates],
+      name: "Location", // Optional, you can add a name or other identifier if desired
+      location: {
+        type: "Point",
+        coordinates: [position.lng, position.lat],
       },
-      properties: {
-        travelTime: entry.fastestTime,
-      },
-    };
-  });
-}
-
-function convertToGeoTravelTime(data: any[]): GeoTravelTime[] {
-  return data.map((entry) => {
-    return {
-      0: { lat: entry["0"].lat, lng: entry["0"].lng },
-      1: { lat: entry["1"].lat, lng: entry["1"].lng },
-      2: { lat: entry["2"].lat, lng: entry["2"].lng },
-      3: { lat: entry["3"].lat, lng: entry["3"].lng },
-      fastestTime: entry.fastestTime,
+      travelTime: position.fastestTime,
     };
   });
 }
