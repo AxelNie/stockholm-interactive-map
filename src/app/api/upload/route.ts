@@ -9,7 +9,7 @@ export async function GET(request: Request) {
 
     const { client, collection } = await connectToDb();
     await collection.deleteMany({});
-    await collection.createIndex({ location: "2dsphere" });
+    await collection.createIndex({ "location.coordinates": "2dsphere" });
     await collection.insertMany(geoJsonData);
 
     client.close();

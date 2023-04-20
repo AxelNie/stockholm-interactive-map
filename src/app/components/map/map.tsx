@@ -78,7 +78,7 @@ async function drawOverlay(map: L.Map | null) {
     const rectangles = [];
 
     // Set the size of each rectangle to cover X pixels
-    const rectSize = 40;
+    const rectSize = 200;
 
     console.log("RENDERING POINTS...");
     let rendered_points = 0;
@@ -108,12 +108,8 @@ async function drawOverlay(map: L.Map | null) {
       }
     }
 
-    console.log(
-      "Övre hörnet:",
-      list_of_points[0].lat + ", " + list_of_points[0].lng
-    );
-
     let travel_time_for_points = await getTravelTimes(list_of_points);
+    console.log(travel_time_for_points);
     travel_time_for_points = travel_time_for_points.travelTimes;
 
     for (var i = 0; i < travel_time_for_points.length; i++) {

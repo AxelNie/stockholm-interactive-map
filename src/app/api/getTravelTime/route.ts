@@ -21,8 +21,10 @@ async function findClosestLocation(coordinate: Coordinate, collection: any) {
         near: { type: "Point", coordinates: [coordinate.lng, coordinate.lat] },
         distanceField: "distance",
         spherical: true,
-        num: 1,
       },
+    },
+    {
+      $limit: 1,
     },
   ];
 
@@ -47,7 +49,7 @@ export async function POST(req: NextRequest) {
 
     const { client, collection } = await connectToDb();
 
-    // Find the closest location for each coordinate
+    // Find the closest location for each coordinate using Promise.all()
     const closestLocationsPromises = coordinatesList.map((coordinate) =>
       findClosestLocation(coordinate, collection)
     );
@@ -56,7 +58,7 @@ export async function POST(req: NextRequest) {
     client.close();
 
     const travelTimes: number[] = closestLocations.map(
-      (location: any) => location.properties.travelTime
+      (location: any) => location.travelTime
     );
 
     return NextResponse.json({
@@ -69,6 +71,7 @@ export async function POST(req: NextRequest) {
     sanitizedError.message = error.message;
     return NextResponse.json({
       error: sanitizedError,
+      errorMessage: error.message,
     });
   }
 }
