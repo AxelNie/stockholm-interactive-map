@@ -47,7 +47,7 @@ export async function POST(req: NextRequest) {
     // Convert the positions to an array of coordinates
     const coordinatesList: Coordinate[] = data.positions;
 
-    const { client, collection } = await connectToDb();
+    const { client, collection } = await connectToDb("GeoTimeGridPoints");
 
     // Find the closest location for each coordinate using Promise.all()
     const closestLocationsPromises = coordinatesList.map((coordinate) =>

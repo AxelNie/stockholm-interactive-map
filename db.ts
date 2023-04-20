@@ -1,9 +1,9 @@
 import { MongoClient, Collection } from "mongodb";
 
-export async function connectToDb() {
+export async function connectToDb(name: string) {
   const uri = `${process.env.DB_URI}`;
   const database = `${process.env.DB_DATABASE}`;
-  const collection_name = `${process.env.DB_COLLECTION}`;
+  const collection_name = name;
 
   const client = new MongoClient(uri);
 

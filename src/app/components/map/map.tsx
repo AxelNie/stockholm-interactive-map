@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import {
   MapContainer,
   Marker,
@@ -6,9 +6,25 @@ import {
   TileLayer,
   useMap,
   SVGOverlay,
+  useMapEvents,
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
+import { getTravelTime } from "@/queries/getTravelTime";
+import { buildTree, findClosestNode } from "@/lib/KDtree";
+import { icon } from "leaflet";
+import image from "@/lib/bakgrund.jpg";
+
+const ICON = icon({
+  iconUrl: image,
+  iconSize: [32, 32],
+});
+
+interface MapClickHandlerProps {
+  setClickedLocationData: (data: TravelTimeData | null) => void;
+  setClickedLocation: (location: Coordinate | null) => void;
+  travelDistancesGrid: any;
+}
 
 interface MapOverlayProps {
   travelDistancesGrid: any;
@@ -20,9 +36,10 @@ interface Coordinate {
   lng: number;
 }
 
-interface Coordinate {
+interface TravelTimeData {
   lat: number;
   lng: number;
+  fastestTime: number;
 }
 
 async function getTravelTimes(coordinates: Coordinate[]): Promise<number[]> {
@@ -57,43 +74,44 @@ async function getTravelTimes(coordinates: Coordinate[]): Promise<number[]> {
 const getColorForTravelTime = (travelTime: number) => {
   // You can use a color scale or any other method to map the travel time to a color
   if (travelTime <= 15) {
-    return "#00FF0050"; // Green
+    return "#00FF0040"; // Green
   } else if (travelTime < 30) {
-    return "#FFFF0050"; // Yellow
+    return "#FFFF0040"; // Yellow
   } else if (travelTime < 45) {
-    return "#FFA50050"; // Orange
+    return "#FFA50040"; // Orange
   } else if (travelTime < 150) {
-    return "#FF000050"; // Red
+    return "#FF000040"; // Red
   } else {
-    return "#00000020"; // Black
+    return "#00000040"; // Black
   }
 };
 
-async function drawOverlay(map: L.Map | null) {
-  if (map !== null) {
+async function drawOverlay(
+  map: L.Map | null,
+  travelDistancesGrid: TravelTimeData[]
+): Promise<JSX.Element | null> {
+  if (map !== null && travelDistancesGrid !== null) {
     const width = map.getSize().x;
     const height = map.getSize().y;
 
     // Create an array to store the rectangles
     const rectangles = [];
 
-    // Set the size of each rectangle to cover X pixels
-    const rectSize = 200;
+    // Set the size of each rectangle to cover 10 pixels
+    const rectSize = 10;
 
     console.log("RENDERING POINTS...");
     let rendered_points = 0;
 
-    var list_of_points: Coordinate[] = [];
+    // Get the points
 
-    // Add all points that we want to render to the list_of_points array
     for (let x = 0; x < width + rectSize / 2; x += rectSize) {
       for (let y = 0; y < height + rectSize / 2; y += rectSize) {
         rendered_points++;
-
         const point = map.layerPointToLatLng(
           map.containerPointToLayerPoint(L.point(x, y))
         );
-        const targetPoint: Coordinate = { lat: point.lat, lng: point.lng };
+        const targetPoint = { lat: point.lat, lng: point.lng };
 
         if (
           targetPoint.lat > 59.145848 &&
@@ -101,44 +119,22 @@ async function drawOverlay(map: L.Map | null) {
           targetPoint.lng > 17.579331 &&
           targetPoint.lng < 18.360638
         ) {
-          list_of_points.push(targetPoint);
-        }
-        {
+          const closestNode = findClosestNode(travelDistancesGrid, targetPoint);
+          const fill = getColorForTravelTime(closestNode.fastestTime);
+
+          rectangles.push(
+            <rect
+              key={`${x}-${y}`}
+              x={x - rectSize / 2}
+              y={y - rectSize / 2}
+              width={rectSize}
+              height={rectSize}
+              fill={fill}
+            />
+          );
         }
       }
     }
-
-    let travel_time_for_points = await getTravelTimes(list_of_points);
-    console.log(travel_time_for_points);
-    travel_time_for_points = travel_time_for_points.travelTimes;
-
-    for (var i = 0; i < travel_time_for_points.length; i++) {
-      const fill = getColorForTravelTime(travel_time_for_points[i]);
-
-      var latlng = L.latLng(list_of_points[i]);
-      const pos = map.layerPointToContainerPoint(
-        map.latLngToLayerPoint(latlng)
-      );
-
-      if (i === 0) {
-        console.log(pos);
-      }
-
-      const x = pos.x;
-      const y = pos.y;
-      rectangles.push(
-        <rect
-          key={`${x}-${y}`}
-          x={x - rectSize / 2}
-          y={y - rectSize / 2}
-          width={rectSize}
-          height={rectSize}
-          fill={fill}
-        />
-      );
-    }
-    console.log(rectangles);
-
     console.log("rendered_points: ", rendered_points);
 
     return (
@@ -161,26 +157,25 @@ async function drawOverlay(map: L.Map | null) {
   }
 }
 
-function MapOverlay() {
+function MapOverlay(props: MapOverlayProps): JSX.Element | null {
   const parentMap = useMap();
   const [rectangles, setRectangles] = useState<any>(null);
 
   useEffect(() => {
     const fetchData = async () => {
-      const data = await drawOverlay(parentMap);
+      const data = await drawOverlay(parentMap, props.travelDistancesGrid);
       setRectangles(data);
       console.log("DONE RENDERING!");
     };
     fetchData();
-  }, [parentMap]);
+  }, [parentMap, props.travelDistancesGrid]);
 
   const onChange = useCallback(() => {
-    drawOverlay(parentMap).then((data) => {
+    drawOverlay(parentMap, props.travelDistancesGrid).then((data) => {
       setRectangles(data);
-
       console.log("DONE RENDERING!");
     });
-  }, [parentMap]);
+  }, [parentMap, props.travelDistancesGrid]);
 
   useEffect(() => {
     parentMap.on("moveend", onChange);
@@ -192,7 +187,52 @@ function MapOverlay() {
   return <SVGOverlay bounds={parentMap.getBounds()}>{rectangles}</SVGOverlay>;
 }
 
+function MapClickHandler({
+  setClickedLocationData,
+  setClickedLocation,
+  travelDistancesGrid,
+}: MapClickHandlerProps) {
+  const map = useMapEvents({
+    click: (event) => {
+      console.log("clicked");
+      const clickedPoint = event.latlng;
+      const closestNode = findClosestNode(travelDistancesGrid, clickedPoint);
+      setClickedLocationData(closestNode);
+      setClickedLocation(clickedPoint); // Set the clicked location
+    },
+  });
+
+  return null;
+}
+
 function Map() {
+  const [travelDistancesGrid, setTravelDistancesGrid] = useState(null);
+  const intializedLoadOfData = useRef(false);
+  const [clickedLocationData, setClickedLocationData] = useState(null);
+  const [clickedLocation, setClickedLocation] = useState<Coordinate | null>(
+    null
+  );
+
+  useEffect(
+    () => {
+      const fetchData = async () => {
+        if (!intializedLoadOfData.current) {
+          intializedLoadOfData.current = true;
+          console.log("fetching data from getTravelDistancesGrid");
+          const result: TravelTimeData[] = await getTravelTime();
+          console.log("fetched data: ", result);
+          const tree = buildTree(result);
+          setTravelDistancesGrid(tree);
+          console.log("DONE LOADING!");
+        }
+      };
+      fetchData();
+    },
+    [
+      /* never changes */
+    ]
+  );
+
   return (
     <div className="container">
       <MapContainer
@@ -204,11 +244,44 @@ function Map() {
       >
         <TileLayer
           className="map"
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-          attribution='&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+          url={process.env.NEXT_PUBLIC_MAP_STYLE_API_URL}
+          attribution="© <a href='https://www.mapbox.com/about/maps/'>Mapbox</a> © <a href='http://www.openstreetmap.org/copyright'>OpenStreetMap</a> <strong><a href='https://www.mapbox.com/map-feedback/' target='_blank'>Improve this map</a></strong>"
         />
-        <MapOverlay className="overlay" />
+        <MapOverlay
+          className="overlay"
+          travelDistancesGrid={travelDistancesGrid}
+        />
+        {clickedLocation && (
+          <Marker position={clickedLocation} icon={ICON}>
+            <Popup>
+              {clickedLocationData ? (
+                <div>
+                  <p>Latitude: {clickedLocationData.lat.toFixed(6)}</p>
+                  <p>Longitude: {clickedLocationData.lng.toFixed(6)}</p>
+                  <p>
+                    Fastest travel time: {clickedLocationData.fastestTime}{" "}
+                    minutes
+                  </p>
+                </div>
+              ) : (
+                <p>Loading travel time...</p>
+              )}
+            </Popup>
+          </Marker>
+        )}
+        <MapClickHandler
+          setClickedLocationData={setClickedLocationData}
+          setClickedLocation={setClickedLocation}
+          travelDistancesGrid={travelDistancesGrid}
+        />
       </MapContainer>
+      {clickedLocationData && (
+        <div className="location-info">
+          <p>Latitude: {clickedLocationData.lat.toFixed(6)}</p>
+          <p>Longitude: {clickedLocationData.lng.toFixed(6)}</p>
+          <p>Fastest travel time: {clickedLocationData.fastestTime} minutes</p>
+        </div>
+      )}
     </div>
   );
 }

@@ -21,9 +21,12 @@
     ],
     "paths": {
       "@/*": ["./src/*"],
-      "@/components/*": ["./src/app/components/*"]
+      "@/components/*": ["./src/app/components/*"],
+      "@/lib/*": ["./src/lib/*"],
+      "@/data/*": ["./src/lib/data*"],
+      "@/queries/*": ["./src/lib/queries/*"],
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/api/getTravelTime"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/api/getTravelTimeGeoSpatial"],
   "exclude": ["node_modules"]
 }
