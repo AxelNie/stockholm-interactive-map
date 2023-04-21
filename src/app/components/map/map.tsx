@@ -7,16 +7,20 @@ import {
   useMap,
   SVGOverlay,
   useMapEvents,
+  Pane,
 } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { getTravelTime } from "@/queries/getTravelTime";
 import { buildTree, findClosestNode } from "@/lib/KDtree";
 import { icon } from "leaflet";
-import image from "@/lib/bakgrund.jpg";
+import Image from "next/image";
+import "./map.css";
+
+const marker = "/marker.svg";
 
 const ICON = icon({
-  iconUrl: image,
+  iconUrl: marker,
   iconSize: [32, 32],
 });
 
@@ -74,15 +78,15 @@ async function getTravelTimes(coordinates: Coordinate[]): Promise<number[]> {
 const getColorForTravelTime = (travelTime: number) => {
   // You can use a color scale or any other method to map the travel time to a color
   if (travelTime <= 15) {
-    return "#00FF0040"; // Green
+    return "#00FF00"; // Green
   } else if (travelTime < 30) {
-    return "#FFFF0040"; // Yellow
+    return "#FFFF00"; // Yellow
   } else if (travelTime < 45) {
-    return "#FFA50040"; // Orange
+    return "#FFA500"; // Orange
   } else if (travelTime < 150) {
-    return "#FF000040"; // Red
+    return "#FF0000"; // Red
   } else {
-    return "#00000040"; // Black
+    return "#000000"; // Black
   }
 };
 
@@ -98,7 +102,7 @@ async function drawOverlay(
     const rectangles = [];
 
     // Set the size of each rectangle to cover 10 pixels
-    const rectSize = 10;
+    const rectSize = 4;
 
     console.log("RENDERING POINTS...");
     let rendered_points = 0;
@@ -184,7 +188,13 @@ function MapOverlay(props: MapOverlayProps): JSX.Element | null {
     };
   }, [parentMap, onChange]);
 
-  return <SVGOverlay bounds={parentMap.getBounds()}>{rectangles}</SVGOverlay>;
+  return (
+    <Pane name="customPane" style={{ zIndex: 500 }}>
+      <SVGOverlay className="svg" bounds={parentMap.getBounds()}>
+        {rectangles}
+      </SVGOverlay>
+    </Pane>
+  );
 }
 
 function MapClickHandler({

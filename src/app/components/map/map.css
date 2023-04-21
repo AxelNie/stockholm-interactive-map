@@ -1,6 +1,7 @@
-
-
-.container{
+.container {
   position: relative;
 }
 
+.leaflet-pane[name="customPane"] svg {
+  mix-blend-mode: hue;
+}
