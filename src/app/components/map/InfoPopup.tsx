@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import "./InfoPopup.scss";
 import TravelTime from "./TravelTime";
 import TravelLeg from "./TravelLeg";
+import { MdOutlineClose } from "react-icons/md";
+import LoadingSkeleton from "./LoadingSkeleton";
 
 interface ILocationData {
   startAddress: string;
@@ -18,6 +20,13 @@ interface ILocationData {
       coordinates: number[];
     };
   }[];
+}
+
+function extractCityAndStreet(input: string): [string, string] {
+  const parts = input.split(",");
+  const street = parts[1].trim();
+  const city = parts[0].trim();
+  return [city, street];
 }
 
 const InfoPopup = ({ coordinates, onClose }) => {
@@ -62,19 +71,78 @@ const InfoPopup = ({ coordinates, onClose }) => {
   return (
     <div className="info-popup-container">
       {errorMessage && <div className="error-message">{errorMessage}</div>}
-      {locationData && (
-        <div className="travel-info-container">
-          <h3>{locationData.startAddress}</h3>
-          <h4>Travel information</h4>
-          <p>Total travel time: {locationData.totalTravelTime}</p>
-          {locationData.legs.map((leg, index) => (
-            <TravelLeg leg={leg} key={index} />
-          ))}
-          <TravelTime time={locationData.totalTravelTime} />
-        </div>
+      {locationData ? (
+        <>
+          <MdOutlineClose className="close-icon" onClick={onClose} />
+          <div className="loaded-content">
+            <Header address={locationData.startAddress} />
+            <div className="travel-info-container">
+              {locationData.legs.map((leg, index) => (
+                <>
+                  <TravelLeg leg={leg} key={index} />
+                  {index < locationData.legs.length - 1 && (
+                    <TimeBetweenLeg
+                      leg={leg}
+                      locationData={locationData}
+                      index={index}
+                    />
+                  )}
+                </>
+              ))}
+              <TravelTime time={locationData.totalTravelTime} />
+            </div>
+          </div>
+        </>
+      ) : (
+        <LoadingSkeleton />
       )}
-      <button onClick={onClose}>Close</button>
     </div>
+  );
+};
+
+// Header component
+const Header = ({ address }) => {
+  const [city, street] = extractCityAndStreet(address);
+  return (
+    <div className="header">
+      <h1 className="city">{city}</h1>
+      <h4 className="street">{street}</h4>
+      <div className="divider" />
+    </div>
+  );
+};
+
+const TimeBetweenLeg = ({ leg, locationData, index }) => {
+  // Helper function to calculate time difference
+  const calculateTimeDifference = (
+    prevTime: string,
+    prevTravelTime: string,
+    nextTime: string
+  ) => {
+    const travelTimeInMinutes = parseInt(prevTravelTime.slice(2, -1));
+    const prevDate = new Date(`1970-01-01T${prevTime}`);
+    const arrivalDate = new Date(
+      prevDate.getTime() + travelTimeInMinutes * 60000
+    );
+    const nextDate = new Date(`1970-01-01T${nextTime}`);
+    const diffInMinutes = (nextDate.getTime() - arrivalDate.getTime()) / 60000;
+
+    return diffInMinutes;
+  };
+
+  return (
+    <>
+      <div className="divider-small" />
+      <div className="time-between-leg">
+        {calculateTimeDifference(
+          leg.time,
+          leg.travelTime,
+          locationData.legs[index + 1].time
+        )}{" "}
+        min change time
+      </div>
+      <div className="divider-small" />
+    </>
   );
 };
 

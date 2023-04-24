@@ -1,0 +1,61 @@
+@import '@/app/variables.module.scss';
+
+.loading-skeleton {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .header-skeleton,
+  .travel-leg-skeleton,
+  .time-between-skeleton,
+  .travel-time-skeleton {
+    background-color: $grey ; /* Choose a color that matches your design */
+    border-radius: 4px;
+    animation: wave-fade 0.7s ease-in-out infinite;
+  }
+  
+  .header-skeleton {
+    height: 34px;
+    width: 100%;
+    margin-bottom: 16px;
+    animation-delay: 0.1s;
+  }
+  
+  .content-skeleton {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .travel-leg-skeleton {
+    height: 58px;
+    width: 100%;
+    margin-bottom: 8px;
+    animation-delay: 0.2s;
+  }
+  
+  .time-between-skeleton {
+    height:26px;
+    width: 100%;
+    margin-bottom: 8px;
+    animation-delay: 0.3s;
+  }
+  
+  .travel-time-skeleton {
+    height: 26px;
+    width: 100%;
+    animation-delay: 0.4s;
+  }
+  
+
+  @keyframes wave-fade {
+    0% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.5;
+    }
+    100% {
+      opacity: 1;
+    }
+  }
+  

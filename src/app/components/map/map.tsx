@@ -89,17 +89,17 @@ const Map: React.FC<MapProps> = ({ onMapClick }) => {
                 ["linear"],
                 ["get", "fastestTime"],
                 0,
-                "#00FF00", // Green
+                "#26d926", // Green
                 15,
-                "#00FF00", // Green
+                "#26d926", // Green
                 30,
-                "#FFFF00", // Yellow
+                "#d9d926", // Yellow
                 45,
-                "#FFA500", // Orange
+                "#d99a26", // Orange
                 150,
-                "#FF0000", // Red
+                "#d92626", // Red
               ],
-              "fill-opacity": 0.4,
+              "fill-opacity": 1,
             },
           },
           waterLayerId // Add the travel time layer before the first symbol layer

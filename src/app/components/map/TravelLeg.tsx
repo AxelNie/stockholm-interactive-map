@@ -50,17 +50,17 @@ function renderIcon(transportType: string) {
 function getString(transportType: string) {
   switch (transportType) {
     case "BUS":
-      return "Buss";
+      return "Bus";
     case "WALK":
-      return "Promenad";
+      return "Walk";
     case "SHP":
-      return "Båt";
+      return "Boat";
     case "MET":
-      return "Tunnelbana";
+      return "Metro";
     case "TRN":
-      return "Pendeltåg";
+      return "Commuter train";
     case "TRM":
-      return "Spårvagn";
+      return "Tram";
     default:
       return null;
   }

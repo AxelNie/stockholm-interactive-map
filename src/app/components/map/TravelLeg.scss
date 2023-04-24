@@ -1,7 +1,7 @@
 @import '@/app/variables.module.scss';
 
 .travel-leg-container{
-    margin: 4rem 0 4rem 0;
+    margin: 2rem 0 2rem 0;
 
 
 }
@@ -23,8 +23,8 @@
     display: flex;
     align-items: center;
     justify-content: center;
-
     font-size: 2.5rem;
+    margin-right: 0.25rem;
 
 }
 
@@ -41,7 +41,6 @@
 
 .travel-type-text{
     color: $grey;
-    margin-top: 0.20rem;
 }
 
 h4{
@@ -50,7 +49,7 @@ h4{
 
 p{
     font-weight: 400;
-    font-size: 0.8rem;
+    font-size: 1rem;
     margin: 0;
 }
 
