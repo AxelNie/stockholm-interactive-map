@@ -2,10 +2,10 @@ export async function getTravelTime() {
   try {
     const apiUrl = "api/getAllTravelTimes";
     const response = await fetch(apiUrl);
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-    const data: TravelTimeData[] = await response.json();
+    const data = await response.json();
+    console.log("data: ", data);
+
+    // Return the travel information
     return data.result;
   } catch (error: any) {
     console.error(error);

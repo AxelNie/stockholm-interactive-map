@@ -22,6 +22,7 @@ interface ILocationData {
 
 const InfoPopup = ({ coordinates, onClose }) => {
   const [locationData, setLocationData] = useState<ILocationData | null>(null);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -31,7 +32,28 @@ const InfoPopup = ({ coordinates, onClose }) => {
         )}`
       );
       const data = await response.json();
-      setLocationData(data);
+
+      if (data.errorCode) {
+        const errorMessages = {
+          "1001": "Key is undefined.",
+          "1002": "Key is invalid.",
+          "1003": "Invalid API.",
+          "1004":
+            "This API is currently not available for keys with priority above 2.",
+          "1005": "Invalid API for key.",
+          "1006": "Too many requests per minute.",
+          "1007": "Too many requests per month.",
+        };
+
+        const errorMessage = errorMessages[data.errorCode] || "Unknown error.";
+        return errorMessage;
+      }
+
+      if (data.error) {
+        setErrorMessage(data.errorMessage);
+      } else {
+        setLocationData(data);
+      }
     };
 
     fetchData();
@@ -39,6 +61,7 @@ const InfoPopup = ({ coordinates, onClose }) => {
 
   return (
     <div className="info-popup-container">
+      {errorMessage && <div className="error-message">{errorMessage}</div>}
       {locationData && (
         <div className="travel-info-container">
           <h3>{locationData.startAddress}</h3>

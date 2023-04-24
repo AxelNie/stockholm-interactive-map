@@ -75,6 +75,13 @@ export async function GET(req: NextRequest) {
 
     const travelInfo = await getTravelTime(parsedCoordinates, tCentralenDestId);
 
+    if (typeof travelInfo === "string") {
+      return NextResponse.json(
+        { error: "Error getting travel information", errorMessage: travelInfo },
+        500
+      );
+    }
+
     if (!travelInfo) {
       return NextResponse.json(
         { error: "Error getting travel information" },

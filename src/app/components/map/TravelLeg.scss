@@ -1,0 +1,26 @@
+@import '@/app/variables.module.scss';
+
+.travel-leg-container{
+    margin: 4rem 0 4rem 0;
+    display: flex;
+    position: relative;
+    align-items: stretch;
+}
+
+.line{
+    width: 2px;
+    background-color: $semi-dark;
+    margin-right: 1rem;
+}
+
+.transport-type-and-time{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    color: $accent;
+}
+
+h4{
+    margin: 0;
+}
+
