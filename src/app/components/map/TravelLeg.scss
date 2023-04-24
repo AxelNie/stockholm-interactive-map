@@ -2,25 +2,55 @@
 
 .travel-leg-container{
     margin: 4rem 0 4rem 0;
-    display: flex;
-    position: relative;
-    align-items: stretch;
+
+
 }
 
 .line{
     width: 2px;
     background-color: $semi-dark;
-    margin-right: 1rem;
+    margin: 0.75rem 0.5rem 0.75rem 0.25rem;
+}
+
+.content{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    margin: 2rem 0 2rem 0;
+}
+
+.icon{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    font-size: 2.5rem;
+
 }
 
 .transport-type-and-time{
     display: flex;
     flex-direction: row;
-    align-items: center;
     color: $accent;
 }
 
+.travel-leg-location{
+    display: flex;
+    align-items: stretch;
+}
+
+.travel-type-text{
+    color: $grey;
+    margin-top: 0.20rem;
+}
+
 h4{
+    margin: 0;
+}
+
+p{
+    font-weight: 400;
+    font-size: 0.8rem;
     margin: 0;
 }
 

@@ -39,7 +39,7 @@ const Map: React.FC<MapProps> = ({ onMapClick }) => {
       mapInstance.on("load", () => {
         // Define grid bounds
         const gridBounds = bbox(
-          buffer(point([18.0686, 59.3293]), 180, { units: "meters" })
+          buffer(point([18.0686, 59.3293]), 190, { units: "meters" })
         ) as [number, number, number, number];
 
         // Add a GeoJSON source for the travel time data
@@ -49,7 +49,7 @@ const Map: React.FC<MapProps> = ({ onMapClick }) => {
             type: "FeatureCollection",
             features: travelTimeData.map((location: ILocation) => {
               const center = point([location.lng, location.lat]);
-              const buffered = buffer(center, 180, { units: "meters" });
+              const buffered = buffer(center, 190, { units: "meters" });
               const squarePolygon = bboxPolygon(bbox(buffered));
 
               return {
