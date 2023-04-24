@@ -1,6 +1,6 @@
 "use client";
 
-import "./globals.css";
+import "./globals.scss";
 import Head from "next/head";
 
 export const metadata = {

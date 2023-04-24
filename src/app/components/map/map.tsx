@@ -1,18 +1,16 @@
 import React, { useEffect, useState, useRef } from "react";
-import mapboxgl from "mapbox-gl";
+const mapboxgl = require("mapbox-gl");
+
 import { getTravelTime } from "@/queries/getTravelTime";
 import * as turf from "@turf/turf";
 import "./map.css";
-import { findClosestNode, buildTree } from "@/lib/KDtree";
 import "mapbox-gl/dist/mapbox-gl.css";
 import { buffer, squareGrid } from "@turf/turf";
-import triangleGrid from "@turf/triangle-grid";
-import rectangleGrid from "@turf/rectangle-grid";
 
 // Get your Mapbox access token from the environment variable
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
 
-function Map() {
+function Map({ onMapClick }) {
   const mapContainer = useRef(null);
   const [map, setMap] = useState(null);
   const [clickedLocationData, setClickedLocationData] = useState(null);
@@ -22,7 +20,6 @@ function Map() {
     const initializeMap = async () => {
       // Load travel time data
       const travelTimeData = await getTravelTime();
-
       // Create a new Mapbox GL JS map
       const mapInstance = new mapboxgl.Map({
         container: mapContainer.current,
@@ -102,6 +99,16 @@ function Map() {
           }
         }
 
+        // Find the water layer in the map style
+        let waterLayerId;
+        const layers2 = mapInstance.getStyle().layers;
+        for (let i = 0; i < layers2.length; i++) {
+          if (layers2[i].id.includes("water")) {
+            waterLayerId = layers2[i].id;
+            break;
+          }
+        }
+
         // Add a heatmap layer using the travel time data
         // Add a square grid layer using the travel time data
         mapInstance.addLayer(
@@ -125,25 +132,11 @@ function Map() {
                 150,
                 "#FF0000", // Red
               ],
-              "fill-opacity": 0.5,
+              "fill-opacity": 0.4,
             },
           },
-          firstSymbolId // Add the travel time layer before the first symbol layer
+          waterLayerId // Add the travel time layer before the first symbol layer
         );
-
-        // Add a vector source for admin-1 boundaries
-        mapInstance.addSource("admin-1", {
-          type: "vector",
-          url: "mapbox://mapbox.boundaries-adm1-v4",
-          promoteId: "mapbox_id",
-        });
-
-        // Define a filter for US worldview boundaries
-        let worldviewFilter = [
-          "any",
-          ["==", "all", ["get", "worldview"]],
-          ["in", "US", ["get", "worldview"]],
-        ];
 
         // Add a style layer with the admin-1 source below map labels
         mapInstance.addLayer(
@@ -169,8 +162,8 @@ function Map() {
         const coordinates = [e.lngLat.lng, e.lngLat.lat];
 
         // Remove the previous marker if it exists
-        if (marker) {
-          marker.remove();
+        if (mapInstance.currentMarker) {
+          mapInstance.currentMarker.remove();
         }
 
         // Create a new marker and add it to the map
@@ -178,11 +171,12 @@ function Map() {
           .setLngLat(coordinates)
           .addTo(mapInstance);
 
-        // Set the marker state
-        setMarker(newMarker);
+        // Store the new marker directly on the map instance
+        mapInstance.currentMarker = newMarker;
 
         // Log the clicked location's information
         console.log("Clicked location:", e.lngLat);
+        onMapClick(coordinates, mapInstance);
       });
 
       setMap(mapInstance);
@@ -196,13 +190,7 @@ function Map() {
   return (
     <div className="container">
       <div ref={mapContainer} className="map-container" />
-      {clickedLocationData && (
-        <div className="location-info">
-          <p>Latitude: {clickedLocationData.lat.toFixed(6)}</p>
-          <p>Longitude: {clickedLocationData.lng.toFixed(6)}</p>
-          <p>Fastest travel time: {clickedLocationData.fastestTime} minutes</p>
-        </div>
-      )}
+      <h2>hej</h2>
     </div>
   );
 }

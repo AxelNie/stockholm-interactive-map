@@ -1,0 +1,20 @@
+@import '@/app/variables.module.scss';
+
+.travel-time-container{
+
+    color: white;
+    background-color: $semi-dark;
+    border-radius: 15px;
+    padding: 1rem;
+}
+
+.label{
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: $grey;
+}
+
+.time{
+    font-weight: 800;
+    font-size: 30px;
+}

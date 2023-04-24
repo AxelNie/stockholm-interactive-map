@@ -1,0 +1,14 @@
+@import '@/app/variables.module.scss';
+
+.info-popup-container{
+    color: white;
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 300px;
+    background-color: $dark;
+    z-index: 1000;
+    overflow-y: "auto";
+    padding: 1rem;
+}
