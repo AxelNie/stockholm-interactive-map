@@ -1,0 +1,75 @@
+@import '@/app/variables.module.scss';
+
+.overlay-controls {
+  position: absolute;
+  bottom: 10px;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 400;
+}
+
+  .overlay-color-slider{
+    
+    width: 200px;
+    
+    z-index: 1;
+    background: $dark;
+    color: white;
+    padding: 10px;
+    border-radius: 5px;
+  }
+  
+  .overlay-controls input[type='range'] {
+    width: 100%;
+    -webkit-appearance: none; // To remove the default appearance
+    height: 4px; // Set the height of the track
+    background: $grey ; // Set the track color
+    outline: none; // Remove the outline
+  
+    // Style for the thumb
+    &::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      width: 15px; // Set the width of the thumb
+      height: 15px; // Set the height of the thumb
+      background: $accent; // Set the thumb color
+      border-radius: 50%; // Make the thumb circular
+      cursor: pointer; // Change the cursor to a pointer
+    }
+  
+    // For Mozilla Firefox
+    &::-moz-range-thumb {
+      width: 20px;
+      height: 20px;
+      background: $accent;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+  
+    // For Internet Explorer
+    &::-ms-thumb {
+      width: 20px;
+      height: 20px;
+      background: $accent;
+      border-radius: 50%;
+      cursor: pointer;
+    }
+  
+    // Style for the track in Mozilla Firefox
+    &::-moz-range-track {
+      background: $accent;
+    }
+  
+    // Style for the track in Internet Explorer
+    &::-ms-track {
+      background: transparent;
+      border-color: transparent;
+      color: transparent;
+    }
+  
+    // Style for the progress in Internet Explorer
+    &::-ms-fill-lower {
+      background: $accent;
+    }
+  }

@@ -1,12 +1,14 @@
-// MapContainer.js
-import React, { useState } from "react";
+// MapContainer.tsx
+import React, { useState, useEffect } from "react";
 import Map from "./Map";
 import InfoPopup from "./InfoPopup";
+import OverlayControls from "./OverlayControls";
 
 const MapContainer = () => {
   const [mapInstance, setMapInstance] = useState(null);
   const [showInfoPopup, setShowInfoPopup] = useState(false);
   const [clickedCoordinates, setClickedCoordinates] = useState(null);
+  const [greenLimit, setGreenLimit] = useState(15);
 
   const onMapClick = (coordinates, map) => {
     // Display the popup
@@ -32,7 +34,7 @@ const MapContainer = () => {
   return (
     <div>
       {/* Pass the onMapClick function and the setMap function as props */}
-      <Map onMapClick={onMapClick} />
+      <Map onMapClick={onMapClick} greenLimit={greenLimit} />
       {/* Conditionally render the InfoPopup component */}
       {showInfoPopup && (
         <InfoPopup
@@ -40,6 +42,10 @@ const MapContainer = () => {
           onClose={handleInfoPopupClose}
         />
       )}
+      <OverlayControls
+        greenLimit={greenLimit}
+        onGreenLimitChange={setGreenLimit}
+      />
     </div>
   );
 };

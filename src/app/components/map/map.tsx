@@ -10,6 +10,7 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string;
 
 interface MapProps {
   onMapClick: (coordinates: LngLatLike, map: mapboxgl.Map) => void;
+  greenLimit: number;
 }
 
 interface ILocation {
@@ -18,7 +19,7 @@ interface ILocation {
   fastestTime: number;
 }
 
-const Map: React.FC<MapProps> = ({ onMapClick }) => {
+const Map: React.FC<MapProps> = ({ onMapClick, greenLimit }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
 
@@ -90,13 +91,13 @@ const Map: React.FC<MapProps> = ({ onMapClick }) => {
                 ["get", "fastestTime"],
                 0,
                 "#26d926", // Green
-                15,
+                greenLimit,
                 "#26d926", // Green
-                30,
+                greenLimit * 2,
                 "#d9d926", // Yellow
-                45,
+                greenLimit * 3,
                 "#d99a26", // Orange
-                150,
+                greenLimit * 10,
                 "#d92626", // Red
               ],
               "fill-opacity": 1,
@@ -132,6 +133,36 @@ const Map: React.FC<MapProps> = ({ onMapClick }) => {
       initializeMap();
     }
   }, [map, onMapClick]);
+
+  // Update heatmap layer's paint property when greenLimit changes
+  useEffect(() => {
+    console.log("greenLimit: ", greenLimit);
+    if (map && map.getLayer("travelTimeGrid")) {
+      map.setPaintProperty("travelTimeGrid", "fill-color", [
+        "interpolate",
+        ["linear"],
+        ["get", "fastestTime"],
+        0,
+        "#26d926", // Green
+        greenLimit,
+        "#26d926", // Green
+        greenLimit * 2,
+        "#d9d926", // Yellow
+        greenLimit * 3,
+        "#d99a26", // Orange
+        greenLimit * 10,
+        "#d92626", // Red
+      ]);
+    }
+
+    updateMap();
+  }, [map, greenLimit]);
+
+  const updateMap = () => {
+    if (map) {
+      map.resize();
+    }
+  };
 
   return (
     <div className="container">
