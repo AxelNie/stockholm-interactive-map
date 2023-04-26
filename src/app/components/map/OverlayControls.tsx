@@ -11,27 +11,49 @@ const OverlayControls: React.FC<OverlayControlsProps> = ({
   greenLimit,
   onGreenLimitChange,
 }) => {
-  const handleSliderChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = parseInt(event.target.value, 10);
-    console.log("Updated green limit:", newValue);
-    onGreenLimitChange(newValue); // Add this line to update the value
+  const increaseLimit = () => {
+    onGreenLimitChange(greenLimit + 5);
   };
+
+  const decreaseLimit = () => {
+    if (greenLimit >= 5) {
+      onGreenLimitChange(greenLimit - 5);
+    }
+  };
+
+  const limits = [
+    greenLimit,
+    15 + greenLimit,
+    45 + greenLimit,
+    45 + greenLimit,
+  ];
+
+  const colors = ["#26d926", "#d9d926", "#d99a26", "#d92626"];
 
   return (
     <div className="overlay-controls">
-      <div className="overlay-color-slider">
-        <label htmlFor="green-limit-slider">
-          Set green limit: {greenLimit} min
-        </label>
-        <input
-          type="range"
-          id="green-limit-slider"
-          min="0"
-          max="60"
-          step="1"
-          value={greenLimit}
-          onChange={handleSliderChange}
-        />
+      <div className="adjust-interval-control">
+        <h3 className="title">Adjust interval</h3>
+        <hr className="separator" />
+        <div className="controls">
+          <button className="control-button" onClick={decreaseLimit}>
+            -
+          </button>
+          <div className="interval-limits">
+            {limits.map((limit, index) => (
+              <div key={index} className="interval-section">
+                <div
+                  className="color-line"
+                  style={{ backgroundColor: colors[index] }}
+                ></div>
+                <span>{limit}</span>
+              </div>
+            ))}
+          </div>
+          <button className="control-button" onClick={increaseLimit}>
+            +
+          </button>
+        </div>
       </div>
     </div>
   );

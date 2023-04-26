@@ -144,13 +144,13 @@ const Map: React.FC<MapProps> = ({ onMapClick, greenLimit }) => {
         ["get", "fastestTime"],
         0,
         "#26d926", // Green
-        greenLimit,
+        greenLimit / 2,
         "#26d926", // Green
-        greenLimit * 2,
+        7.5 + greenLimit,
         "#d9d926", // Yellow
-        greenLimit * 3,
+        30 + greenLimit,
         "#d99a26", // Orange
-        greenLimit * 10,
+        45 + greenLimit,
         "#d92626", // Red
       ]);
     }
