@@ -80,7 +80,7 @@ const InfoPopup = ({ coordinates, onClose }) => {
             <div className="travel-info-container">
               {locationData.legs.map((leg, index) => (
                 <>
-                  <TravelLeg leg={leg} key={index} />
+                  <TravelLeg leg={leg} key={index} onHover={onLegMouseEnter} />
                   {index < locationData.legs.length - 1 && (
                     <TimeBetweenLeg
                       leg={leg}

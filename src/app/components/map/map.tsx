@@ -11,6 +11,7 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string;
 interface MapProps {
   onMapClick: (coordinates: LngLatLike, map: mapboxgl.Map) => void;
   greenLimit: number;
+  highlightedPolyline: string | null;
 }
 
 interface ILocation {
@@ -19,9 +20,22 @@ interface ILocation {
   fastestTime: number;
 }
 
-const Map: React.FC<MapProps> = ({ onMapClick, greenLimit }) => {
+const Map: React.FC<MapProps> = ({
+  onMapClick,
+  greenLimit,
+  highlightedPolyline,
+}) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
+
+  useEffect(() => {
+    if (map && highlightedPolyline) {
+      const source = map.getSource(
+        "highlightedPolyline"
+      ) as mapboxgl.GeoJSONSource;
+      source.setData(JSON.parse(highlightedPolyline));
+    }
+  }, [highlightedPolyline, map]);
 
   useEffect(() => {
     async function initializeMap() {
@@ -103,6 +117,23 @@ const Map: React.FC<MapProps> = ({ onMapClick, greenLimit }) => {
           },
           waterLayerId // Add the travel time layer before the first symbol layer
         );
+
+        // Inside the 'load' event handler
+        mapInstance.addLayer({
+          id: "highlightedPolyline",
+          type: "line",
+          source: {
+            type: "geojson",
+            data: {
+              type: "FeatureCollection",
+              features: [],
+            },
+          },
+          paint: {
+            "line-color": "#007cbf",
+            "line-width": 5,
+          },
+        });
       });
 
       mapInstance.on("click", (e) => {
