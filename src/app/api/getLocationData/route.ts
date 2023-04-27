@@ -42,8 +42,10 @@ async function getTravelTime(
     const response = await fetch(apiUrl);
     const data = await response.json();
 
+    const result = data.Trip[0];
+
     // Return the travel information
-    return data.Trip[0];
+    return result;
   } catch (error) {
     console.log("Error getting travel time.");
     console.error(error.message);
@@ -99,6 +101,8 @@ export async function GET(req: NextRequest) {
           transportType = leg.type;
         }
 
+        const polyline = leg.Polyline;
+
         var travelTime;
         if (leg.duration) {
           travelTime = leg.duration;
@@ -124,6 +128,7 @@ export async function GET(req: NextRequest) {
           endPosition,
           date,
           time,
+          polyline,
         };
       }
     );

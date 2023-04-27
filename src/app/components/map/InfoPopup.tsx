@@ -41,6 +41,7 @@ const InfoPopup = ({ coordinates, onClose }) => {
         )}`
       );
       const data = await response.json();
+      console.log(data);
 
       if (data.errorCode) {
         const errorMessages = {

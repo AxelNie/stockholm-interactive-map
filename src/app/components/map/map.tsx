@@ -90,15 +90,13 @@ const Map: React.FC<MapProps> = ({ onMapClick, greenLimit }) => {
                 ["linear"],
                 ["get", "fastestTime"],
                 0,
-                "#26d926", // Green
-                greenLimit,
-                "#26d926", // Green
-                greenLimit * 2,
-                "#d9d926", // Yellow
-                greenLimit * 3,
-                "#d99a26", // Orange
-                greenLimit * 10,
-                "#d92626", // Red
+                colors[0], // Green
+                limits[0], // End of green
+                colors[1], // Start of yellow
+                limits[1], // Start fading yellow
+                colors[2], // Start of orange
+                limits[2], // Start fading orange
+                colors[3], // Red
               ],
               "fill-opacity": 1,
             },
@@ -134,6 +132,9 @@ const Map: React.FC<MapProps> = ({ onMapClick, greenLimit }) => {
     }
   }, [map, onMapClick]);
 
+  const limits = [greenLimit, 15 + greenLimit, 45 + greenLimit];
+  const colors = ["#13C81A", "#C2D018", "#D1741F", "#BE3A1D"];
+
   // Update heatmap layer's paint property when greenLimit changes
   useEffect(() => {
     console.log("greenLimit: ", greenLimit);
@@ -143,15 +144,13 @@ const Map: React.FC<MapProps> = ({ onMapClick, greenLimit }) => {
         ["linear"],
         ["get", "fastestTime"],
         0,
-        "#26d926", // Green
-        greenLimit / 2,
-        "#26d926", // Green
-        7.5 + greenLimit,
-        "#d9d926", // Yellow
-        30 + greenLimit,
-        "#d99a26", // Orange
-        45 + greenLimit,
-        "#d92626", // Red
+        colors[0], // Green
+        limits[0], // Start fading green
+        colors[1], // Start of yellow
+        limits[1], // Start fading yellow
+        colors[2], // Start of orange
+        limits[2], // Start fading orange
+        colors[3], // Red
       ]);
     }
 
