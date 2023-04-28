@@ -9,9 +9,7 @@ const MapContainer = () => {
   const [showInfoPopup, setShowInfoPopup] = useState(false);
   const [clickedCoordinates, setClickedCoordinates] = useState(null);
   const [greenLimit, setGreenLimit] = useState(15);
-  const [highlightedPolyline, setHighlightedPolyline] = useState<string | null>(
-    null
-  );
+  const [polyline, setPolyline] = useState(null);
 
   const onMapClick = (coordinates, map) => {
     // Display the popup
@@ -34,22 +32,25 @@ const MapContainer = () => {
     setShowInfoPopup(false);
   };
 
+  const handlePolylineData = (polylineData) => {
+    setPolyline(polylineData);
+    console.log("polylineData: ", polylineData);
+  };
+
   return (
     <div>
       {/* Pass the onMapClick function and the setMap function as props */}
       <Map
         onMapClick={onMapClick}
         greenLimit={greenLimit}
-        highlightedPolyline={highlightedPolyline}
+        polyline={polyline}
       />
       {/* Conditionally render the InfoPopup component */}
       {showInfoPopup && (
         <InfoPopup
           coordinates={clickedCoordinates}
           onClose={handleInfoPopupClose}
-          onLegMouseEnter={(polyline, isHover) =>
-            setHighlightedPolyline(isHover ? polyline : null)
-          }
+          onPolylineData={handlePolylineData}
         />
       )}
       <OverlayControls

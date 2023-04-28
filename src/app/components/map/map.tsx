@@ -11,7 +11,6 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string;
 interface MapProps {
   onMapClick: (coordinates: LngLatLike, map: mapboxgl.Map) => void;
   greenLimit: number;
-  highlightedPolyline: string | null;
 }
 
 interface ILocation {
@@ -20,22 +19,59 @@ interface ILocation {
   fastestTime: number;
 }
 
-const Map: React.FC<MapProps> = ({
-  onMapClick,
-  greenLimit,
-  highlightedPolyline,
-}) => {
+const Map: React.FC<MapProps> = ({ onMapClick, greenLimit, polyline }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
 
+  const polyLine = [18.01752, 59.404045, 0, -0.000009];
+
+  function convertPolylines(polyline) {
+    const convertedPolylines = polyline.map((polyline) => {
+      if (polyline.length === 2 && Array.isArray(polyline[0])) {
+        // Case 1: The polyline is represented as a list of absolute coordinates
+        return polyline;
+      } else {
+        // Case 2: The polyline is represented as the first absolute coordinate
+        // followed by the differences of the other points relative to the first one
+        const [startLongitude, startLatitude, ...differences] = polyline;
+        const coordinates = [[startLongitude, startLatitude]];
+
+        for (let i = 0; i < differences.length; i += 2) {
+          const lastCoordinate = coordinates[coordinates.length - 1];
+          const longitude = lastCoordinate[0] + differences[i];
+          const latitude = lastCoordinate[1] + differences[i + 1];
+          coordinates.push([longitude, latitude]);
+        }
+
+        return coordinates;
+      }
+    });
+
+    return convertedPolylines;
+  }
+
+  // Update the useEffect to handle an array of polyline data
   useEffect(() => {
-    if (map && highlightedPolyline) {
-      const source = map.getSource(
-        "highlightedPolyline"
-      ) as mapboxgl.GeoJSONSource;
-      source.setData(JSON.parse(highlightedPolyline));
+    console.log("polyline: ", polyline);
+    if (map && polyline) {
+      const source = map.getSource("polyline") as mapboxgl.GeoJSONSource;
+
+      // Convert the polyline data to GeoJSON format
+      const geoJSONData = {
+        type: "FeatureCollection",
+        features: convertPolylines(polyline).map((coordinates) => ({
+          type: "Feature",
+          geometry: {
+            type: "LineString",
+            coordinates,
+          },
+          properties: {},
+        })),
+      };
+
+      source.setData(geoJSONData);
     }
-  }, [highlightedPolyline, map]);
+  }, [polyline, map]);
 
   useEffect(() => {
     async function initializeMap() {
@@ -56,6 +92,31 @@ const Map: React.FC<MapProps> = ({
         const gridBounds = bbox(
           buffer(point([18.0686, 59.3293]), 190, { units: "meters" })
         ) as [number, number, number, number];
+
+        const test = [
+          [17.892043, 60.12335],
+          [18.148423, 59.243129],
+        ];
+
+        // Add a GeoJSON source for the polyline
+        mapInstance.addSource("polyline", {
+          type: "geojson",
+          data: {
+            type: "FeatureCollection",
+            features: [],
+          },
+        });
+
+        // Add the polyline layer
+        mapInstance.addLayer({
+          id: "polyline",
+          type: "line",
+          source: "polyline",
+          paint: {
+            "line-color": "#ff0000", // Change this to your desired color for the polyline
+            "line-width": 5,
+          },
+        });
 
         // Add a GeoJSON source for the travel time data
         mapInstance.addSource("travelTimeData", {
@@ -117,23 +178,6 @@ const Map: React.FC<MapProps> = ({
           },
           waterLayerId // Add the travel time layer before the first symbol layer
         );
-
-        // Inside the 'load' event handler
-        mapInstance.addLayer({
-          id: "highlightedPolyline",
-          type: "line",
-          source: {
-            type: "geojson",
-            data: {
-              type: "FeatureCollection",
-              features: [],
-            },
-          },
-          paint: {
-            "line-color": "#007cbf",
-            "line-width": 5,
-          },
-        });
       });
 
       mapInstance.on("click", (e) => {

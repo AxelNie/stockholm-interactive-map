@@ -71,8 +71,8 @@ const TravelLeg = ({ leg, onHover }) => {
   return (
     <div
       className="travel-leg-container"
-      onMouseEnter={() => onHover(leg.polyline, true)}
-      onMouseLeave={() => onHover(leg.polyline, false)}
+      /*onMouseEnter={() => onHover(leg.polyline, true)}
+      onMouseLeave={() => onHover(leg.polyline, false)}*/
     >
       <h4 className="travel-leg-location">{leg.startPosition.address}</h4>
       <div className="transport-type-and-time">

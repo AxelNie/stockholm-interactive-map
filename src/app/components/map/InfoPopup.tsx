@@ -29,9 +29,27 @@ function extractCityAndStreet(input: string): [string, string] {
   return [city, street];
 }
 
-const InfoPopup = ({ coordinates, onClose }) => {
+const InfoPopup = ({ coordinates, onClose, onPolylineData }) => {
   const [locationData, setLocationData] = useState<ILocationData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // New function to extract polyline data
+  const extractPolylineData = (data) => {
+    const polylineData = [];
+
+    data.legs.forEach((leg) => {
+      if (leg.polyline) {
+        polylineData.push(leg.polyline.crd);
+      } else {
+        polylineData.push([
+          leg.startPosition.coordinates,
+          leg.endPosition.coordinates,
+        ]);
+      }
+    });
+
+    return polylineData;
+  };
 
   useEffect(() => {
     const fetchData = async () => {
@@ -63,6 +81,7 @@ const InfoPopup = ({ coordinates, onClose }) => {
         setErrorMessage(data.errorMessage);
       } else {
         setLocationData(data);
+        onPolylineData(extractPolylineData(data));
       }
     };
 
@@ -80,7 +99,7 @@ const InfoPopup = ({ coordinates, onClose }) => {
             <div className="travel-info-container">
               {locationData.legs.map((leg, index) => (
                 <>
-                  <TravelLeg leg={leg} key={index} onHover={onLegMouseEnter} />
+                  <TravelLeg leg={leg} key={index} />
                   {index < locationData.legs.length - 1 && (
                     <TimeBetweenLeg
                       leg={leg}
