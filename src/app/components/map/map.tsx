@@ -11,6 +11,8 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string;
 interface MapProps {
   onMapClick: (coordinates: LngLatLike, map: mapboxgl.Map) => void;
   greenLimit: number;
+  polyline: any;
+  hoveredLegId: number | null;
 }
 
 interface ILocation {
@@ -19,59 +21,65 @@ interface ILocation {
   fastestTime: number;
 }
 
-const Map: React.FC<MapProps> = ({ onMapClick, greenLimit, polyline }) => {
+const Map: React.FC<MapProps> = ({
+  onMapClick,
+  greenLimit,
+  polyline,
+  hoveredLegId,
+}) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
 
-  const polyLine = [18.01752, 59.404045, 0, -0.000009];
-
-  function convertPolylines(polyline) {
-    const convertedPolylines = polyline.map((polyline) => {
-      if (polyline.length === 2 && Array.isArray(polyline[0])) {
-        // Case 1: The polyline is represented as a list of absolute coordinates
-        return polyline;
-      } else {
-        // Case 2: The polyline is represented as the first absolute coordinate
-        // followed by the differences of the other points relative to the first one
-        const [startLongitude, startLatitude, ...differences] = polyline;
-        const coordinates = [[startLongitude, startLatitude]];
-
-        for (let i = 0; i < differences.length; i += 2) {
-          const lastCoordinate = coordinates[coordinates.length - 1];
-          const longitude = lastCoordinate[0] + differences[i];
-          const latitude = lastCoordinate[1] + differences[i + 1];
-          coordinates.push([longitude, latitude]);
-        }
-
-        return coordinates;
-      }
-    });
-
-    return convertedPolylines;
-  }
-
   // Update the useEffect to handle an array of polyline data
   useEffect(() => {
-    console.log("polyline: ", polyline);
     if (map && polyline) {
       const source = map.getSource("polyline") as mapboxgl.GeoJSONSource;
-
-      // Convert the polyline data to GeoJSON format
+      const convertedPolylines = convertPolylines(polyline, hoveredLegId);
       const geoJSONData = {
         type: "FeatureCollection",
-        features: convertPolylines(polyline).map((coordinates) => ({
+        features: convertedPolylines.map(({ coordinates, isHovered }) => ({
           type: "Feature",
           geometry: {
             type: "LineString",
             coordinates,
           },
-          properties: {},
+          properties: {
+            isHovered,
+          },
         })),
       };
+      if (source) {
+        source.setData(geoJSONData);
+      }
 
-      source.setData(geoJSONData);
+      // Handle the circle features
+      const circleSource = map.getSource("circle") as mapboxgl.GeoJSONSource;
+      const circleGeoJSONData = {
+        type: "FeatureCollection",
+        features: getCircleFeatures(convertedPolylines),
+      };
+      if (circleSource) {
+        circleSource.setData(circleGeoJSONData);
+      }
+    } else if (map && polyline === null) {
+      const source = map.getSource("polyline") as mapboxgl.GeoJSONSource;
+      if (source) {
+        source.setData({
+          type: "FeatureCollection",
+          features: [],
+        });
+      }
+
+      // Remove circle features
+      const circleSource = map.getSource("circle") as mapboxgl.GeoJSONSource;
+      if (circleSource) {
+        circleSource.setData({
+          type: "FeatureCollection",
+          features: [],
+        });
+      }
     }
-  }, [polyline, map]);
+  }, [map, polyline, hoveredLegId]);
 
   useEffect(() => {
     async function initializeMap() {
@@ -93,11 +101,6 @@ const Map: React.FC<MapProps> = ({ onMapClick, greenLimit, polyline }) => {
           buffer(point([18.0686, 59.3293]), 190, { units: "meters" })
         ) as [number, number, number, number];
 
-        const test = [
-          [17.892043, 60.12335],
-          [18.148423, 59.243129],
-        ];
-
         // Add a GeoJSON source for the polyline
         mapInstance.addSource("polyline", {
           type: "geojson",
@@ -113,8 +116,39 @@ const Map: React.FC<MapProps> = ({ onMapClick, greenLimit, polyline }) => {
           type: "line",
           source: "polyline",
           paint: {
-            "line-color": "#ff0000", // Change this to your desired color for the polyline
+            "line-color": [
+              "case",
+              ["boolean", ["get", "isHovered"], false],
+              "#ffffff", // White color for the hovered polyline
+              "#ff0000", // Default color for other polylines
+            ],
             "line-width": 5,
+          },
+        });
+
+        // Polyline circle, travel path
+        mapInstance.addSource("circle", {
+          type: "geojson",
+          data: {
+            type: "FeatureCollection",
+            features: [],
+          },
+        });
+
+        // Polyline circle, travel path
+        // Add the circle layer for the start and end of each polyline
+        mapInstance.addLayer({
+          id: "circle",
+          type: "circle",
+          source: "circle",
+          paint: {
+            "circle-radius": 6,
+            "circle-color": [
+              "case",
+              ["boolean", ["get", "isHovered"], false],
+              "#ffffff", // Color for hovered circles
+              "#ff0000", // Default color for circles
+            ],
           },
         });
 
@@ -197,6 +231,19 @@ const Map: React.FC<MapProps> = ({ onMapClick, greenLimit, polyline }) => {
         (mapInstance as any).currentMarker = newMarker;
 
         onMapClick(coordinates, mapInstance);
+
+        // Logging positon time for testing
+
+        // Query the travel time data at the clicked position
+        const featuresAtPosition = mapInstance.queryRenderedFeatures(e.point, {
+          layers: ["travelTimeGrid"],
+        });
+
+        // If there's a feature at the clicked position, log its travel time data
+        if (featuresAtPosition.length > 0) {
+          const travelTimeData = featuresAtPosition[0].properties.fastestTime;
+          console.log("Travel time data at clicked position:", travelTimeData);
+        }
       });
 
       setMap(mapInstance);
@@ -246,3 +293,66 @@ const Map: React.FC<MapProps> = ({ onMapClick, greenLimit, polyline }) => {
 };
 
 export default Map;
+
+function convertPolylines(polyline, hoveredLegId: number | null) {
+  const convertedPolylines = polyline.map((polyline, index) => {
+    // Check if the current polyline is hovered
+    const isHovered = index === hoveredLegId;
+
+    if (polyline.length === 2 && Array.isArray(polyline[0])) {
+      return { coordinates: polyline, isHovered };
+    } else {
+      const [startLongitude, startLatitude, ...differences] = polyline;
+      const coordinates = [[startLongitude, startLatitude]];
+
+      for (let i = 0; i < differences.length; i += 2) {
+        const lastCoordinate = coordinates[coordinates.length - 1];
+        const longitude = lastCoordinate[0] + differences[i];
+        const latitude = lastCoordinate[1] + differences[i + 1];
+        coordinates.push([longitude, latitude]);
+      }
+
+      return { coordinates, isHovered };
+    }
+  });
+
+  return convertedPolylines;
+}
+
+function getCircleFeatures(convertedPolylines) {
+  const circleFeatures = [];
+
+  const combinedCircles = {};
+
+  convertedPolylines.forEach(({ coordinates, isHovered }) => {
+    const start = coordinates[0].toString();
+    const end = coordinates[coordinates.length - 1].toString();
+
+    if (combinedCircles.hasOwnProperty(start)) {
+      combinedCircles[start] = combinedCircles[start] || isHovered;
+    } else {
+      combinedCircles[start] = isHovered;
+    }
+
+    if (combinedCircles.hasOwnProperty(end)) {
+      combinedCircles[end] = combinedCircles[end] || isHovered;
+    } else {
+      combinedCircles[end] = isHovered;
+    }
+  });
+
+  Object.entries(combinedCircles).forEach(([coordinates, isHovered]) => {
+    circleFeatures.push({
+      type: "Feature",
+      geometry: {
+        type: "Point",
+        coordinates: coordinates.split(",").map(Number),
+      },
+      properties: {
+        isHovered,
+      },
+    });
+  });
+
+  return circleFeatures;
+}

@@ -10,6 +10,11 @@ const MapContainer = () => {
   const [clickedCoordinates, setClickedCoordinates] = useState(null);
   const [greenLimit, setGreenLimit] = useState(15);
   const [polyline, setPolyline] = useState(null);
+  const [hoveredLegId, setHoveredLegId] = useState<number | null>(null);
+
+  const handleLegHover = (id: number, isHovering: boolean) => {
+    setHoveredLegId(isHovering ? id : null);
+  };
 
   const onMapClick = (coordinates, map) => {
     // Display the popup
@@ -30,6 +35,9 @@ const MapContainer = () => {
 
     // Hide the popup
     setShowInfoPopup(false);
+
+    // Remove the polyline
+    setPolyline(null);
   };
 
   const handlePolylineData = (polylineData) => {
@@ -44,6 +52,7 @@ const MapContainer = () => {
         onMapClick={onMapClick}
         greenLimit={greenLimit}
         polyline={polyline}
+        hoveredLegId={hoveredLegId}
       />
       {/* Conditionally render the InfoPopup component */}
       {showInfoPopup && (
@@ -51,6 +60,7 @@ const MapContainer = () => {
           coordinates={clickedCoordinates}
           onClose={handleInfoPopupClose}
           onPolylineData={handlePolylineData}
+          onLegHover={handleLegHover} // Pass the function as a prop
         />
       )}
       <OverlayControls

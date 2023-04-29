@@ -29,9 +29,14 @@ function extractCityAndStreet(input: string): [string, string] {
   return [city, street];
 }
 
-const InfoPopup = ({ coordinates, onClose, onPolylineData }) => {
+const InfoPopup = ({ coordinates, onClose, onPolylineData, onLegHover }) => {
   const [locationData, setLocationData] = useState<ILocationData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [hoveredLegId, setHoveredLegId] = useState<number | null>(null);
+
+  const handleLegHover = (id: number, isHovering: boolean) => {
+    onLegHover(id, isHovering); // Call the onLegHover prop directly
+  };
 
   // New function to extract polyline data
   const extractPolylineData = (data) => {
@@ -99,7 +104,12 @@ const InfoPopup = ({ coordinates, onClose, onPolylineData }) => {
             <div className="travel-info-container">
               {locationData.legs.map((leg, index) => (
                 <>
-                  <TravelLeg leg={leg} key={index} />
+                  <TravelLeg
+                    leg={leg}
+                    key={index}
+                    id={index}
+                    onHover={handleLegHover}
+                  />
                   {index < locationData.legs.length - 1 && (
                     <TimeBetweenLeg
                       leg={leg}

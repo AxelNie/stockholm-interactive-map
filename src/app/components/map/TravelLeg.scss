@@ -3,6 +3,9 @@
 .travel-leg-container{
     margin: 2rem 0 2rem 0;
 
+    &:hover{
+        background-color: rgba($color: #ffffff, $alpha: 0.1);
+    }
 
 }
 

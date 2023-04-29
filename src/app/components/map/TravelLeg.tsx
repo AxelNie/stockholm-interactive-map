@@ -66,13 +66,13 @@ function getString(transportType: string) {
   }
 }
 
-const TravelLeg = ({ leg, onHover }) => {
+const TravelLeg = ({ leg, onHover, id }) => {
   console.log("leg:", leg);
   return (
     <div
       className="travel-leg-container"
-      /*onMouseEnter={() => onHover(leg.polyline, true)}
-      onMouseLeave={() => onHover(leg.polyline, false)}*/
+      onMouseEnter={() => onHover(id, true)}
+      onMouseLeave={() => onHover(id, false)}
     >
       <h4 className="travel-leg-location">{leg.startPosition.address}</h4>
       <div className="transport-type-and-time">
