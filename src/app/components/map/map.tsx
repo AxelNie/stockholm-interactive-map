@@ -26,6 +26,7 @@ const Map: React.FC<MapProps> = ({
   greenLimit,
   polyline,
   hoveredLegId,
+  onLegHover,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
@@ -37,16 +38,19 @@ const Map: React.FC<MapProps> = ({
       const convertedPolylines = convertPolylines(polyline, hoveredLegId);
       const geoJSONData = {
         type: "FeatureCollection",
-        features: convertedPolylines.map(({ coordinates, isHovered }) => ({
-          type: "Feature",
-          geometry: {
-            type: "LineString",
-            coordinates,
-          },
-          properties: {
-            isHovered,
-          },
-        })),
+        features: convertedPolylines.map(
+          ({ coordinates, isHovered }, index) => ({
+            type: "Feature",
+            geometry: {
+              type: "LineString",
+              coordinates,
+            },
+            properties: {
+              isHovered,
+              legId: index, // Set the legId property
+            },
+          })
+        ),
       };
       if (source) {
         source.setData(geoJSONData);
@@ -279,11 +283,36 @@ const Map: React.FC<MapProps> = ({
     updateMap();
   }, [map, greenLimit]);
 
+  useEffect(() => {
+    if (map) {
+      // Add the event listeners
+      map.on("mousemove", "polyline", hoverFeature);
+      map.on("mouseleave", "polyline", unhoverFeature);
+
+      // Clean up the event listeners
+      return () => {
+        map.off("mousemove", "polyline", hoverFeature);
+        map.off("mouseleave", "polyline", unhoverFeature);
+      };
+    }
+  }, [map]);
+
   const updateMap = () => {
     if (map) {
       map.resize();
     }
   };
+
+  function hoverFeature(e: mapboxgl.MapMouseEvent) {
+    if (e.features && e.features.length > 0) {
+      const legId = e.features[0].properties?.legId;
+      onLegHover(legId, true);
+    }
+  }
+
+  function unhoverFeature(e: mapboxgl.MapMouseEvent) {
+    onLegHover(null, false);
+  }
 
   return (
     <div className="container">

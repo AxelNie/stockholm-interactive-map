@@ -66,11 +66,12 @@ function getString(transportType: string) {
   }
 }
 
-const TravelLeg = ({ leg, onHover, id }) => {
-  console.log("leg:", leg);
+const TravelLeg = ({ leg, onHover, id, hoveredLegId }) => {
   return (
     <div
-      className="travel-leg-container"
+      className={`travel-leg-container${
+        id === hoveredLegId ? "-highlighted" : ""
+      }`}
       onMouseEnter={() => onHover(id, true)}
       onMouseLeave={() => onHover(id, false)}
     >

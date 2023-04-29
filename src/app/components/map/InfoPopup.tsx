@@ -29,10 +29,15 @@ function extractCityAndStreet(input: string): [string, string] {
   return [city, street];
 }
 
-const InfoPopup = ({ coordinates, onClose, onPolylineData, onLegHover }) => {
+const InfoPopup = ({
+  coordinates,
+  onClose,
+  onPolylineData,
+  onLegHover,
+  hoveredLegId,
+}) => {
   const [locationData, setLocationData] = useState<ILocationData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [hoveredLegId, setHoveredLegId] = useState<number | null>(null);
 
   const handleLegHover = (id: number, isHovering: boolean) => {
     onLegHover(id, isHovering); // Call the onLegHover prop directly
@@ -109,6 +114,7 @@ const InfoPopup = ({ coordinates, onClose, onPolylineData, onLegHover }) => {
                     key={index}
                     id={index}
                     onHover={handleLegHover}
+                    hoveredLegId={hoveredLegId}
                   />
                   {index < locationData.legs.length - 1 && (
                     <TimeBetweenLeg

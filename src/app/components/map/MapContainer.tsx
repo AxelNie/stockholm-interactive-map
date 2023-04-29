@@ -53,6 +53,7 @@ const MapContainer = () => {
         greenLimit={greenLimit}
         polyline={polyline}
         hoveredLegId={hoveredLegId}
+        onLegHover={handleLegHover}
       />
       {/* Conditionally render the InfoPopup component */}
       {showInfoPopup && (
@@ -60,6 +61,7 @@ const MapContainer = () => {
           coordinates={clickedCoordinates}
           onClose={handleInfoPopupClose}
           onPolylineData={handlePolylineData}
+          hoveredLegId={hoveredLegId}
           onLegHover={handleLegHover} // Pass the function as a prop
         />
       )}
