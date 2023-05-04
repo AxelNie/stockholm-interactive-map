@@ -8,15 +8,13 @@ interface Coordinate {
 
 export async function GET(req: NextRequest) {
   try {
-    const { client, collection } = await connectToDb("AllStationsNotTree");
+    const { client, collection } = await connectToDb("TravelTimesSmall");
 
     const document = await collection.findOne();
 
-    const result: any = document.data;
-
     client.close();
 
-    return new NextResponse(JSON.stringify({ result }), {
+    return new NextResponse(JSON.stringify({ document }), {
       headers: {
         "Content-Type": "application/json",
       },

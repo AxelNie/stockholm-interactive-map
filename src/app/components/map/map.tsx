@@ -11,8 +11,9 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string;
 interface MapProps {
   onMapClick: (coordinates: LngLatLike, map: mapboxgl.Map) => void;
   greenLimit: number;
-  polyline: any;
+  polyline: Array<Array<number> | number[]>;
   hoveredLegId: number | null;
+  onLegHover: (legId: number | null, isHovering: boolean) => void;
 }
 
 interface ILocation {
@@ -30,6 +31,26 @@ const Map: React.FC<MapProps> = ({
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
+
+  function getListOfLocationTravelTimes(data: {
+    _id: string;
+    startPoint: { lat: number; lng: number };
+    endPoint: { lat: number; lng: number };
+    stepDegrees: { lat: number; lng: number };
+    travelTimes: number[];
+  }): ILocation[] {
+    const locations: ILocation[] = [];
+
+    for (let i = 0; i < data.travelTimes.length; i++) {
+      const lat = data.startPoint.lat + i * data.stepDegrees.lat;
+      const lng = data.startPoint.lng + i * data.stepDegrees.lng;
+      const fastestTime = data.travelTimes[i];
+
+      locations.push({ lng, lat, fastestTime });
+    }
+
+    return locations;
+  }
 
   // Update the useEffect to handle an array of polyline data
   useEffect(() => {
@@ -88,8 +109,12 @@ const Map: React.FC<MapProps> = ({
   useEffect(() => {
     async function initializeMap() {
       // Load travel time data
-      const travelTimeData: ILocation[] = await getTravelTime();
-      console.log("travelTimeData: ", travelTimeData);
+
+      const travelTimeResponse = await getTravelTime();
+      console.log("not formatted travelTimeResponse: ", travelTimeResponse);
+      const travelTimeData: ILocation[] =
+        getListOfLocationTravelTimes(travelTimeResponse);
+      console.log("formatted travelTimeData: ", travelTimeData);
 
       // Create a new Mapbox GL JS map
       const mapInstance = new mapboxgl.Map({

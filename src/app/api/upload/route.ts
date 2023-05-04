@@ -1,16 +1,14 @@
-import { NextApiRequest, NextApiResponse } from "next";
-import { Collection } from "mongodb";
 import { connectToDb } from "../../../../db";
-import data from "@/data/travel_distances_grid_geojson_250m_point.json";
+import data from "../../../lib/data/travel_distances_grid_geojson_250m_point_small.json";
 
 export async function GET(request: Request) {
   try {
-    const geoJsonData = convertToGeoJson(data);
+    //const geoJsonData = convertToGeoJson(data);
 
-    const { client, collection } = await connectToDb();
+    const { client, collection } = await connectToDb("TravelTimesSmall");
     await collection.deleteMany({});
-    await collection.createIndex({ "location.coordinates": "2dsphere" });
-    await collection.insertMany(geoJsonData);
+    //await collection.createIndex({ "location.coordinates": "2dsphere" });
+    await collection.insertOne(data);
 
     client.close();
     return new Response("Data uploaded successfully");
