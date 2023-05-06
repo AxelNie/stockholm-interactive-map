@@ -1,6 +1,7 @@
 // OverlayControls.tsx
 import React from "react";
 import "./OverlayControls.scss";
+import { FiPlus, FiMinus } from "react-icons/fi";
 
 interface OverlayControlsProps {
   greenLimit: number;
