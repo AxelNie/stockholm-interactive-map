@@ -77,7 +77,7 @@ const TravelLeg = ({ leg, onHover, id, hoveredLegId }) => {
     >
       <h4 className="travel-leg-location">{leg.startPosition.address}</h4>
       <div className="transport-type-and-time">
-        <div className="line" />
+        <div className={`line${id === hoveredLegId ? "-highlighted" : ""}`} />
         <div className="content">
           <div className="icon">{renderIcon(leg.transportType)}</div>
           <div className="leg-info-text">

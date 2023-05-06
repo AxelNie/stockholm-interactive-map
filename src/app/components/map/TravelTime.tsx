@@ -2,6 +2,8 @@ import "./TravelTime.scss";
 
 interface ITravelTimeProps {
   time: string;
+  isScrollable: boolean;
+  isAtBottom: boolean;
 }
 
 function convertTimeFormat(timeString: unknown): string {
@@ -36,8 +38,12 @@ function convertTimeFormat(timeString: unknown): string {
 const TravelTime = ({ time }: ITravelTimeProps) => {
   return (
     <div className="travel-time-container">
-      <div className="label">Travel time</div>
-      <div className="time">{convertTimeFormat(time)}</div>
+      <div className="travel-time-background">
+        <div className="travel-time">
+          <div className="label">Travel time</div>
+          <div className="time">{convertTimeFormat(time)}</div>
+        </div>
+      </div>
     </div>
   );
 };

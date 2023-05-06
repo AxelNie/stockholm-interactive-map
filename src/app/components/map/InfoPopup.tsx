@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import "./InfoPopup.scss";
 import TravelTime from "./TravelTime";
 import TravelLeg from "./TravelLeg";
@@ -98,20 +98,21 @@ const InfoPopup = ({
     fetchData();
   }, [coordinates]);
 
+  const travelInfoContainerRef = useRef(null);
+
   return (
     <div className="info-popup-container">
       {errorMessage && <div className="error-message">{errorMessage}</div>}
       {locationData ? (
         <>
-          <MdOutlineClose className="close-icon" onClick={onClose} />
           <div className="loaded-content">
-            <Header address={locationData.startAddress} />
-            <div className="travel-info-container">
+            <Header address={locationData.startAddress} onClose={onClose} />
+            <div className="travel-legs scrollable">
               {locationData.legs.map((leg, index) => (
-                <>
+                <React.Fragment key={index}>
                   <TravelLeg
                     leg={leg}
-                    key={index}
+                    key={index + "l"}
                     id={index}
                     onHover={handleLegHover}
                     hoveredLegId={hoveredLegId}
@@ -121,12 +122,13 @@ const InfoPopup = ({
                       leg={leg}
                       locationData={locationData}
                       index={index}
+                      key={index + "t"}
                     />
                   )}
-                </>
+                </React.Fragment>
               ))}
-              <TravelTime time={locationData.totalTravelTime} />
             </div>
+            <TravelTime time={locationData.totalTravelTime} />
           </div>
         </>
       ) : (
@@ -137,13 +139,16 @@ const InfoPopup = ({
 };
 
 // Header component
-const Header = ({ address }) => {
+const Header = ({ address, onClose }) => {
   const [city, street] = extractCityAndStreet(address);
   return (
     <div className="header">
-      <h1 className="city">{city}</h1>
-      <h4 className="street">{street}</h4>
-      <div className="divider" />
+      <div className="text">
+        <h1 className="city">{city}</h1>
+        <h4 className="street">{street}</h4>
+        <div className="divider" />
+      </div>
+      <MdOutlineClose className="close-icon" onClick={onClose} />
     </div>
   );
 };

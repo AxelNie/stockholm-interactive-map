@@ -1,11 +1,11 @@
 @import '@/app/variables.module.scss';
 
 .travel-leg-container{
-    margin: 2rem 0 2rem 0;
+    padding: 1rem;
 }
 
 .travel-leg-container-highlighted{
-    margin: 2rem 0 2rem 0;
+    padding: 1rem;
     background-color: rgba($color: #ffffff, $alpha: 0.1);
     
 }
@@ -15,6 +15,13 @@
     background-color: $semi-dark;
     margin: 0.75rem 0.5rem 0.75rem 0.25rem;
 }
+
+.line-highlighted{
+    width: 2px;
+    background-color: $accent;
+    margin: 0.75rem 0.5rem 0.75rem 0.25rem;
+}
+
 
 .content{
     display: flex;

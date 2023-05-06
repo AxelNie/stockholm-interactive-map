@@ -3,6 +3,7 @@ import React, { useState, useEffect } from "react";
 import Map from "./Map";
 import InfoPopup from "./InfoPopup";
 import OverlayControls from "./OverlayControls";
+import "./MapContainer.scss";
 
 const MapContainer = () => {
   const [mapInstance, setMapInstance] = useState(null);
@@ -46,7 +47,7 @@ const MapContainer = () => {
   };
 
   return (
-    <div>
+    <div className="main-map-container">
       {/* Pass the onMapClick function and the setMap function as props */}
       <Map
         onMapClick={onMapClick}
