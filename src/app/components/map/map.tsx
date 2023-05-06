@@ -218,6 +218,17 @@ const Map: React.FC<MapProps> = ({
           },
           waterLayerId // Add the travel time layer before the first symbol layer
         );
+
+        // Add the invisible polyline layer for hovering
+        mapInstance.addLayer({
+          id: "invisible-polyline-hover",
+          type: "line",
+          source: "polyline",
+          paint: {
+            "line-color": "transparent",
+            "line-width": 25, // Adjust the width for the desired hitbox size
+          },
+        });
       });
 
       mapInstance.on("click", (e) => {
@@ -288,13 +299,13 @@ const Map: React.FC<MapProps> = ({
   useEffect(() => {
     if (map) {
       // Add the event listeners
-      map.on("mousemove", "polyline", hoverFeature);
-      map.on("mouseleave", "polyline", unhoverFeature);
+      map.on("mousemove", "invisible-polyline-hover", hoverFeature);
+      map.on("mouseleave", "invisible-polyline-hover", unhoverFeature);
 
       // Clean up the event listeners
       return () => {
-        map.off("mousemove", "polyline", hoverFeature);
-        map.off("mouseleave", "polyline", unhoverFeature);
+        map.off("mousemove", "invisible-polyline-hover", hoverFeature);
+        map.off("mouseleave", "invisible-polyline-hover", unhoverFeature);
       };
     }
   }, [map]);
