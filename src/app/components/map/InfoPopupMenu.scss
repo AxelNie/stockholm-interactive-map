@@ -1,0 +1,44 @@
+@import '@/app/variables.module.scss';
+
+
+.toggle-button {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 1rem;
+  }
+  
+  .toggle-line {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    position: relative;
+    height: 2px;
+    background-color: $semi-dark;
+  }
+  
+  .toggle-line-section {
+    flex: 1;
+    height: 100%;
+    background-color: $semi-dark;
+  }
+  
+  .toggle-line-section.active {
+    background-color: $accent
+  }
+
+  .info-menu-buttons-container{
+    width: 100%;
+  }
+  
+  .toggle-option {
+    flex: 1;
+    border: none;
+    padding: 10px;
+    width: 50%;
+  }
+  
+  .toggle-option.active {
+    background-color: $semi-dark;
+  }
+  

@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import "./InfoPopup.scss";
-import TravelTime from "./TravelTime";
-import TravelLeg from "./TravelLeg";
+import TripDetails from "./TripDetails";
+import HousingPriceStats from "./HousingPriceStats";
 import { MdOutlineClose } from "react-icons/md";
+import InfoPopupMenu from "./InfoPopupMenu";
 import LoadingSkeleton from "./LoadingSkeleton";
 
 interface ILocationData {
@@ -38,6 +39,7 @@ const InfoPopup = ({
 }) => {
   const [locationData, setLocationData] = useState<ILocationData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+  const [selectedOption, setSelectedOption] = useState("Travel details"); // New state to keep track of selected option
 
   const handleLegHover = (id: number, isHovering: boolean) => {
     onLegHover(id, isHovering); // Call the onLegHover prop directly
@@ -100,6 +102,10 @@ const InfoPopup = ({
 
   const travelInfoContainerRef = useRef(null);
 
+  const handleToggle = (selectedOption: string) => {
+    setSelectedOption(selectedOption);
+  };
+
   return (
     <div className="info-popup-container">
       {errorMessage && <div className="error-message">{errorMessage}</div>}
@@ -107,28 +113,19 @@ const InfoPopup = ({
         <>
           <div className="loaded-content">
             <Header address={locationData.startAddress} onClose={onClose} />
-            <div className="travel-legs scrollable">
-              {locationData.legs.map((leg, index) => (
-                <React.Fragment key={index}>
-                  <TravelLeg
-                    leg={leg}
-                    key={index + "l"}
-                    id={index}
-                    onHover={handleLegHover}
-                    hoveredLegId={hoveredLegId}
-                  />
-                  {index < locationData.legs.length - 1 && (
-                    <TimeBetweenLeg
-                      leg={leg}
-                      locationData={locationData}
-                      index={index}
-                      key={index + "t"}
-                    />
-                  )}
-                </React.Fragment>
-              ))}
-            </div>
-            <TravelTime time={locationData.totalTravelTime} />
+            <InfoPopupMenu
+              options={["Travel details", "Housing prices"]}
+              onToggle={handleToggle}
+            />
+            {selectedOption === "Travel details" ? (
+              <TripDetails
+                locationData={locationData}
+                onLegHover={handleLegHover}
+                hoveredLegId={hoveredLegId}
+              />
+            ) : (
+              <HousingPriceStats locationData={locationData} />
+            )}
           </div>
         </>
       ) : (
@@ -146,7 +143,6 @@ const Header = ({ address, onClose }) => {
       <div className="text">
         <h1 className="city">{city}</h1>
         <h4 className="street">{street}</h4>
-        <div className="divider" />
       </div>
       <MdOutlineClose className="close-icon" onClick={onClose} />
     </div>

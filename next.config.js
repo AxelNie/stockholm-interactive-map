@@ -3,9 +3,6 @@ const nextConfig = {
   experimental: {
     appDir: true,
   },
-};
-
-module.exports = {
   env: {
     DB_USER: process.env.DB_URI,
     DB_DATABASE: process.env.DB_DATABASE,

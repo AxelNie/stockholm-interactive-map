@@ -8,7 +8,17 @@ interface Coordinate {
 
 export async function GET(req: NextRequest) {
   try {
-    const { client, collection } = await connectToDb("TravelTimesSmall");
+    let collectionName = "TravelTimesSmall";
+
+    if (req.nextUrl.searchParams.get("include_wait_time") === "true") {
+      if (req.nextUrl.searchParams.get("time") === "23") {
+        collectionName = "TravelTimesAvg23";
+      } else {
+        collectionName = "TravelTimesAvg7_8";
+      }
+    }
+
+    const { client, collection } = await connectToDb(collectionName);
 
     const document = await collection.findOne();
 

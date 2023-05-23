@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from "react";
-import mapboxgl, { LngLatLike } from "mapbox-gl";
+import mapboxgl, { LngLatLike, Popup } from "mapbox-gl";
 import { buffer, bbox, bboxPolygon, point, Point } from "@turf/turf";
 import { getTravelTime } from "@/queries/getTravelTime";
 import "./map.css";
@@ -31,6 +31,13 @@ const Map: React.FC<MapProps> = ({
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
+  const [mapTheme, setMapTheme] = useState<string>("dark");
+
+  let popup: Popup | null = null;
+
+  const toggleTheme = () => {
+    setMapTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
+  };
 
   // Update the useEffect to handle an array of polyline data
   useEffect(() => {
@@ -90,13 +97,16 @@ const Map: React.FC<MapProps> = ({
     async function initializeMap() {
       // Load travel time data
 
-      const travelTimeData = await getTravelTime();
+      const travelTimeData = await getTravelTime(true, 23);
       console.log("formatted travelTimeData: ", travelTimeData);
 
       // Create a new Mapbox GL JS map
       const mapInstance = new mapboxgl.Map({
         container: mapContainerRef.current!,
-        style: "mapbox://styles/axeln/clgp2ccxh00gs01pc0iat3y1d",
+        style:
+          mapTheme === "light"
+            ? "mapbox://styles/mapbox/streets-v11" // Change this to the desired light style
+            : "mapbox://styles/axeln/clgp2ccxh00gs01pc0iat3y1d", // The current dark style
         center: [18.0686, 59.3293],
         zoom: 11,
       });
@@ -263,6 +273,14 @@ const Map: React.FC<MapProps> = ({
         }
       });
 
+      // Add a 'mouseleave' event listener for the travelTimeGrid layer to remove the popup
+      mapInstance.on("mouseleave", "travelTimeGrid", () => {
+        if (popup) {
+          popup.remove();
+          popup = null;
+        }
+      });
+
       setMap(mapInstance);
     }
 
@@ -309,6 +327,16 @@ const Map: React.FC<MapProps> = ({
       };
     }
   }, [map]);
+
+  useEffect(() => {
+    if (map) {
+      map.setStyle(
+        mapTheme === "light"
+          ? "mapbox://styles/mapbox/streets-v11" // Change this to the desired light style
+          : "mapbox://styles/axeln/clgp2ccxh00gs01pc0iat3y1d" // The current dark style
+      );
+    }
+  }, [map, mapTheme]);
 
   const updateMap = () => {
     if (map) {

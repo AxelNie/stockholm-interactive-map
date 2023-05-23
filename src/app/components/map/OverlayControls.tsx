@@ -2,6 +2,7 @@
 import React from "react";
 import "./OverlayControls.scss";
 import { FiPlus, FiMinus } from "react-icons/fi";
+import MapModeSelector from "./MapModeSelector";
 
 interface OverlayControlsProps {
   greenLimit: number;
@@ -62,6 +63,7 @@ const OverlayControls: React.FC<OverlayControlsProps> = ({
           </div>
         </div>
       </div>
+      <MapModeSelector />
     </div>
   );
 };
