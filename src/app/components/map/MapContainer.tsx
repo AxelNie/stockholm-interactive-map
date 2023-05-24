@@ -12,9 +12,16 @@ const MapContainer = () => {
   const [greenLimit, setGreenLimit] = useState(15);
   const [polyline, setPolyline] = useState(null);
   const [hoveredLegId, setHoveredLegId] = useState<number | null>(null);
+  const InfoPopupModes = ["Travel details", "Housing prices"];
+  const [selectedOption, setSelectedOption] = useState(InfoPopupModes[0]);
+  const [housingPriceRadius, setHousingPriceRadius] = useState(1000);
 
   const handleLegHover = (id: number, isHovering: boolean) => {
     setHoveredLegId(isHovering ? id : null);
+  };
+
+  const handleSliderChange = (event, newValue) => {
+    setHousingPriceRadius(newValue);
   };
 
   const onMapClick = (coordinates, map) => {
@@ -41,6 +48,14 @@ const MapContainer = () => {
     setPolyline(null);
   };
 
+  const handleInfoPopupModeToggle = () => {
+    if (selectedOption === InfoPopupModes[0]) {
+      setSelectedOption(InfoPopupModes[1]);
+    } else {
+      setSelectedOption(InfoPopupModes[0]);
+    }
+  };
+
   const handlePolylineData = (polylineData) => {
     setPolyline(polylineData);
     console.log("polylineData: ", polylineData);
@@ -55,6 +70,8 @@ const MapContainer = () => {
         polyline={polyline}
         hoveredLegId={hoveredLegId}
         onLegHover={handleLegHover}
+        housingPriceRadius={housingPriceRadius}
+        selectedPopupMode={selectedOption}
       />
       {/* Conditionally render the InfoPopup component */}
       {showInfoPopup && (
@@ -64,6 +81,10 @@ const MapContainer = () => {
           onPolylineData={handlePolylineData}
           hoveredLegId={hoveredLegId}
           onLegHover={handleLegHover} // Pass the function as a prop
+          onToggle={handleInfoPopupModeToggle}
+          selectedOption={selectedOption}
+          housingPriceRadius={housingPriceRadius}
+          handleSliderChange={handleSliderChange}
         />
       )}
       <OverlayControls

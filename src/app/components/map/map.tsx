@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, use } from "react";
 import mapboxgl, { LngLatLike, Popup } from "mapbox-gl";
 import { buffer, bbox, bboxPolygon, point, Point } from "@turf/turf";
 import { getTravelTime } from "@/queries/getTravelTime";
@@ -14,6 +14,8 @@ interface MapProps {
   polyline: Array<Array<number> | number[]>;
   hoveredLegId: number | null;
   onLegHover: (legId: number | null, isHovering: boolean) => void;
+  housingPriceRadius: number;
+  selectedPopupMode: string;
 }
 
 interface ILocation {
@@ -28,6 +30,8 @@ const Map: React.FC<MapProps> = ({
   polyline,
   hoveredLegId,
   onLegHover,
+  housingPriceRadius,
+  selectedPopupMode,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
@@ -41,7 +45,7 @@ const Map: React.FC<MapProps> = ({
 
   // Update the useEffect to handle an array of polyline data
   useEffect(() => {
-    if (map && polyline) {
+    if (map && polyline && selectedPopupMode === "Travel details") {
       const source = map.getSource("polyline") as mapboxgl.GeoJSONSource;
       const convertedPolylines = convertPolylines(polyline, hoveredLegId);
       const geoJSONData = {
@@ -73,7 +77,8 @@ const Map: React.FC<MapProps> = ({
       if (circleSource) {
         circleSource.setData(circleGeoJSONData);
       }
-    } else if (map && polyline === null) {
+    } else if (map && selectedPopupMode !== "Travel details") {
+      // This line is modified
       const source = map.getSource("polyline") as mapboxgl.GeoJSONSource;
       if (source) {
         source.setData({
@@ -91,7 +96,7 @@ const Map: React.FC<MapProps> = ({
         });
       }
     }
-  }, [map, polyline, hoveredLegId]);
+  }, [map, polyline, hoveredLegId, selectedPopupMode]);
 
   useEffect(() => {
     async function initializeMap() {
@@ -112,61 +117,58 @@ const Map: React.FC<MapProps> = ({
       });
 
       mapInstance.on("load", () => {
-        // Define grid bounds
-        const gridBounds = bbox(
-          buffer(point([18.0686, 59.3293]), 100, { units: "meters" })
-        ) as [number, number, number, number];
+        if (selectedPopupMode === "Travel details") {
+          // Add a GeoJSON source for the polyline
+          mapInstance.addSource("polyline", {
+            type: "geojson",
+            data: {
+              type: "FeatureCollection",
+              features: [],
+            },
+          });
 
-        // Add a GeoJSON source for the polyline
-        mapInstance.addSource("polyline", {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: [],
-          },
-        });
+          // Add the polyline layer
+          mapInstance.addLayer({
+            id: "polyline",
+            type: "line",
+            source: "polyline",
+            paint: {
+              "line-color": [
+                "case",
+                ["boolean", ["get", "isHovered"], false],
+                "#ffffff", // White color for the hovered polyline
+                "#ff0000", // Default color for other polylines
+              ],
+              "line-width": 5,
+            },
+          });
 
-        // Add the polyline layer
-        mapInstance.addLayer({
-          id: "polyline",
-          type: "line",
-          source: "polyline",
-          paint: {
-            "line-color": [
-              "case",
-              ["boolean", ["get", "isHovered"], false],
-              "#ffffff", // White color for the hovered polyline
-              "#ff0000", // Default color for other polylines
-            ],
-            "line-width": 5,
-          },
-        });
+          // Polyline circle, travel path
+          mapInstance.addSource("circle", {
+            type: "geojson",
+            data: {
+              type: "FeatureCollection",
+              features: [],
+            },
+          });
 
-        // Polyline circle, travel path
-        mapInstance.addSource("circle", {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: [],
-          },
-        });
-
-        // Polyline circle, travel path
-        // Add the circle layer for the start and end of each polyline
-        mapInstance.addLayer({
-          id: "circle",
-          type: "circle",
-          source: "circle",
-          paint: {
-            "circle-radius": 6,
-            "circle-color": [
-              "case",
-              ["boolean", ["get", "isHovered"], false],
-              "#ffffff", // Color for hovered circles
-              "#ff0000", // Default color for circles
-            ],
-          },
-        });
+          // Polyline circle, travel path
+          // Add the circle layer for the start and end of each polyline
+          mapInstance.addLayer({
+            id: "circle",
+            type: "circle",
+            source: "circle",
+            paint: {
+              "circle-radius": 6,
+              "circle-color": [
+                "case",
+                ["boolean", ["get", "isHovered"], false],
+                "#ffffff", // Color for hovered circles
+                "#ff0000", // Default color for circles
+              ],
+            },
+          });
+        }
 
         // Add a GeoJSON source for the travel time data
         mapInstance.addSource("travelTimeData", {
@@ -287,7 +289,7 @@ const Map: React.FC<MapProps> = ({
     if (!map) {
       initializeMap();
     }
-  }, [map, onMapClick]);
+  }, [map, onMapClick, selectedPopupMode]);
 
   const limits = [greenLimit, 15 + greenLimit, 45 + greenLimit];
   const colors = ["#13C81A", "#C2D018", "#D1741F", "#BE3A1D"];
@@ -313,6 +315,16 @@ const Map: React.FC<MapProps> = ({
 
     updateMap();
   }, [map, greenLimit]);
+
+  useEffect(() => {
+    if (selectedPopupMode == "Housing prices") {
+      addSquareAroundMaker(map, housingPriceRadius);
+    } else {
+      removeSquareAroundMaker(map);
+    }
+
+    console.log("CHAAANGE", selectedPopupMode);
+  }, [map, selectedPopupMode, housingPriceRadius, onMapClick]);
 
   useEffect(() => {
     if (map) {
@@ -425,4 +437,85 @@ function getCircleFeatures(convertedPolylines) {
   });
 
   return circleFeatures;
+}
+
+const addSquareAroundMaker = (map, housingPriceRadius) => {
+  // Get the marker's position in geographic coordinates
+  const marker = map.currentMarker;
+  var markerLngLat = marker.getLngLat();
+
+  const latDiff = ((0.001806 / 2.0) * housingPriceRadius) / 100.0 / 2.0;
+  const longDiff = ((0.006618 / 3.75) * housingPriceRadius) / 100.0 / 2.0;
+
+  // Compute the square's coordinates
+  var squareLngLat = [
+    [markerLngLat.lng - longDiff, markerLngLat.lat - latDiff], // bottom left
+    [markerLngLat.lng + longDiff, markerLngLat.lat - latDiff], // bottom right
+    [markerLngLat.lng + longDiff, markerLngLat.lat + latDiff], // top right
+    [markerLngLat.lng - longDiff, markerLngLat.lat + latDiff], // top left
+    [markerLngLat.lng - longDiff, markerLngLat.lat - latDiff], // back to bottom left to close the polygon
+  ];
+
+  // Remove old square layer if it exists
+  if (map.getLayer("square")) {
+    map.removeLayer("square");
+  }
+
+  // Remove old square source if it exists
+  if (map.getSource("square")) {
+    map.removeSource("square");
+  }
+
+  if (!doesLayerExist("square", map) && !doesSourceExist("square", map)) {
+    // Add a square to the map
+    map.addSource("square", {
+      type: "geojson",
+      data: {
+        type: "Polygon",
+        coordinates: [squareLngLat],
+      },
+    });
+
+    map.addLayer({
+      id: "square",
+      type: "fill",
+      source: "square",
+      layout: {},
+      paint: {
+        "fill-color": "#ff0000",
+        "fill-opacity": 0.3,
+      },
+    });
+  } else {
+    const mySource = map.getSource("square");
+
+    mySource.setData({
+      type: "geojson",
+      data: {
+        type: "Polygon",
+        coordinates: [squareLngLat],
+      },
+    });
+  }
+};
+
+const removeSquareAroundMaker = (map) => {
+  try {
+    if (map.getSource("square")) {
+      map.removeSource("square");
+      map.removeLayer("square");
+    }
+  } catch (e) {}
+};
+
+function doesLayerExist(layerId, map) {
+  console.log(map);
+  const layers = map.getStyle().layers;
+  return layers.some((layer) => layer.id === layerId);
+}
+
+// Check if a source with a specific ID exists
+function doesSourceExist(sourceId, map) {
+  const sources = map.getStyle().sources;
+  return sources.hasOwnProperty(sourceId);
 }

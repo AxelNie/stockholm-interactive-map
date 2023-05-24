@@ -39,8 +39,6 @@ export async function GET(req: NextRequest) {
       sizeOfArea
     );
 
-    console.log(housingPriceData);
-
     return new Response(
       JSON.stringify(getMonthlyAveragePrices(housingPriceData)),
       {
@@ -98,13 +96,34 @@ function getMonthlyAveragePrices(data: ApartmentData[]) {
   });
 
   // Compute averages
-  Object.keys(monthlyAvg).forEach(
-    (key) => (monthlyAvg[key] = monthlyAvg[key].total / monthlyAvg[key].count)
-  );
+  Object.keys(monthlyAvg).forEach((key) => {
+    if (monthlyAvg[key].count === 0) {
+    }
+    monthlyAvg[key] = Math.round(monthlyAvg[key].total / monthlyAvg[key].count);
+  });
 
-  const overallAvg = totalSum / totalCount;
+  const overallAvg = Math.round(totalSum / totalCount);
 
-  return { monthlyAvg, overallAvg };
+  // Reverse the order of monthlyAvg
+  const monthlyAvgCorrectOrder = {};
+  Object.keys(monthlyAvg)
+    .reverse()
+    .forEach((key) => {
+      monthlyAvgCorrectOrder[key] = monthlyAvg[key];
+    });
+
+  let sufficientMonthlyData = true;
+  console.log(monthlyAvg);
+  console.log(Object.keys(monthlyAvg).length);
+  if (Object.keys(monthlyAvg).length < 10) {
+    sufficientMonthlyData = false;
+  }
+
+  return {
+    monthlyAvg: monthlyAvgCorrectOrder,
+    overallAvg,
+    sufficientMonthlyData,
+  };
 }
 
 async function fetchDataForCoordinate(
@@ -132,13 +151,10 @@ async function fetchDataForCoordinate(
     iterations++;
     const url = `https://api.booli.se/sold?center=${coordinates.lng},${coordinates.lat}&dim=${sizeOfArea},${sizeOfArea}&objectType=lägenhet&offset=${offset}&limit=500&callerId=${process.env.NEXT_PUBLIC_BOOLI_PUBLIC_KEY}&time=${timestamp}&unique=${unique}&hash=${hashed}&
     `;
-    console.log(url);
 
     try {
       const response = await fetch(url);
       const data = await response.json();
-
-      console.log("data: ", data);
 
       if (data.sold.length > 0) {
         allData.push(
@@ -151,7 +167,6 @@ async function fetchDataForCoordinate(
             objectType: item.objectType,
           }))
         );
-        console.log(new Date(data.sold[data.sold.length - 1].soldDate));
 
         if (
           new Date(data.sold[data.sold.length - 1].soldDate) >

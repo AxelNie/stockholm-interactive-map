@@ -1,5 +1,68 @@
 @import '@/app/variables.module.scss';
 
 .graph{
-    padding: 1rem;
+    padding: 0 0.75rem 0 0.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
 }
+
+.description-graph{
+    font-weight: bold;
+    margin: 0.5rem 0 1rem 0;
+}
+
+.housing-price-stats{
+    display: flex;
+    justify-content: center;
+    align-self: center;
+    width: inherit;
+}
+
+.loading-pricing-stats-for-area{
+    margin: 3rem 0 3rem 0;
+}
+
+.avg-price-container{
+    width: inherit;
+    box-sizing: border-box;   
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box; 
+    color: white;
+}
+
+.avg-price-bg{
+    padding: 0.75rem;
+    background-color: $dark;
+    box-sizing: border-box;   
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box; 
+    width: inherit;
+    height: inherit;
+    border-radius: 0 0 5px 5px;
+}
+
+.avg-price{
+    background-color: $semi-dark; 
+    padding: 0.75rem;
+}
+
+.avg-price-label{
+    font-size: 0.8rem;
+    font-weight: 800;
+    color: $grey;
+}
+
+.price-per-sqrmeter{
+    margin-top: 0.25rem;
+    font-weight: 800;
+    font-size: 30px;
+}
+
+.loaded-content-wrapper{
+    display: flex;
+    flex-direction: column;
+    width: inherit;
+}
+

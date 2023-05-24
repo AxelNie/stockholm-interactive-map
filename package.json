@@ -9,7 +9,10 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@emotion/react": "^11.11.0",
+    "@emotion/styled": "^11.11.0",
     "@mapbox/polyline": "^1.2.0",
+    "@mui/material": "^5.13.2",
     "@turf/rectangle-grid": "^6.5.0",
     "@turf/turf": "^6.5.0",
     "@types/leaflet": "^1.9.3",

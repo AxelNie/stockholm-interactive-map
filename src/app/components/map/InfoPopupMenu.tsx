@@ -2,16 +2,15 @@ import React, { useState } from "react";
 import "./InfoPopupMenu.scss";
 
 interface Props {
-  options: string[];
-  onToggle: (selectedOption: string) => void;
+  onToggle: () => void;
+  selectedOption: string;
 }
 
-const InfoPopupMenu: React.FC<Props> = ({ options, onToggle }) => {
-  const [selectedOption, setSelectedOption] = useState(options[0]);
+const InfoPopupMenu: React.FC<Props> = ({ onToggle, selectedOption }) => {
+  const options = ["Travel details", "Housing prices"];
 
   const handleClick = (option: string) => {
-    setSelectedOption(option);
-    onToggle(option);
+    onToggle();
   };
 
   return (

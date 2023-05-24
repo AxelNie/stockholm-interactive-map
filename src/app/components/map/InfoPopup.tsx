@@ -36,10 +36,13 @@ const InfoPopup = ({
   onPolylineData,
   onLegHover,
   hoveredLegId,
+  selectedOption,
+  onToggle,
+  housingPriceRadius,
+  handleSliderChange,
 }) => {
   const [locationData, setLocationData] = useState<ILocationData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [selectedOption, setSelectedOption] = useState("Travel details"); // New state to keep track of selected option
 
   const handleLegHover = (id: number, isHovering: boolean) => {
     onLegHover(id, isHovering); // Call the onLegHover prop directly
@@ -102,10 +105,6 @@ const InfoPopup = ({
 
   const travelInfoContainerRef = useRef(null);
 
-  const handleToggle = (selectedOption: string) => {
-    setSelectedOption(selectedOption);
-  };
-
   return (
     <div className="info-popup-container">
       {errorMessage && <div className="error-message">{errorMessage}</div>}
@@ -114,8 +113,8 @@ const InfoPopup = ({
           <div className="loaded-content">
             <Header address={locationData.startAddress} onClose={onClose} />
             <InfoPopupMenu
-              options={["Travel details", "Housing prices"]}
-              onToggle={handleToggle}
+              selectedOption={selectedOption}
+              onToggle={onToggle}
             />
             {selectedOption === "Travel details" ? (
               <TripDetails
@@ -124,7 +123,11 @@ const InfoPopup = ({
                 hoveredLegId={hoveredLegId}
               />
             ) : (
-              <HousingPriceStats locationData={locationData} />
+              <HousingPriceStats
+                locationData={locationData}
+                housingPriceRadius={housingPriceRadius}
+                handleSliderChange={handleSliderChange}
+              />
             )}
           </div>
         </>
