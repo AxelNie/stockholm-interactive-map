@@ -450,15 +450,29 @@ const addSquareAroundMaker = (map, housingPriceRadius) => {
   // Compute the square's coordinates
   var squareLngLat = [
     [markerLngLat.lng - longDiff, markerLngLat.lat - latDiff], // bottom left
-    [markerLngLat.lng + longDiff, markerLngLat.lat - latDiff], // bottom right
-    [markerLngLat.lng + longDiff, markerLngLat.lat + latDiff], // top right
     [markerLngLat.lng - longDiff, markerLngLat.lat + latDiff], // top left
-    [markerLngLat.lng - longDiff, markerLngLat.lat - latDiff], // back to bottom left to close the polygon
+    [markerLngLat.lng + longDiff, markerLngLat.lat + latDiff], // top right
+    [markerLngLat.lng + longDiff, markerLngLat.lat - latDiff], // bottom right
+    [markerLngLat.lng - longDiff, markerLngLat.lat - latDiff], // back to bottom left
+  ];
+
+  const holePolygon = [
+    // Cover the whole world
+    [
+      [-180, -90],
+      [-180, 90],
+      [180, 90],
+      [180, -90],
+      [-180, -90],
+    ],
+    // Your square (the hole)
+    squareLngLat,
   ];
 
   // Remove old square layer if it exists
-  if (map.getLayer("square")) {
-    map.removeLayer("square");
+  if (map.getLayer("square-fill")) {
+    map.removeLayer("square-fill");
+    map.removeLayer("square-border");
   }
 
   // Remove old square source if it exists
@@ -467,23 +481,43 @@ const addSquareAroundMaker = (map, housingPriceRadius) => {
   }
 
   if (!doesLayerExist("square", map) && !doesSourceExist("square", map)) {
+    console.log("Adding square layer and source");
+    console.log("squareHoleLngLat", holePolygon);
     // Add a square to the map
     map.addSource("square", {
       type: "geojson",
       data: {
-        type: "Polygon",
-        coordinates: [squareLngLat],
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Polygon",
+          coordinates: holePolygon,
+        },
       },
     });
 
+    // Add fill layer
     map.addLayer({
-      id: "square",
+      id: "square-fill",
       type: "fill",
       source: "square",
       layout: {},
       paint: {
-        "fill-color": "#ff0000",
+        "fill-color": "#0F1319",
         "fill-opacity": 0.3,
+      },
+    });
+
+    // Add border layer
+    map.addLayer({
+      id: "square-border",
+      type: "line",
+      source: "square",
+      layout: {},
+      paint: {
+        "line-color": "#ffffff",
+        "line-width": 1,
+        "line-opacity": 0.5,
       },
     });
   } else {
@@ -502,8 +536,9 @@ const addSquareAroundMaker = (map, housingPriceRadius) => {
 const removeSquareAroundMaker = (map) => {
   try {
     if (map.getSource("square")) {
+      map.removeLayer("square-fill");
+      map.removeLayer("square-border");
       map.removeSource("square");
-      map.removeLayer("square");
     }
   } catch (e) {}
 };

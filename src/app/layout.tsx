@@ -1,5 +1,3 @@
-"use client";
-
 import "./globals.scss";
 import Head from "next/head";
 
@@ -24,11 +22,6 @@ export default function RootLayout({
           href="https://api.mapbox.com/mapbox-gl-js/v2.6.1/mapbox-gl.css"
           rel="stylesheet"
         />
-        <script
-          src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"
-          integrity="sha384-9mGPKin8e58Wd0t+cAVHt0wFTovD+swFv8YfOyO1N0lX9d/5Qq3zg5h5DZK5/5Aj"
-          crossOrigin=""
-        ></script>
       </Head>
       <body>{children}</body>
     </html>

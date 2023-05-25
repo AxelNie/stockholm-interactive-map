@@ -1,4 +1,5 @@
-// MapContainer.tsx
+"use client";
+
 import React, { useState, useEffect } from "react";
 import Map from "./Map";
 import InfoPopup from "./InfoPopup";
