@@ -1,7 +1,5 @@
 import { NextRequest } from "next/server";
-import { MongoClient } from "mongodb";
 import crypto from "crypto";
-import { connectToDb } from "../../../../db";
 
 interface ICoordinate {
   lat: number;
@@ -36,7 +34,7 @@ export async function GET(req: NextRequest) {
   try {
     const housingPriceData = await fetchDataForCoordinate(
       coordinates,
-      sizeOfArea
+      parseInt(sizeOfArea || "0")
     );
 
     return new Response(
@@ -78,7 +76,7 @@ function getMonthlyAveragePrices(data: ApartmentData[]) {
       pricePerSquareMeter: item.soldPrice / item.livingArea,
     }));
 
-  const monthlyAvg: Record<string, number> = {};
+  const monthlyAvg: Record<string, { total: number; count: number }> = {};
 
   monthlyData.forEach((item) => {
     if (!monthlyAvg[item.soldDate]) {
@@ -95,32 +93,28 @@ function getMonthlyAveragePrices(data: ApartmentData[]) {
     totalCount++;
   });
 
+  const monthlyAvgAverages: Record<string, number> = {};
+
   // Compute averages
   Object.keys(monthlyAvg).forEach((key) => {
-    if (monthlyAvg[key].count === 0) {
+    if (monthlyAvg[key].count !== 0) {
+      monthlyAvgAverages[key] = Math.round(
+        monthlyAvg[key].total / monthlyAvg[key].count
+      );
     }
-    monthlyAvg[key] = Math.round(monthlyAvg[key].total / monthlyAvg[key].count);
   });
 
   const overallAvg = Math.round(totalSum / totalCount);
 
-  // Reverse the order of monthlyAvg
-  const monthlyAvgCorrectOrder = {};
-  Object.keys(monthlyAvg)
-    .reverse()
-    .forEach((key) => {
-      monthlyAvgCorrectOrder[key] = monthlyAvg[key];
-    });
-
   let sufficientMonthlyData = true;
-  console.log(monthlyAvg);
-  console.log(Object.keys(monthlyAvg).length);
-  if (Object.keys(monthlyAvg).length < 10) {
+  console.log(monthlyAvgAverages);
+  console.log(Object.keys(monthlyAvgAverages).length);
+  if (Object.keys(monthlyAvgAverages).length < 10) {
     sufficientMonthlyData = false;
   }
 
   return {
-    monthlyAvg: monthlyAvgCorrectOrder,
+    monthlyAvg: monthlyAvgAverages,
     overallAvg,
     sufficientMonthlyData,
   };

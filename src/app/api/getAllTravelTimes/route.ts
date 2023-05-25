@@ -1,11 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDb } from "../../../../db";
 
-interface Coordinate {
-  lat: number;
-  lng: number;
-}
-
 export async function GET(req: NextRequest) {
   try {
     let collectionName = "TravelTimesSmall";

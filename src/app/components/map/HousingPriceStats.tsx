@@ -20,13 +20,30 @@ interface IHousingPriceData {
   sufficientMonthlyData: boolean;
 }
 
+type LocationDataType = {
+  startAddress: string;
+  legs: any[];
+  totalTravelTime: string;
+};
+
+type SliderChangeEvent = (
+  event: React.ChangeEvent<{}>,
+  newValue: number | number[]
+) => void;
+
+interface IProps {
+  locationData: LocationDataType;
+  housingPriceRadius: number;
+  handleSliderChange: SliderChangeEvent;
+}
+
 function extractCity(input: string): string {
   const parts = input.split(",");
   const city = parts[0].trim();
   return city;
 }
 
-const HousingPriceStats = ({
+const HousingPriceStats: React.FC<IProps> = ({
   locationData,
   housingPriceRadius,
   handleSliderChange,
@@ -34,6 +51,11 @@ const HousingPriceStats = ({
   const [housingPriceData, setHousingPriceData] =
     useState<IHousingPriceData | null>(null);
   const [displayRadius, setDisplayRadius] = useState(housingPriceRadius);
+
+  console.log("DATAAA:");
+  console.log(locationData);
+  console.log(housingPriceRadius);
+  console.log(handleSliderChange);
 
   useEffect(() => {
     const fetchData = async () => {
