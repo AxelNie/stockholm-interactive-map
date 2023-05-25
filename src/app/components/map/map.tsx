@@ -2,7 +2,7 @@ import { useState, useEffect, useRef, use } from "react";
 import mapboxgl, { LngLatLike, Popup } from "mapbox-gl";
 import { buffer, bbox, bboxPolygon, point, Point } from "@turf/turf";
 import { getTravelTime } from "@/queries/getTravelTime";
-import "./map.css";
+import "./Map.scss";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 // Get your Mapbox access token from the environment variable
