@@ -1,8 +1,6 @@
 // OverlayControls.tsx
 import React from "react";
 import "./OverlayControls.scss";
-import { FiPlus, FiMinus } from "react-icons/fi";
-import MapModeSelector from "./MapModeSelector";
 
 interface OverlayControlsProps {
   greenLimit: number;
@@ -41,7 +39,7 @@ const OverlayControls: React.FC<OverlayControlsProps> = ({
         <div className="separator" />
         <div className="controls">
           <div>
-            <button className="control-button" onClick={() => decreaseLimit(0)}>
+            <button className="control-button" onClick={() => decreaseLimit()}>
               -
             </button>
           </div>
@@ -57,13 +55,12 @@ const OverlayControls: React.FC<OverlayControlsProps> = ({
             ))}
           </div>
           <div>
-            <button className="control-button" onClick={() => increaseLimit(0)}>
+            <button className="control-button" onClick={() => increaseLimit()}>
               +
             </button>
           </div>
         </div>
       </div>
-      <MapModeSelector />
     </div>
   );
 };

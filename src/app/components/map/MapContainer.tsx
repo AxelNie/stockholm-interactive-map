@@ -1,38 +1,37 @@
 "use client";
-
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { LngLatLike } from "mapbox-gl";
 import Map from "./Map";
 import InfoPopup from "./InfoPopup";
 import OverlayControls from "./OverlayControls";
 import "./MapContainer.scss";
 
+type MapInstanceType = {
+  map: mapboxgl.Map | null;
+  currentMarker?: mapboxgl.Marker | null;
+};
 const MapContainer = () => {
-  const [mapInstance, setMapInstance] = useState(null);
+  const [mapInstance, setMapInstance] = useState<MapInstanceType | null>(null);
   const [showInfoPopup, setShowInfoPopup] = useState(false);
-  const [clickedCoordinates, setClickedCoordinates] = useState(null);
+  const [clickedCoordinates, setClickedCoordinates] = useState<any>(null);
   const [greenLimit, setGreenLimit] = useState(15);
-  const [polyline, setPolyline] = useState(null);
+  const [polyline, setPolyline] = useState<any>(null);
   const [hoveredLegId, setHoveredLegId] = useState<number | null>(null);
   const InfoPopupModes = ["Travel details", "Housing prices"];
   const [selectedOption, setSelectedOption] = useState(InfoPopupModes[0]);
   const [housingPriceRadius, setHousingPriceRadius] = useState(1000);
 
-  const handleLegHover = (id: number, isHovering: boolean) => {
+  const handleLegHover = (id: number | null, isHovering: boolean) => {
     setHoveredLegId(isHovering ? id : null);
   };
 
-  const handleSliderChange = (event, newValue) => {
+  const handleSliderChange = (event: any, newValue: number) => {
     setHousingPriceRadius(newValue);
   };
 
-  const onMapClick = (coordinates, map) => {
-    // Display the popup
+  const onMapClick = (coordinates: LngLatLike, map: MapInstanceType) => {
     setShowInfoPopup(true);
-
-    // Store the clicked coordinates
     setClickedCoordinates(coordinates);
-
-    // Store the map instance
     setMapInstance(map);
   };
 
@@ -57,14 +56,13 @@ const MapContainer = () => {
     }
   };
 
-  const handlePolylineData = (polylineData) => {
+  const handlePolylineData = (polylineData: any) => {
     setPolyline(polylineData);
     console.log("polylineData: ", polylineData);
   };
 
   return (
     <div className="main-map-container">
-      {/* Pass the onMapClick function and the setMap function as props */}
       <Map
         onMapClick={onMapClick}
         greenLimit={greenLimit}
@@ -74,14 +72,13 @@ const MapContainer = () => {
         housingPriceRadius={housingPriceRadius}
         selectedPopupMode={selectedOption}
       />
-      {/* Conditionally render the InfoPopup component */}
       {showInfoPopup && (
         <InfoPopup
           coordinates={clickedCoordinates}
           onClose={handleInfoPopupClose}
           onPolylineData={handlePolylineData}
           hoveredLegId={hoveredLegId}
-          onLegHover={handleLegHover} // Pass the function as a prop
+          onLegHover={handleLegHover}
           onToggle={handleInfoPopupModeToggle}
           selectedOption={selectedOption}
           housingPriceRadius={housingPriceRadius}

@@ -3,7 +3,7 @@ import React from "react";
 import TravelLeg from "./TravelLeg";
 import TravelTime from "./TravelTime";
 
-const TripDetails = ({ locationData, onLegHover, hoveredLegId }) => {
+const TripDetails = ({ locationData, onLegHover, hoveredLegId }: any) => {
   const handleLegHover = (id: number, isHovering: boolean) => {
     onLegHover(id, isHovering); // Call the onLegHover prop directly
   };
@@ -11,7 +11,7 @@ const TripDetails = ({ locationData, onLegHover, hoveredLegId }) => {
   return (
     <>
       <div className="travel-legs scrollable">
-        {locationData.legs.map((leg, index) => (
+        {locationData.legs.map((leg: any, index: number) => (
           <React.Fragment key={index}>
             <TravelLeg
               leg={leg}
@@ -38,7 +38,7 @@ const TripDetails = ({ locationData, onLegHover, hoveredLegId }) => {
 
 export default TripDetails;
 
-const TimeBetweenLeg = ({ leg, locationData, index }) => {
+const TimeBetweenLeg = ({ leg, locationData, index }: any) => {
   // Helper function to calculate time difference
   const calculateTimeDifference = (
     prevTime: string,

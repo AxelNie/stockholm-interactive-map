@@ -10,8 +10,12 @@ import "mapbox-gl/dist/mapbox-gl.css";
 // Get your Mapbox access token from the environment variable
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string;
 
+interface IMap {
+  map: mapboxgl.Map;
+}
+
 interface MapProps {
-  onMapClick: (coordinates: LngLatLike, map: mapboxgl.Map) => void;
+  onMapClick: (coordinates: LngLatLike, map: IMap) => void;
   greenLimit: number;
   polyline: Array<Array<number> | number[]>;
   hoveredLegId: number | null;
@@ -50,10 +54,10 @@ const Map: React.FC<MapProps> = ({
     if (map && polyline && selectedPopupMode === "Travel details") {
       const source = map.getSource("polyline") as mapboxgl.GeoJSONSource;
       const convertedPolylines = convertPolylines(polyline, hoveredLegId);
-      const geoJSONData = {
+      const geoJSONData: any = {
         type: "FeatureCollection",
         features: convertedPolylines.map(
-          ({ coordinates, isHovered }, index) => ({
+          ({ coordinates, isHovered }: any, index: any) => ({
             type: "Feature",
             geometry: {
               type: "LineString",
@@ -72,7 +76,7 @@ const Map: React.FC<MapProps> = ({
 
       // Handle the circle features
       const circleSource = map.getSource("circle") as mapboxgl.GeoJSONSource;
-      const circleGeoJSONData = {
+      const circleGeoJSONData: any = {
         type: "FeatureCollection",
         features: getCircleFeatures(convertedPolylines),
       };
@@ -261,14 +265,17 @@ const Map: React.FC<MapProps> = ({
         // Store the new marker directly on the map instance
         (mapInstance as any).currentMarker = newMarker;
 
-        onMapClick(coordinates, mapInstance);
+        onMapClick(coordinates, { map: mapInstance });
 
         // Logging positon time for testing
 
         // Query the travel time data at the clicked position
-        const featuresAtPosition = mapInstance.queryRenderedFeatures(e.point, {
-          layers: ["travelTimeGrid"],
-        });
+        const featuresAtPosition: any = mapInstance.queryRenderedFeatures(
+          e.point,
+          {
+            layers: ["travelTimeGrid"],
+          }
+        );
 
         // If there's a feature at the clicked position, log its travel time data
         if (featuresAtPosition.length > 0) {
@@ -359,8 +366,9 @@ const Map: React.FC<MapProps> = ({
   };
 
   function hoverFeature(e: mapboxgl.MapMouseEvent) {
-    if (e.features && e.features.length > 0) {
-      const legId = e.features[0].properties?.legId;
+    const features = e.target.queryRenderedFeatures(e.point);
+    if (features && features.length > 0) {
+      const legId = features[0].properties?.legId;
       onLegHover(legId, true);
     }
   }
@@ -378,8 +386,8 @@ const Map: React.FC<MapProps> = ({
 
 export default Map;
 
-function convertPolylines(polyline, hoveredLegId: number | null) {
-  const convertedPolylines = polyline.map((polyline, index) => {
+function convertPolylines(polyline: any, hoveredLegId: number | null) {
+  const convertedPolylines = polyline.map((polyline: any, index: number) => {
     // Check if the current polyline is hovered
     const isHovered = index === hoveredLegId;
 
@@ -403,12 +411,12 @@ function convertPolylines(polyline, hoveredLegId: number | null) {
   return convertedPolylines;
 }
 
-function getCircleFeatures(convertedPolylines) {
-  const circleFeatures = [];
+function getCircleFeatures(convertedPolylines: any) {
+  const circleFeatures: any = [];
 
-  const combinedCircles = {};
+  const combinedCircles: any = {};
 
-  convertedPolylines.forEach(({ coordinates, isHovered }) => {
+  convertedPolylines.forEach(({ coordinates, isHovered }: any) => {
     const start = coordinates[0].toString();
     const end = coordinates[coordinates.length - 1].toString();
 
@@ -441,7 +449,7 @@ function getCircleFeatures(convertedPolylines) {
   return circleFeatures;
 }
 
-const addSquareAroundMaker = (map, housingPriceRadius) => {
+const addSquareAroundMaker = (map: any, housingPriceRadius: number) => {
   // Get the marker's position in geographic coordinates
   const marker = map.currentMarker;
   var markerLngLat = marker.getLngLat();
@@ -535,7 +543,7 @@ const addSquareAroundMaker = (map, housingPriceRadius) => {
   }
 };
 
-const removeSquareAroundMaker = (map) => {
+const removeSquareAroundMaker = (map: any) => {
   try {
     if (map.getSource("square")) {
       map.removeLayer("square-fill");
@@ -545,14 +553,14 @@ const removeSquareAroundMaker = (map) => {
   } catch (e) {}
 };
 
-function doesLayerExist(layerId, map) {
+function doesLayerExist(layerId: string, map: any) {
   console.log(map);
   const layers = map.getStyle().layers;
-  return layers.some((layer) => layer.id === layerId);
+  return layers.some((layer: any) => layer.id === layerId);
 }
 
 // Check if a source with a specific ID exists
-function doesSourceExist(sourceId, map) {
+function doesSourceExist(sourceId: string, map: any) {
   const sources = map.getStyle().sources;
   return sources.hasOwnProperty(sourceId);
 }

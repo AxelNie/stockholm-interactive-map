@@ -2,8 +2,6 @@ import "./TravelTime.scss";
 
 interface ITravelTimeProps {
   time: string;
-  isScrollable: boolean;
-  isAtBottom: boolean;
 }
 
 function convertTimeFormat(timeString: unknown): string {

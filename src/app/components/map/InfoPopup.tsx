@@ -23,6 +23,18 @@ interface ILocationData {
   }[];
 }
 
+interface InfoPopupProps {
+  coordinates: any; // Define the appropriate type here
+  onClose: () => void;
+  onPolylineData: any; // Define the appropriate type here
+  onLegHover: (id: number, isHovering: boolean) => void;
+  hoveredLegId: number | null;
+  selectedOption: string;
+  onToggle: any; // Define the appropriate type here
+  housingPriceRadius: number;
+  handleSliderChange: any; // Define the appropriate type here
+}
+
 function extractCityAndStreet(input: string): [string, string] {
   const parts = input.split(",");
   const street = parts[1].trim();
@@ -30,7 +42,7 @@ function extractCityAndStreet(input: string): [string, string] {
   return [city, street];
 }
 
-const InfoPopup = ({
+const InfoPopup: React.FC<InfoPopupProps> = ({
   coordinates,
   onClose,
   onPolylineData,
@@ -45,14 +57,13 @@ const InfoPopup = ({
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   const handleLegHover = (id: number, isHovering: boolean) => {
-    onLegHover(id, isHovering); // Call the onLegHover prop directly
+    onLegHover(id, isHovering);
   };
 
-  // New function to extract polyline data
-  const extractPolylineData = (data) => {
-    const polylineData = [];
+  const extractPolylineData = (data: any) => {
+    const polylineData: any = [];
 
-    data.legs.forEach((leg) => {
+    data.legs.forEach((leg: any) => {
       if (leg.polyline) {
         polylineData.push(leg.polyline.crd);
       } else {
@@ -73,11 +84,10 @@ const InfoPopup = ({
           JSON.stringify(coordinates)
         )}`
       );
-      const data = await response.json();
-      console.log(data);
+      const data: any = await response.json();
 
       if (data.errorCode) {
-        const errorMessages = {
+        const errorMessages: any = {
           "1001": "Key is undefined.",
           "1002": "Key is invalid.",
           "1003": "Invalid API.",
@@ -102,8 +112,6 @@ const InfoPopup = ({
 
     fetchData();
   }, [coordinates]);
-
-  const travelInfoContainerRef = useRef(null);
 
   return (
     <div className="info-popup-container">
@@ -138,8 +146,12 @@ const InfoPopup = ({
   );
 };
 
-// Header component
-const Header = ({ address, onClose }) => {
+interface HeaderProps {
+  address: string;
+  onClose: () => void;
+}
+
+const Header: React.FC<HeaderProps> = ({ address, onClose }) => {
   const [city, street] = extractCityAndStreet(address);
   return (
     <div className="header">
@@ -149,40 +161,6 @@ const Header = ({ address, onClose }) => {
       </div>
       <MdOutlineClose className="close-icon" onClick={onClose} />
     </div>
-  );
-};
-
-const TimeBetweenLeg = ({ leg, locationData, index }) => {
-  // Helper function to calculate time difference
-  const calculateTimeDifference = (
-    prevTime: string,
-    prevTravelTime: string,
-    nextTime: string
-  ) => {
-    const travelTimeInMinutes = parseInt(prevTravelTime.slice(2, -1));
-    const prevDate = new Date(`1970-01-01T${prevTime}`);
-    const arrivalDate = new Date(
-      prevDate.getTime() + travelTimeInMinutes * 60000
-    );
-    const nextDate = new Date(`1970-01-01T${nextTime}`);
-    const diffInMinutes = (nextDate.getTime() - arrivalDate.getTime()) / 60000;
-
-    return diffInMinutes;
-  };
-
-  return (
-    <>
-      <div className="divider-small" />
-      <div className="time-between-leg">
-        {calculateTimeDifference(
-          leg.time,
-          leg.travelTime,
-          locationData.legs[index + 1].time
-        )}{" "}
-        min change time
-      </div>
-      <div className="divider-small" />
-    </>
   );
 };
 

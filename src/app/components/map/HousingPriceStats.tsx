@@ -1,4 +1,3 @@
-// HousingPriceStats.tsx
 import React, { useEffect, useState } from "react";
 import "./HousingPriceStats.scss";
 import {
@@ -27,20 +26,14 @@ type LocationDataType = {
 };
 
 type SliderChangeEvent = (
-  event: React.ChangeEvent<{}>,
-  newValue: number | number[]
+  event: React.SyntheticEvent | Event,
+  value: number | number[]
 ) => void;
 
 interface IProps {
   locationData: LocationDataType;
   housingPriceRadius: number;
   handleSliderChange: SliderChangeEvent;
-}
-
-function extractCity(input: string): string {
-  const parts = input.split(",");
-  const city = parts[0].trim();
-  return city;
 }
 
 const HousingPriceStats: React.FC<IProps> = ({
@@ -50,18 +43,13 @@ const HousingPriceStats: React.FC<IProps> = ({
 }) => {
   const [housingPriceData, setHousingPriceData] =
     useState<IHousingPriceData | null>(null);
-  const [displayRadius, setDisplayRadius] = useState(housingPriceRadius);
-
-  console.log("DATAAA:");
-  console.log(locationData);
-  console.log(housingPriceRadius);
-  console.log(handleSliderChange);
+  const [displayRadius, setDisplayRadius] =
+    useState<number>(housingPriceRadius);
 
   useEffect(() => {
     const fetchData = async () => {
       setHousingPriceData(null);
       console.log(locationData.legs[0].startPosition.coordinates);
-      const city = extractCity(locationData.startAddress);
 
       const response = await fetch(
         `http://localhost:3000/api/getHousingPricesForArea?location=${locationData.legs[0].startPosition.coordinates}&dim=${housingPriceRadius}`
@@ -119,7 +107,11 @@ const HousingPriceStats: React.FC<IProps> = ({
                   min={200}
                   max={2000}
                   step={100}
-                  onChange={(event, newValue) => setDisplayRadius(newValue)}
+                  onChange={(event, newValue) => {
+                    if (typeof newValue === "number") {
+                      setDisplayRadius(newValue);
+                    }
+                  }}
                   onChangeCommitted={handleSliderChange}
                   valueLabelDisplay="auto"
                   aria-labelledby="range-slider"
@@ -149,7 +141,6 @@ const HousingPriceStats: React.FC<IProps> = ({
 
 export default HousingPriceStats;
 
-// Months mapping array
 const MONTHS = [
   "Jan.",
   "Feb.",
@@ -165,13 +156,11 @@ const MONTHS = [
   "Dec.",
 ];
 
-// Custom function for formatting the y-axis
-const formatYAxis = (tickItem) => {
-  return `${tickItem / 1000}k`;
+const formatYAxis = (tickItem: string) => {
+  return `${parseInt(tickItem) / 1000}k`;
 };
 
-// Custom function for formatting the x-axis
-const formatXAxis = (tickItem) => {
+const formatXAxis = (tickItem: string) => {
   const date = new Date(tickItem);
   return `${MONTHS[date.getMonth()]}-${date
     .getFullYear()
@@ -179,8 +168,7 @@ const formatXAxis = (tickItem) => {
     .slice(-2)} `;
 };
 
-// Custom tooltip
-const CustomTooltip = ({ active, payload, label }) => {
+const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
       <div className="custom-tooltip">

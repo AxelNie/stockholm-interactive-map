@@ -1,5 +1,4 @@
 import { NextRequest } from "next/server";
-import { MongoClient } from "mongodb";
 import { connectToDb } from "../../../../db";
 
 export async function GET(req: NextRequest) {
