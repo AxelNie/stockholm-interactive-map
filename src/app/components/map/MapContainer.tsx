@@ -1,8 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { LngLatLike } from "mapbox-gl";
-import Map from "./Map";
 import InfoPopup from "./InfoPopup";
+import Map from "./Map";
 import OverlayControls from "./OverlayControls";
 import "./MapContainer.scss";
 

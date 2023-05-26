@@ -1,8 +1,7 @@
 "use client";
-
 import { useState, useEffect, useRef } from "react";
 import mapboxgl, { LngLatLike, Popup } from "mapbox-gl";
-import { buffer, bbox, bboxPolygon, point, Point } from "@turf/turf";
+import { buffer, bbox, bboxPolygon, point } from "@turf/turf";
 import { getTravelTime } from "@/queries/getTravelTime";
 import "./Map.scss";
 import "mapbox-gl/dist/mapbox-gl.css";
