@@ -81,7 +81,7 @@ const InfoPopup: React.FC<InfoPopupProps> = ({
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch(
-        `http://localhost:3000/api/getLocationData?coordinates=${encodeURIComponent(
+        `https://restidkollen.vercel.app/api/getLocationData?coordinates=${encodeURIComponent(
           JSON.stringify(coordinates)
         )}`
       );
