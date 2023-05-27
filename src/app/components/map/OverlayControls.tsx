@@ -1,4 +1,4 @@
-// OverlayControls.tsx
+"use client";
 import React from "react";
 import "./OverlayControls.scss";
 

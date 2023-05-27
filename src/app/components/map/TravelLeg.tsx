@@ -1,5 +1,5 @@
+"use client";
 import "./TravelLeg.scss";
-
 import {
   MdDirectionsBus,
   MdDirectionsWalk,

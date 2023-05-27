@@ -1,5 +1,5 @@
+"use client";
 import "./TravelTime.scss";
-
 interface ITravelTimeProps {
   time: string;
 }

@@ -1,3 +1,4 @@
+"use client";
 import React, { useEffect, useState, useRef } from "react";
 import "./InfoPopup.scss";
 import TripDetails from "./TripDetails";

@@ -1,4 +1,4 @@
-// TripDetails.tsx
+"use client";
 import React from "react";
 import TravelLeg from "./TravelLeg";
 import TravelTime from "./TravelTime";

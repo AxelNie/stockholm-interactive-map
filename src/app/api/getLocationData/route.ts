@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 
+export const dynamic = "force-dynamic";
+
 async function getTravelTime(
   originCoordinates: [number, number],
   destExtId: number,
@@ -25,14 +27,20 @@ async function getTravelTime(
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const coordinates = req.nextUrl.searchParams.get("coordinates");
+    const { searchParams } = new URL(request.url);
+    const coordinates = searchParams.get("coordinates");
 
     if (!coordinates) {
-      return NextResponse.json(
-        { error: "Coordinates are required" },
-        { status: 400 }
+      return new Response(
+        JSON.stringify({ error: "Coordinates are required" }),
+        {
+          status: 400,
+          headers: {
+            "content-type": "application/json",
+          },
+        }
       );
     }
 

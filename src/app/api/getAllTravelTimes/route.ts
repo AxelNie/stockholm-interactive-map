@@ -1,12 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDb } from "../../../../db";
 
-export async function GET(req: NextRequest) {
+export const dynamic = "force-dynamic";
+
+export async function GET(request: Request) {
   try {
     let collectionName = "TravelTimesSmall";
+    const { searchParams } = new URL(request.url);
 
-    if (req.nextUrl.searchParams.get("include_wait_time") === "true") {
-      if (req.nextUrl.searchParams.get("time") === "23") {
+    if (searchParams.get("include_wait_time") === "true") {
+      if (searchParams.get("time") === "23") {
         collectionName = "TravelTimesAvg23";
       } else {
         collectionName = "TravelTimesAvg7_8";
@@ -19,7 +22,8 @@ export async function GET(req: NextRequest) {
 
     client.close();
 
-    return new NextResponse(JSON.stringify({ document }), {
+    return new Response(JSON.stringify({ document }), {
+      status: 200,
       headers: {
         "Content-Type": "application/json",
       },
