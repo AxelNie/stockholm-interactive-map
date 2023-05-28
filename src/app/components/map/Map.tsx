@@ -11,6 +11,7 @@ mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string;
 
 interface IMap {
   map: mapboxgl.Map;
+  currentMarker?: mapboxgl.Marker | null;
 }
 
 interface MapProps {
@@ -27,6 +28,7 @@ interface ILocation {
   lng: number;
   lat: number;
   fastestTime: number;
+  showInfoPopup: boolean;
 }
 
 const Map: React.FC<MapProps> = ({
@@ -37,6 +39,7 @@ const Map: React.FC<MapProps> = ({
   onLegHover,
   housingPriceRadius,
   selectedPopupMode,
+  showInfoPopup,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
@@ -82,8 +85,8 @@ const Map: React.FC<MapProps> = ({
       if (circleSource) {
         circleSource.setData(circleGeoJSONData);
       }
-    } else if (map && selectedPopupMode !== "Travel details") {
-      // This line is modified
+    } else if (map) {
+      // Remove polyline features
       const source = map.getSource("polyline") as mapboxgl.GeoJSONSource;
       if (source) {
         source.setData({
@@ -108,7 +111,6 @@ const Map: React.FC<MapProps> = ({
       // Load travel time data
 
       const travelTimeData = await getTravelTime(true, 23);
-      console.log("formatted travelTimeData: ", travelTimeData);
 
       // Create a new Mapbox GL JS map
       const mapInstance = new mapboxgl.Map({
@@ -279,7 +281,6 @@ const Map: React.FC<MapProps> = ({
         // If there's a feature at the clicked position, log its travel time data
         if (featuresAtPosition.length > 0) {
           const travelTimeData = featuresAtPosition[0].properties.fastestTime;
-          console.log("Travel time data at clicked position:", travelTimeData);
         }
       });
 
@@ -304,7 +305,6 @@ const Map: React.FC<MapProps> = ({
 
   // Update heatmap layer's paint property when greenLimit changes
   useEffect(() => {
-    console.log("greenLimit: ", greenLimit);
     if (map && map.getLayer("travelTimeGrid")) {
       map.setPaintProperty("travelTimeGrid", "fill-color", [
         "interpolate",
@@ -325,14 +325,19 @@ const Map: React.FC<MapProps> = ({
   }, [map, greenLimit]);
 
   useEffect(() => {
-    if (selectedPopupMode == "Housing prices") {
-      addSquareAroundMaker(map, housingPriceRadius);
-    } else {
-      removeSquareAroundMaker(map);
-    }
+    if (map) {
+      if (selectedPopupMode == "Housing prices" && showInfoPopup == true) {
+        addSquareAroundMaker(map, housingPriceRadius);
+      } else {
+        removeSquareAroundMaker(map);
+      }
 
-    console.log("CHAAANGE", selectedPopupMode);
-  }, [map, selectedPopupMode, housingPriceRadius, onMapClick]);
+      if (showInfoPopup == false) {
+        console.log("No marker");
+        removeSquareAroundMaker(map);
+      }
+    }
+  }, [map, selectedPopupMode, housingPriceRadius, onMapClick, showInfoPopup]);
 
   useEffect(() => {
     if (map) {
@@ -490,8 +495,6 @@ const addSquareAroundMaker = (map: any, housingPriceRadius: number) => {
   }
 
   if (!doesLayerExist("square", map) && !doesSourceExist("square", map)) {
-    console.log("Adding square layer and source");
-    console.log("squareHoleLngLat", holePolygon);
     // Add a square to the map
     map.addSource("square", {
       type: "geojson",
@@ -544,16 +547,14 @@ const addSquareAroundMaker = (map: any, housingPriceRadius: number) => {
 
 const removeSquareAroundMaker = (map: any) => {
   try {
-    if (map.getSource("square")) {
+    if (map.getLayer("square-fill") && map.getLayer("square-border")) {
       map.removeLayer("square-fill");
       map.removeLayer("square-border");
-      map.removeSource("square");
     }
   } catch (e) {}
 };
 
 function doesLayerExist(layerId: string, map: any) {
-  console.log(map);
   const layers = map.getStyle().layers;
   return layers.some((layer: any) => layer.id === layerId);
 }

@@ -37,8 +37,8 @@ const MapContainer = () => {
 
   const handleInfoPopupClose = () => {
     // Remove the marker from the map
-    if (mapInstance && mapInstance.currentMarker) {
-      mapInstance.currentMarker.remove();
+    if (mapInstance && mapInstance.map.currentMarker) {
+      mapInstance.map.currentMarker.remove();
     }
 
     // Hide the popup
@@ -71,6 +71,7 @@ const MapContainer = () => {
         onLegHover={handleLegHover}
         housingPriceRadius={housingPriceRadius}
         selectedPopupMode={selectedOption}
+        showInfoPopup={showInfoPopup}
       />
       {showInfoPopup && (
         <InfoPopup
