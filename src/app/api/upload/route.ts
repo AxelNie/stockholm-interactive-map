@@ -1,20 +1,36 @@
 import { connectToDb } from "../../../../db";
-import data from "../../../lib/data/travel_distances_grid_geojson_250m_point_small.json";
+import data from "../../../lib/data/travel_distances_grid_geojson_250m_point_small_23_average.json";
 
 export async function GET(request: Request) {
   try {
     //const geoJsonData = convertToGeoJson(data);
 
-    const { client, collection } = await connectToDb("TravelTimesSmall");
+    const { client, collection } = await connectToDb("TravelTimesAvg23");
     await collection.deleteMany({});
     //await collection.createIndex({ "location.coordinates": "2dsphere" });
-    await collection.insertOne(data);
+    await collection.insertOne(processTravelData(data));
 
     client.close();
     return new Response("Data uploaded successfully");
   } catch (error) {
+    console.log(error);
     return new Response("Error uploading data");
   }
+}
+
+function processTravelData(data: any) {
+  // Convert travelDistancesGrid array to an array with only the int values
+  const travelTimes = data.averageTravelTimes.map((item: any) =>
+    Math.floor(item.averageFastestTime)
+  );
+
+  // Remove the "averageFastestTime" text
+  delete data.averageTravelTimes;
+
+  // Change the name of the array to travelTimes
+  data.travelTimes = travelTimes;
+
+  return data;
 }
 
 function convertToGeoJson(data: any[]) {

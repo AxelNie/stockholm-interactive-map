@@ -1,20 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { connectToDb } from "../../../../db";
 
-interface Coordinate {
-  lat: number;
-  lng: number;
-}
+export const dynamic = "force-dynamic";
 
-export async function GET(req: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const { client, collection } = await connectToDb("TravelTimesSmall");
+    let collectionName = "TravelTimesSmall";
+    const { searchParams } = new URL(request.url);
+
+    if (searchParams.get("include_wait_time") === "true") {
+      if (searchParams.get("time") === "23") {
+        collectionName = "TravelTimesAvg23";
+      } else {
+        collectionName = "TravelTimesAvg7_8";
+      }
+    }
+
+    const { client, collection } = await connectToDb(collectionName);
 
     const document = await collection.findOne();
 
     client.close();
 
-    return new NextResponse(JSON.stringify({ document }), {
+    return new Response(JSON.stringify({ document }), {
+      status: 200,
       headers: {
         "Content-Type": "application/json",
       },

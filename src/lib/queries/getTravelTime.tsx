@@ -4,9 +4,16 @@ interface ILocation {
   fastestTime: number;
 }
 
-export async function getTravelTime() {
+export async function getTravelTime(
+  include_wait_time: boolean,
+  time: number = 7
+) {
   try {
-    const apiUrl = "api/getAllTravelTimes";
+    const apiUrl =
+      "api/getAllTravelTimes?include_wait_time=" +
+      include_wait_time +
+      "&time=" +
+      time;
     const response = await fetch(apiUrl);
     const data = await response.json();
 

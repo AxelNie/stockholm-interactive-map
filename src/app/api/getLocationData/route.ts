@@ -1,39 +1,13 @@
-import type { NextApiRequest, NextApiResponse } from "next";
 import { NextRequest, NextResponse } from "next/server";
-//import fetch from "node-fetch";
 
-type LocationData = {
-  address: string;
-  travelInfo: object;
-};
-
-async function reverseGeocode(coordinates: [number, number]): Promise<string> {
-  const [lng, lat] = coordinates;
-
-  const accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN;
-  const url = `https://api.mapbox.com/geocoding/v5/mapbox.places/${lng},${lat}.json?access_token=${accessToken}`;
-
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    if (data.features.length > 0) {
-      const location = data.features[0].place_name;
-      return location;
-    } else {
-      return "Location not found";
-    }
-  } catch (error) {
-    console.error("Error reverse geocoding:", error);
-    return "Error reverse geocoding";
-  }
-}
+export const dynamic = "force-dynamic";
 
 async function getTravelTime(
   originCoordinates: [number, number],
   destExtId: number,
   date = "2023-04-24",
   time = "08:00"
-): Promise<object> {
+): Promise<object | { error: string }> {
   const [originLng, originLat] = originCoordinates;
 
   try {
@@ -46,48 +20,69 @@ async function getTravelTime(
 
     // Return the travel information
     return result;
-  } catch (error) {
+  } catch (error: any) {
     console.log("Error getting travel time.");
     console.error(error.message);
-    return null;
+    return { error: error.message };
   }
 }
 
-export async function GET(req: NextRequest) {
+export async function GET(request: Request) {
   try {
-    const coordinates = req.nextUrl.searchParams.get("coordinates");
+    const { searchParams } = new URL(request.url);
+    const coordinates = searchParams.get("coordinates");
 
     if (!coordinates) {
-      return NextResponse.json({ error: "Coordinates are required" }, 400);
+      return new Response(
+        JSON.stringify({ error: "Coordinates are required" }),
+        {
+          status: 400,
+          headers: {
+            "content-type": "application/json",
+          },
+        }
+      );
     }
 
-    let parsedCoordinates;
+    let parsedCoordinates: [number, number] = JSON.parse(coordinates) as [
+      number,
+      number
+    ];
 
     try {
       parsedCoordinates = JSON.parse(coordinates);
     } catch (error) {
-      return NextResponse.json({ error: "Invalid coordinates format" }, 400);
+      return NextResponse.json(
+        { error: "Invalid coordinates format" },
+        { status: 400 }
+      );
     }
 
     if (!Array.isArray(parsedCoordinates) || parsedCoordinates.length !== 2) {
-      return NextResponse.json({ error: "Invalid coordinates format" }, 400);
+      return NextResponse.json(
+        { error: "Invalid coordinates format" },
+        { status: 400 }
+      );
     }
 
-    const tCentralenDestId = "9001"; // T-Centralen station coordinates
+    const tCentralenDestId = 9001; // T-Centralen station coordinates
 
-    const travelInfo = await getTravelTime(parsedCoordinates, tCentralenDestId);
+    const travelInfo: any = await getTravelTime(
+      parsedCoordinates,
+      tCentralenDestId
+    );
 
     if (typeof travelInfo === "string") {
       return NextResponse.json(
         { error: "Error getting travel information", errorMessage: travelInfo },
-        500
+        { status: 500 }
       );
     }
 
     if (!travelInfo) {
       return NextResponse.json(
         { error: "Error getting travel information" },
-        500
+        { status: 500 }
       );
     }
 
@@ -155,7 +150,7 @@ export async function GET(req: NextRequest) {
       },
       status: 200,
     });
-  } catch (error) {
+  } catch (error: any) {
     console.error(error);
     const sanitizedError = new Error("Failed to process the request");
     sanitizedError.name = error.name;
@@ -165,18 +160,17 @@ export async function GET(req: NextRequest) {
         error: sanitizedError,
         errorMessage: error.message,
       },
-      500
+      { status: 500 }
     );
   }
 }
 
-function getTimeDifference(time1, time2) {
+function getTimeDifference(time1: string, time2: string) {
   // Create two temporary Date objects to store the time strings
-  const date1 = new Date(`1970-01-01T${time1}Z`);
-  const date2 = new Date(`1970-01-01T${time2}Z`);
+  const date1: Date = new Date(`1970-01-01T${time1}Z`);
+  const date2: Date = new Date(`1970-01-01T${time2}Z`);
 
-  // Calculate the time difference in milliseconds
-  const diffInMilliseconds = Math.abs(date1 - date2);
+  const diffInMilliseconds = Math.abs(date1.getTime() - date2.getTime());
 
   // Convert the time difference to seconds
   const diffInSeconds = diffInMilliseconds / 1000;
@@ -185,7 +179,7 @@ function getTimeDifference(time1, time2) {
   return diffInMinutes;
 }
 
-function addMinutesToTimeString(timeString, minutesToAdd) {
+function addMinutesToTimeString(timeString: any, minutesToAdd: any) {
   // Extract hours and minutes from the time string
   const [, hours = 0, , minutes = 0] = timeString.match(
     /PT((\d+)?H)?((\d+)?M)?/
@@ -205,7 +199,7 @@ function addMinutesToTimeString(timeString, minutesToAdd) {
   }
 }
 
-function calculateTravelTimeOfLeg(leg) {
+function calculateTravelTimeOfLeg(leg: any) {
   const departureDateTime = new Date(`${leg.Origin.date}T${leg.Origin.time}`);
   const arrivalDateTime = new Date(
     `${leg.Destination.date}T${leg.Destination.time}`

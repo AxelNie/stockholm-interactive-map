@@ -1,19 +1,26 @@
+"use client";
 import { useState, useEffect, useRef } from "react";
-import mapboxgl, { LngLatLike } from "mapbox-gl";
-import { buffer, bbox, bboxPolygon, point, Point } from "@turf/turf";
+import mapboxgl, { LngLatLike, Popup } from "mapbox-gl";
+import { buffer, bbox, bboxPolygon, point } from "@turf/turf";
 import { getTravelTime } from "@/queries/getTravelTime";
-import "./map.css";
+import "./Map.scss";
 import "mapbox-gl/dist/mapbox-gl.css";
 
 // Get your Mapbox access token from the environment variable
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string;
 
+interface IMap {
+  map: mapboxgl.Map;
+}
+
 interface MapProps {
-  onMapClick: (coordinates: LngLatLike, map: mapboxgl.Map) => void;
+  onMapClick: (coordinates: LngLatLike, map: IMap) => void;
   greenLimit: number;
   polyline: Array<Array<number> | number[]>;
   hoveredLegId: number | null;
   onLegHover: (legId: number | null, isHovering: boolean) => void;
+  housingPriceRadius: number;
+  selectedPopupMode: string;
 }
 
 interface ILocation {
@@ -28,19 +35,28 @@ const Map: React.FC<MapProps> = ({
   polyline,
   hoveredLegId,
   onLegHover,
+  housingPriceRadius,
+  selectedPopupMode,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<mapboxgl.Map | null>(null);
+  const [mapTheme, setMapTheme] = useState<string>("dark");
+
+  let popup: Popup | null = null;
+
+  const toggleTheme = () => {
+    setMapTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
+  };
 
   // Update the useEffect to handle an array of polyline data
   useEffect(() => {
-    if (map && polyline) {
+    if (map && polyline && selectedPopupMode === "Travel details") {
       const source = map.getSource("polyline") as mapboxgl.GeoJSONSource;
       const convertedPolylines = convertPolylines(polyline, hoveredLegId);
-      const geoJSONData = {
+      const geoJSONData: any = {
         type: "FeatureCollection",
         features: convertedPolylines.map(
-          ({ coordinates, isHovered }, index) => ({
+          ({ coordinates, isHovered }: any, index: any) => ({
             type: "Feature",
             geometry: {
               type: "LineString",
@@ -59,14 +75,15 @@ const Map: React.FC<MapProps> = ({
 
       // Handle the circle features
       const circleSource = map.getSource("circle") as mapboxgl.GeoJSONSource;
-      const circleGeoJSONData = {
+      const circleGeoJSONData: any = {
         type: "FeatureCollection",
         features: getCircleFeatures(convertedPolylines),
       };
       if (circleSource) {
         circleSource.setData(circleGeoJSONData);
       }
-    } else if (map && polyline === null) {
+    } else if (map && selectedPopupMode !== "Travel details") {
+      // This line is modified
       const source = map.getSource("polyline") as mapboxgl.GeoJSONSource;
       if (source) {
         source.setData({
@@ -84,79 +101,79 @@ const Map: React.FC<MapProps> = ({
         });
       }
     }
-  }, [map, polyline, hoveredLegId]);
+  }, [map, polyline, hoveredLegId, selectedPopupMode]);
 
   useEffect(() => {
     async function initializeMap() {
       // Load travel time data
 
-      const travelTimeData = await getTravelTime();
+      const travelTimeData = await getTravelTime(true, 23);
       console.log("formatted travelTimeData: ", travelTimeData);
 
       // Create a new Mapbox GL JS map
       const mapInstance = new mapboxgl.Map({
         container: mapContainerRef.current!,
-        style: "mapbox://styles/axeln/clgp2ccxh00gs01pc0iat3y1d",
+        style:
+          mapTheme === "light"
+            ? "mapbox://styles/mapbox/streets-v11" // Change this to the desired light style
+            : "mapbox://styles/axeln/clgp2ccxh00gs01pc0iat3y1d", // The current dark style
         center: [18.0686, 59.3293],
         zoom: 11,
       });
 
       mapInstance.on("load", () => {
-        // Define grid bounds
-        const gridBounds = bbox(
-          buffer(point([18.0686, 59.3293]), 100, { units: "meters" })
-        ) as [number, number, number, number];
+        if (selectedPopupMode === "Travel details") {
+          // Add a GeoJSON source for the polyline
+          mapInstance.addSource("polyline", {
+            type: "geojson",
+            data: {
+              type: "FeatureCollection",
+              features: [],
+            },
+          });
 
-        // Add a GeoJSON source for the polyline
-        mapInstance.addSource("polyline", {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: [],
-          },
-        });
+          // Add the polyline layer
+          mapInstance.addLayer({
+            id: "polyline",
+            type: "line",
+            source: "polyline",
+            paint: {
+              "line-color": [
+                "case",
+                ["boolean", ["get", "isHovered"], false],
+                "#ffffff", // White color for the hovered polyline
+                "#ff0000", // Default color for other polylines
+              ],
+              "line-width": 5,
+            },
+          });
 
-        // Add the polyline layer
-        mapInstance.addLayer({
-          id: "polyline",
-          type: "line",
-          source: "polyline",
-          paint: {
-            "line-color": [
-              "case",
-              ["boolean", ["get", "isHovered"], false],
-              "#ffffff", // White color for the hovered polyline
-              "#ff0000", // Default color for other polylines
-            ],
-            "line-width": 5,
-          },
-        });
+          // Polyline circle, travel path
+          mapInstance.addSource("circle", {
+            type: "geojson",
+            data: {
+              type: "FeatureCollection",
+              features: [],
+            },
+          });
 
-        // Polyline circle, travel path
-        mapInstance.addSource("circle", {
-          type: "geojson",
-          data: {
-            type: "FeatureCollection",
-            features: [],
-          },
-        });
-
-        // Polyline circle, travel path
-        // Add the circle layer for the start and end of each polyline
-        mapInstance.addLayer({
-          id: "circle",
-          type: "circle",
-          source: "circle",
-          paint: {
-            "circle-radius": 6,
-            "circle-color": [
-              "case",
-              ["boolean", ["get", "isHovered"], false],
-              "#ffffff", // Color for hovered circles
-              "#ff0000", // Default color for circles
-            ],
-          },
-        });
+          // Polyline circle, travel path
+          // Add the circle layer for the start and end of each polyline
+          mapInstance.addLayer({
+            id: "circle",
+            type: "circle",
+            source: "circle",
+            paint: {
+              "circle-radius": 6,
+              "circle-color": [
+                "case",
+                ["boolean", ["get", "isHovered"], false],
+                "#ffffff", // Color for hovered circles
+                "#ff0000", // Default color for circles
+              ],
+            },
+          });
+        }
 
         // Add a GeoJSON source for the travel time data
         mapInstance.addSource("travelTimeData", {
@@ -247,19 +264,30 @@ const Map: React.FC<MapProps> = ({
         // Store the new marker directly on the map instance
         (mapInstance as any).currentMarker = newMarker;
 
-        onMapClick(coordinates, mapInstance);
+        onMapClick(coordinates, { map: mapInstance });
 
         // Logging positon time for testing
 
         // Query the travel time data at the clicked position
-        const featuresAtPosition = mapInstance.queryRenderedFeatures(e.point, {
-          layers: ["travelTimeGrid"],
-        });
+        const featuresAtPosition: any = mapInstance.queryRenderedFeatures(
+          e.point,
+          {
+            layers: ["travelTimeGrid"],
+          }
+        );
 
         // If there's a feature at the clicked position, log its travel time data
         if (featuresAtPosition.length > 0) {
           const travelTimeData = featuresAtPosition[0].properties.fastestTime;
           console.log("Travel time data at clicked position:", travelTimeData);
+        }
+      });
+
+      // Add a 'mouseleave' event listener for the travelTimeGrid layer to remove the popup
+      mapInstance.on("mouseleave", "travelTimeGrid", () => {
+        if (popup) {
+          popup.remove();
+          popup = null;
         }
       });
 
@@ -269,7 +297,7 @@ const Map: React.FC<MapProps> = ({
     if (!map) {
       initializeMap();
     }
-  }, [map, onMapClick]);
+  }, [map, onMapClick, selectedPopupMode]);
 
   const limits = [greenLimit, 15 + greenLimit, 45 + greenLimit];
   const colors = ["#13C81A", "#C2D018", "#D1741F", "#BE3A1D"];
@@ -297,6 +325,16 @@ const Map: React.FC<MapProps> = ({
   }, [map, greenLimit]);
 
   useEffect(() => {
+    if (selectedPopupMode == "Housing prices") {
+      addSquareAroundMaker(map, housingPriceRadius);
+    } else {
+      removeSquareAroundMaker(map);
+    }
+
+    console.log("CHAAANGE", selectedPopupMode);
+  }, [map, selectedPopupMode, housingPriceRadius, onMapClick]);
+
+  useEffect(() => {
     if (map) {
       // Add the event listeners
       map.on("mousemove", "invisible-polyline-hover", hoverFeature);
@@ -310,6 +348,16 @@ const Map: React.FC<MapProps> = ({
     }
   }, [map]);
 
+  useEffect(() => {
+    if (map) {
+      map.setStyle(
+        mapTheme === "light"
+          ? "mapbox://styles/mapbox/streets-v11" // Change this to the desired light style
+          : "mapbox://styles/axeln/clgp2ccxh00gs01pc0iat3y1d" // The current dark style
+      );
+    }
+  }, [map, mapTheme]);
+
   const updateMap = () => {
     if (map) {
       map.resize();
@@ -317,8 +365,9 @@ const Map: React.FC<MapProps> = ({
   };
 
   function hoverFeature(e: mapboxgl.MapMouseEvent) {
-    if (e.features && e.features.length > 0) {
-      const legId = e.features[0].properties?.legId;
+    const features = e.target.queryRenderedFeatures(e.point);
+    if (features && features.length > 0) {
+      const legId = features[0].properties?.legId;
       onLegHover(legId, true);
     }
   }
@@ -336,8 +385,8 @@ const Map: React.FC<MapProps> = ({
 
 export default Map;
 
-function convertPolylines(polyline, hoveredLegId: number | null) {
-  const convertedPolylines = polyline.map((polyline, index) => {
+function convertPolylines(polyline: any, hoveredLegId: number | null) {
+  const convertedPolylines = polyline.map((polyline: any, index: number) => {
     // Check if the current polyline is hovered
     const isHovered = index === hoveredLegId;
 
@@ -361,12 +410,12 @@ function convertPolylines(polyline, hoveredLegId: number | null) {
   return convertedPolylines;
 }
 
-function getCircleFeatures(convertedPolylines) {
-  const circleFeatures = [];
+function getCircleFeatures(convertedPolylines: any) {
+  const circleFeatures: any = [];
 
-  const combinedCircles = {};
+  const combinedCircles: any = {};
 
-  convertedPolylines.forEach(({ coordinates, isHovered }) => {
+  convertedPolylines.forEach(({ coordinates, isHovered }: any) => {
     const start = coordinates[0].toString();
     const end = coordinates[coordinates.length - 1].toString();
 
@@ -397,4 +446,120 @@ function getCircleFeatures(convertedPolylines) {
   });
 
   return circleFeatures;
+}
+
+const addSquareAroundMaker = (map: any, housingPriceRadius: number) => {
+  // Get the marker's position in geographic coordinates
+  const marker = map.currentMarker;
+  var markerLngLat = marker.getLngLat();
+
+  const latDiff = ((0.001806 / 2.0) * housingPriceRadius) / 100.0 / 2.0;
+  const longDiff = ((0.006618 / 3.75) * housingPriceRadius) / 100.0 / 2.0;
+
+  // Compute the square's coordinates
+  var squareLngLat = [
+    [markerLngLat.lng - longDiff, markerLngLat.lat - latDiff], // bottom left
+    [markerLngLat.lng - longDiff, markerLngLat.lat + latDiff], // top left
+    [markerLngLat.lng + longDiff, markerLngLat.lat + latDiff], // top right
+    [markerLngLat.lng + longDiff, markerLngLat.lat - latDiff], // bottom right
+    [markerLngLat.lng - longDiff, markerLngLat.lat - latDiff], // back to bottom left
+  ];
+
+  const holePolygon = [
+    // Cover the whole world
+    [
+      [-180, -90],
+      [-180, 90],
+      [180, 90],
+      [180, -90],
+      [-180, -90],
+    ],
+    // Your square (the hole)
+    squareLngLat,
+  ];
+
+  // Remove old square layer if it exists
+  if (map.getLayer("square-fill")) {
+    map.removeLayer("square-fill");
+    map.removeLayer("square-border");
+  }
+
+  // Remove old square source if it exists
+  if (map.getSource("square")) {
+    map.removeSource("square");
+  }
+
+  if (!doesLayerExist("square", map) && !doesSourceExist("square", map)) {
+    console.log("Adding square layer and source");
+    console.log("squareHoleLngLat", holePolygon);
+    // Add a square to the map
+    map.addSource("square", {
+      type: "geojson",
+      data: {
+        type: "Feature",
+        properties: {},
+        geometry: {
+          type: "Polygon",
+          coordinates: holePolygon,
+        },
+      },
+    });
+
+    // Add fill layer
+    map.addLayer({
+      id: "square-fill",
+      type: "fill",
+      source: "square",
+      layout: {},
+      paint: {
+        "fill-color": "#0F1319",
+        "fill-opacity": 0.3,
+      },
+    });
+
+    // Add border layer
+    map.addLayer({
+      id: "square-border",
+      type: "line",
+      source: "square",
+      layout: {},
+      paint: {
+        "line-color": "#ffffff",
+        "line-width": 1,
+        "line-opacity": 0.5,
+      },
+    });
+  } else {
+    const mySource = map.getSource("square");
+
+    mySource.setData({
+      type: "geojson",
+      data: {
+        type: "Polygon",
+        coordinates: [squareLngLat],
+      },
+    });
+  }
+};
+
+const removeSquareAroundMaker = (map: any) => {
+  try {
+    if (map.getSource("square")) {
+      map.removeLayer("square-fill");
+      map.removeLayer("square-border");
+      map.removeSource("square");
+    }
+  } catch (e) {}
+};
+
+function doesLayerExist(layerId: string, map: any) {
+  console.log(map);
+  const layers = map.getStyle().layers;
+  return layers.some((layer: any) => layer.id === layerId);
+}
+
+// Check if a source with a specific ID exists
+function doesSourceExist(sourceId: string, map: any) {
+  const sources = map.getStyle().sources;
+  return sources.hasOwnProperty(sourceId);
 }

@@ -1,5 +1,5 @@
+"use client";
 import "./TravelLeg.scss";
-
 import {
   MdDirectionsBus,
   MdDirectionsWalk,
@@ -66,7 +66,7 @@ function getString(transportType: string) {
   }
 }
 
-const TravelLeg = ({ leg, onHover, id, hoveredLegId }) => {
+const TravelLeg = ({ leg, onHover, id, hoveredLegId }: any) => {
   return (
     <div
       className={`travel-leg-container${
