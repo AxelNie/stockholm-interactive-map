@@ -53,7 +53,7 @@ const HousingPriceStats: React.FC<IProps> = ({
       console.log(locationData.legs[0].startPosition.coordinates);
 
       const response = await fetch(
-        `https://www.restidkollen.se/api/getHousingPricesForArea?location=${locationData.legs[0].startPosition.coordinates}&dim=${housingPriceRadius}`
+        `/api/getHousingPricesForArea?location=${locationData.legs[0].startPosition.coordinates}&dim=${housingPriceRadius}`
       );
       const data = await response.json();
 
@@ -65,10 +65,14 @@ const HousingPriceStats: React.FC<IProps> = ({
   }, [locationData, housingPriceRadius]);
 
   const dataForChart = housingPriceData
-    ? Object.entries(housingPriceData.monthlyAvg).map(([month, price]) => ({
-        month,
-        price,
-      }))
+    ? Object.entries(housingPriceData.monthlyAvg)
+        .map(([month, price]) => ({
+          month,
+          price,
+        }))
+        .sort(
+          (a, b) => new Date(a.month).getTime() - new Date(b.month).getTime()
+        )
     : [];
 
   return (
