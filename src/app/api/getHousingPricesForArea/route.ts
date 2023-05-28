@@ -37,6 +37,8 @@ export async function GET(req: NextRequest) {
       parseInt(sizeOfArea || "0")
     );
 
+    console.log("avg data: ", getMonthlyAveragePrices(housingPriceData));
+
     return new Response(
       JSON.stringify(getMonthlyAveragePrices(housingPriceData)),
       {

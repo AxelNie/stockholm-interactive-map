@@ -53,7 +53,7 @@ const HousingPriceStats: React.FC<IProps> = ({
       console.log(locationData.legs[0].startPosition.coordinates);
 
       const response = await fetch(
-        `https://restidkollen.vercel.app/api/getHousingPricesForArea?location=${locationData.legs[0].startPosition.coordinates}&dim=${housingPriceRadius}`
+        `https://www.restidkollen.se/api/getHousingPricesForArea?location=${locationData.legs[0].startPosition.coordinates}&dim=${housingPriceRadius}`
       );
       const data = await response.json();
 
