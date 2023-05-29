@@ -1,7 +1,8 @@
 "use client";
 import "./TravelTime.scss";
+import GenericLoadingSkeleton from "./GenericLoadingSkeleton";
 interface ITravelTimeProps {
-  time: string;
+  time: string | null;
 }
 
 function convertTimeFormat(timeString: unknown): string {
@@ -36,12 +37,18 @@ function convertTimeFormat(timeString: unknown): string {
 const TravelTime = ({ time }: ITravelTimeProps) => {
   return (
     <div className="travel-time-container">
-      <div className="travel-time-background">
-        <div className="travel-time">
-          <div className="label">Travel time</div>
-          <div className="time">{convertTimeFormat(time)}</div>
+      {time ? (
+        <div className="travel-time-background">
+          <div className="travel-time">
+            <div className="label">Travel time</div>
+            <div className="time">{convertTimeFormat(time)}</div>
+          </div>
         </div>
-      </div>
+      ) : (
+        <div className="travel-time-background">
+          <GenericLoadingSkeleton height="79px" />
+        </div>
+      )}
     </div>
   );
 };

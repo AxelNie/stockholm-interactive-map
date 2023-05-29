@@ -6,8 +6,7 @@ import Map from "./Map";
 import OverlayControls from "./OverlayControls";
 import "./MapContainer.scss";
 
-interface MapInstanceType {
-  map: mapboxgl.Map;
+interface MapInstanceType extends mapboxgl.Map {
   currentMarker?: mapboxgl.Marker | null;
 }
 
@@ -33,24 +32,20 @@ const MapContainer = () => {
   const onMapClick = (coordinates: LngLatLike, map: MapInstanceType) => {
     setShowInfoPopup(true);
     setClickedCoordinates(coordinates);
-
-    if (map.currentMarker) {
-      setMapInstance(map);
-    }
+    setMapInstance(map);
   };
 
   const handleInfoPopupClose = () => {
     // Remove the marker from the map
-    if (mapInstance?.currentMarker) {
+    if (mapInstance && mapInstance.currentMarker) {
+      console.log("remove");
+
       mapInstance.currentMarker.remove();
-
-      setMapInstance((prev) =>
-        prev ? { ...prev, currentMarker: null } : null
-      );
     }
-
+    // Hide the popup
     setShowInfoPopup(false);
 
+    // Remove the polyline
     setPolyline(null);
   };
 

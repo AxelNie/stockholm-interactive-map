@@ -2,14 +2,18 @@ import React from "react";
 import PropTypes from "prop-types";
 import "./GenericLoadingSkeleton.scss";
 
-const LoadingSkeleton = ({ height = "100px" }) => {
+const GenericLoadingSkeleton = ({ height = "100px", width = "100%" }) => {
   return (
-    <div className="generic-loading-skeleton" style={{ height: height }}></div>
+    <div
+      className="generic-loading-skeleton"
+      style={{ height: height, width: width }}
+    ></div>
   );
 };
 
-LoadingSkeleton.propTypes = {
-  size: PropTypes.string,
+GenericLoadingSkeleton.propTypes = {
+  height: PropTypes.string,
+  width: PropTypes.string,
 };
 
-export default LoadingSkeleton;
+export default GenericLoadingSkeleton;

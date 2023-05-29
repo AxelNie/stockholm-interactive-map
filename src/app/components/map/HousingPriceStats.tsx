@@ -35,7 +35,7 @@ type SliderChangeEvent = (
 ) => void;
 
 interface IProps {
-  locationData: LocationDataType;
+  locationData: LocationDataType | null;
   housingPriceRadius: number;
   handleSliderChange: SliderChangeEvent;
 }
@@ -53,10 +53,9 @@ const HousingPriceStats: React.FC<IProps> = ({
   useEffect(() => {
     const fetchData = async () => {
       setHousingPriceData(null);
-      console.log(locationData.legs[0].startPosition.coordinates);
 
       const response = await fetch(
-        `/api/getHousingPricesForArea?location=${locationData.legs[0].startPosition.coordinates}&dim=${housingPriceRadius}`
+        `/api/getHousingPricesForArea?location=${locationData?.legs[0].startPosition.coordinates}&dim=${housingPriceRadius}`
       );
       const data = await response.json();
 
@@ -64,7 +63,9 @@ const HousingPriceStats: React.FC<IProps> = ({
       console.log(data);
     };
 
-    fetchData();
+    if (locationData) {
+      fetchData();
+    }
   }, [locationData, housingPriceRadius]);
 
   const dataForChart = housingPriceData

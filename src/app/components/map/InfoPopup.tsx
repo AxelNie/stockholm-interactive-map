@@ -5,7 +5,7 @@ import TripDetails from "./TripDetails";
 import HousingPriceStats from "./HousingPriceStats";
 import { MdOutlineClose } from "react-icons/md";
 import InfoPopupMenu from "./InfoPopupMenu";
-import LoadingSkeleton from "./LoadingSkeleton";
+import GenericLoadingSkeleton from "./GenericLoadingSkeleton";
 
 interface ILocationData {
   startAddress: string;
@@ -122,48 +122,49 @@ const InfoPopup: React.FC<InfoPopupProps> = ({
   return (
     <div className="info-popup-container">
       {errorMessage && <div className="error-message">{errorMessage}</div>}
-      {locationData ? (
-        <>
-          <div className="loaded-content">
-            <Header address={locationData.startAddress} onClose={onClose} />
-            <InfoPopupMenu
-              selectedOption={selectedOption}
-              onToggle={onToggle}
-            />
-            {selectedOption === "Travel details" ? (
-              <TripDetails
-                locationData={locationData}
-                onLegHover={handleLegHover}
-                hoveredLegId={hoveredLegId}
-              />
-            ) : (
-              <HousingPriceStats
-                locationData={locationData}
-                housingPriceRadius={housingPriceRadius}
-                handleSliderChange={handleSliderChange}
-              />
-            )}
-          </div>
-        </>
-      ) : (
-        <LoadingSkeleton />
-      )}
+
+      <div className="loaded-content">
+        <Header adress={locationData?.startAddress} onClose={onClose} />
+        <InfoPopupMenu selectedOption={selectedOption} onToggle={onToggle} />
+        {selectedOption === "Travel details" ? (
+          <TripDetails
+            locationData={locationData}
+            onLegHover={handleLegHover}
+            hoveredLegId={hoveredLegId}
+          />
+        ) : (
+          <HousingPriceStats
+            locationData={locationData}
+            housingPriceRadius={housingPriceRadius}
+            handleSliderChange={handleSliderChange}
+          />
+        )}
+      </div>
     </div>
   );
 };
 
 interface HeaderProps {
-  address: string;
+  adress: string | undefined;
   onClose: () => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ address, onClose }) => {
-  const [city, street] = extractCityAndStreet(address);
+const Header: React.FC<HeaderProps> = ({ adress, onClose }) => {
+  const [city, street] = adress ? extractCityAndStreet(adress) : ["", ""];
   return (
     <div className="header">
       <div className="text">
-        <h1 className="city">{city}</h1>
-        <h4 className="street">{street}</h4>
+        {adress ? (
+          <>
+            <h1 className="city">{city}</h1>
+            <h4 className="street">{street}</h4>
+          </>
+        ) : (
+          <div className="header-skeleton">
+            <GenericLoadingSkeleton height="38px" />
+            <GenericLoadingSkeleton height="18px" />
+          </div>
+        )}
       </div>
       <MdOutlineClose className="close-icon" onClick={onClose} />
     </div>

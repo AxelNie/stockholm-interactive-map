@@ -130,3 +130,17 @@
 .scrollable::-moz-scrollbar-thumb:hover {
   background-color: $grey-highlight;
 }
+
+.trip-details-loading-skeleton{
+  padding: 1rem;
+  .generic-loading-skeleton:not(:last-child) {
+    margin-bottom: 10px;  // adjust this value as per your needs
+  }
+}
+
+.header-skeleton{
+  padding-top: 0.6rem;
+  .generic-loading-skeleton:not(:last-child) {
+    margin-bottom: 10px;  // adjust this value as per your needs
+  }
+}

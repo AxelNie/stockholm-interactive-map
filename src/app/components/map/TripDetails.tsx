@@ -2,6 +2,7 @@
 import React from "react";
 import TravelLeg from "./TravelLeg";
 import TravelTime from "./TravelTime";
+import GenericLoadingSkeleton from "./GenericLoadingSkeleton";
 
 const TripDetails = ({ locationData, onLegHover, hoveredLegId }: any) => {
   const handleLegHover = (id: number, isHovering: boolean) => {
@@ -11,27 +12,44 @@ const TripDetails = ({ locationData, onLegHover, hoveredLegId }: any) => {
   return (
     <>
       <div className="travel-legs scrollable">
-        {locationData.legs.map((leg: any, index: number) => (
-          <React.Fragment key={index}>
-            <TravelLeg
-              leg={leg}
-              key={index + "l"}
-              id={index}
-              onHover={handleLegHover}
-              hoveredLegId={hoveredLegId}
-            />
-            {index < locationData.legs.length - 1 && (
-              <TimeBetweenLeg
-                leg={leg}
-                locationData={locationData}
-                index={index}
-                key={index + "t"}
-              />
-            )}
-          </React.Fragment>
-        ))}
+        {locationData ? (
+          <>
+            {locationData.legs.map((leg: any, index: number) => (
+              <React.Fragment key={index}>
+                <TravelLeg
+                  leg={leg}
+                  key={index + "l"}
+                  id={index}
+                  onHover={handleLegHover}
+                  hoveredLegId={hoveredLegId}
+                />
+                {index < locationData.legs.length - 1 && (
+                  <TimeBetweenLeg
+                    leg={leg}
+                    locationData={locationData}
+                    index={index}
+                    key={index + "t"}
+                  />
+                )}
+              </React.Fragment>
+            ))}
+          </>
+        ) : (
+          <>
+            <div className="trip-details-loading-skeleton">
+              <GenericLoadingSkeleton height="20px" width="80%" />
+              <GenericLoadingSkeleton height="70px" width="40%" />
+              <GenericLoadingSkeleton height="20px" width="65%" />
+            </div>
+            <div className="trip-details-loading-skeleton">
+              <GenericLoadingSkeleton height="20px" width="80%" />
+              <GenericLoadingSkeleton height="70px" width="40%" />
+              <GenericLoadingSkeleton height="20px" width="65%" />
+            </div>
+          </>
+        )}
       </div>
-      <TravelTime time={locationData.totalTravelTime} />
+      <TravelTime time={locationData?.totalTravelTime} />
     </>
   );
 };

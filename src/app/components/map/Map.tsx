@@ -9,8 +9,7 @@ import "mapbox-gl/dist/mapbox-gl.css";
 // Get your Mapbox access token from the environment variable
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string;
 
-interface IMap {
-  map: mapboxgl.Map;
+interface IMap extends mapboxgl.Map {
   currentMarker?: mapboxgl.Marker | null;
 }
 
@@ -42,7 +41,7 @@ const Map: React.FC<MapProps> = ({
   showInfoPopup,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
-  const [map, setMap] = useState<mapboxgl.Map | null>(null);
+  const [map, setMap] = useState<IMap | null>(null);
   const [mapTheme, setMapTheme] = useState<string>("dark");
 
   let popup: Popup | null = null;
@@ -121,7 +120,7 @@ const Map: React.FC<MapProps> = ({
             : "mapbox://styles/axeln/clgp2ccxh00gs01pc0iat3y1d", // The current dark style
         center: [18.0686, 59.3293],
         zoom: 11,
-      });
+      }) as IMap;
 
       mapInstance.on("load", () => {
         if (selectedPopupMode === "Travel details") {
@@ -266,7 +265,7 @@ const Map: React.FC<MapProps> = ({
         // Store the new marker directly on the map instance
         (mapInstance as any).currentMarker = newMarker;
 
-        onMapClick(coordinates, { map: mapInstance });
+        onMapClick(coordinates, mapInstance as IMap);
 
         // Logging positon time for testing
 
