@@ -1,0 +1,21 @@
+@import '@/app/variables.module.scss';
+
+.generic-loading-skeleton {
+  background-color: rgba($color: #ffffff, $alpha: 0.1);
+  animation: wave-fade 2s ease-in-out infinite;
+  width: 100%;
+  
+}
+
+
+@keyframes wave-fade {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}

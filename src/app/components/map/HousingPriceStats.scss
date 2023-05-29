@@ -5,12 +5,11 @@
     display: flex;
     flex-direction: column;
     justify-content: center;
-    align-items: center;
 }
 
 .description-graph{
     font-weight: bold;
-    margin: 0.5rem 0 1rem 0;
+    margin: 0.5rem 0.25rem 1rem 0.25rem;
 }
 
 .housing-price-stats{
@@ -43,6 +42,17 @@
     border-radius: 0 0 5px 5px;
 }
 
+.loading-avg-price-bg{
+    padding: 0.75rem;
+    background-color: $dark;
+    box-sizing: border-box;   
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box; 
+    width: inherit;
+    height: inherit;
+    border-radius: 0 0 5px 5px;
+}
+
 .avg-price{
     background-color: $semi-dark; 
     padding: 0.75rem;
@@ -50,7 +60,7 @@
 
 .avg-price-label{
     font-size: 0.8rem;
-    font-weight: 800;
+    font-weight: 700;
     color: $grey;
 }
 
@@ -64,5 +74,60 @@
     display: flex;
     flex-direction: column;
     width: inherit;
+}
+
+.slider-component{
+    position: relative;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background-color: $semi-dark;
+    padding: 0.75rem 0.75rem;
+}
+
+.error-graph-message{
+    height: calc(200px - 2rem); // 2rem is the padding of the component
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    margin: 1rem;
+}
+
+.loading-graph{
+    height: calc(200px); // 2rem is the padding of the component
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    padding: 0 0.25rem 0 0.25rem;
+}
+.slider-title{
+    top: 8px;
+    font-size: 1rem;
+    font-weight: 500;
+    color: white;
+    margin: 1rem 0.25rem 0.25rem 0.25rem;
+}
+
+.error-icon{
+    font-size: 3rem;
+    color: $grey;
+    margin-bottom: 0.5rem;
+}
+
+
+.slider-value-box{
+    background-color: $dark;
+    font-weight: 600;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 0.5rem;
+    border-radius: 5px;
+}
+
+.slider-container{
+    margin: 0 0 0rem 0;
 }
 

@@ -22,13 +22,13 @@ interface MapProps {
   onLegHover: (legId: number | null, isHovering: boolean) => void;
   housingPriceRadius: number;
   selectedPopupMode: string;
+  showInfoPopup: boolean;
 }
 
 interface ILocation {
   lng: number;
   lat: number;
   fastestTime: number;
-  showInfoPopup: boolean;
 }
 
 const Map: React.FC<MapProps> = ({

@@ -6,10 +6,11 @@ import Map from "./Map";
 import OverlayControls from "./OverlayControls";
 import "./MapContainer.scss";
 
-type MapInstanceType = {
-  map: mapboxgl.Map | null;
+interface MapInstanceType {
+  map: mapboxgl.Map;
   currentMarker?: mapboxgl.Marker | null;
-};
+}
+
 const MapContainer = () => {
   const [mapInstance, setMapInstance] = useState<MapInstanceType | null>(null);
   const [showInfoPopup, setShowInfoPopup] = useState(false);
@@ -32,19 +33,24 @@ const MapContainer = () => {
   const onMapClick = (coordinates: LngLatLike, map: MapInstanceType) => {
     setShowInfoPopup(true);
     setClickedCoordinates(coordinates);
-    setMapInstance(map);
+
+    if (map.currentMarker) {
+      setMapInstance(map);
+    }
   };
 
   const handleInfoPopupClose = () => {
     // Remove the marker from the map
-    if (mapInstance && mapInstance.map.currentMarker) {
-      mapInstance.map.currentMarker.remove();
+    if (mapInstance?.currentMarker) {
+      mapInstance.currentMarker.remove();
+
+      setMapInstance((prev) =>
+        prev ? { ...prev, currentMarker: null } : null
+      );
     }
 
-    // Hide the popup
     setShowInfoPopup(false);
 
-    // Remove the polyline
     setPolyline(null);
   };
 

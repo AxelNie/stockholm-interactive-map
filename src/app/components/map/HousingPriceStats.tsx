@@ -11,6 +11,9 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import Slider from "@mui/material/Slider";
+import Box from "@mui/material/Box";
+import { MdError } from "react-icons/md";
+import GenericLoadingSkeleton from "./GenericLoadingSkeleton";
 
 interface IHousingPriceData {
   monthlyAvg: {
@@ -77,12 +80,12 @@ const HousingPriceStats: React.FC<IProps> = ({
 
   return (
     <div className="housing-price-stats">
-      {housingPriceData ? (
-        <div className="loaded-content-wrapper">
-          <div className="graph">
-            <p className="description-graph">Price for appartments</p>
-            {housingPriceData.sufficientMonthlyData ? (
-              <>
+      <div className="loaded-content-wrapper">
+        <div className="graph">
+          <p className="description-graph">Price for appartments</p>
+          {housingPriceData ? (
+            <>
+              {housingPriceData?.sufficientMonthlyData ? (
                 <ResponsiveContainer height={200}>
                   <LineChart data={dataForChart} margin={{ right: 30 }}>
                     <CartesianGrid stroke="#1E232D" />
@@ -107,39 +110,71 @@ const HousingPriceStats: React.FC<IProps> = ({
                     />
                   </LineChart>
                 </ResponsiveContainer>
-                <Slider
-                  value={displayRadius}
-                  min={200}
-                  max={2000}
-                  step={100}
-                  onChange={(event, newValue) => {
-                    if (typeof newValue === "number") {
-                      setDisplayRadius(newValue);
-                    }
-                  }}
-                  onChangeCommitted={handleSliderChange}
-                  valueLabelDisplay="auto"
-                  aria-labelledby="range-slider"
-                />
-              </>
-            ) : (
-              <p>Not enough monthly data for this area</p>
-            )}
-          </div>
-          <div className="avg-price-container">
-            <div className="avg-price-bg">
-              <div className="avg-price">
-                <p className="avg-price-label">Average price for one year: </p>
-                <p className="price-per-sqrmeter">{`${formatPriceWithSpaces(
-                  housingPriceData.overallAvg
-                )} kr/kvm`}</p>
-              </div>
+              ) : (
+                <div className="error-graph-message">
+                  <MdError className="error-icon" />
+                  <p>
+                    Not enough monthly data for this area, try selecting larger
+                    area
+                  </p>
+                </div>
+              )}
+            </>
+          ) : (
+            <div className="loading-graph">
+              <GenericLoadingSkeleton height="200px" />
+            </div>
+          )}
+          <div className="slider-container">
+            <p className="slider-title">Set area size</p>
+            <div className="slider-component">
+              <Slider
+                value={displayRadius}
+                min={200}
+                max={2000}
+                step={100}
+                onChange={(event, newValue) => {
+                  if (typeof newValue === "number") {
+                    setDisplayRadius(newValue);
+                  }
+                }}
+                onChangeCommitted={handleSliderChange}
+                aria-labelledby="range-slider"
+                sx={{
+                  color: "#5ADF92",
+                  "& .MuiSlider-thumb": {
+                    "&:hover, &.Mui-focusVisible": {
+                      boxShadow: "0 0 0 0.4rem rgba(90, 223, 146, 0.1)",
+                    },
+                  },
+                }}
+              />
+              <Box className="slider-value-box" sx={{ ml: 2 }}>
+                {displayRadius}m
+              </Box>
             </div>
           </div>
         </div>
-      ) : (
-        <p className="loading-pricing-stats-for-area">Loading...</p>
-      )}
+        <div className="avg-price-container">
+          {housingPriceData ? (
+            <div className="avg-price-bg">
+              <div className="avg-price">
+                <p className="avg-price-label">Average price for one year: </p>
+
+                <p className="price-per-sqrmeter">
+                  {`${formatPriceWithSpaces(
+                    housingPriceData?.overallAvg
+                  )} kr/kvm`}
+                </p>
+              </div>
+            </div>
+          ) : (
+            <div className="loading-avg-price-bg">
+              <GenericLoadingSkeleton height="79px" />
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

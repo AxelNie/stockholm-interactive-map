@@ -78,6 +78,11 @@ const InfoPopup: React.FC<InfoPopupProps> = ({
     return polylineData;
   };
 
+  // Activate loading skeleton when coordinates change
+  useEffect(() => {
+    setLocationData(null);
+  }, [coordinates]);
+
   useEffect(() => {
     const fetchData = async () => {
       const response = await fetch(
