@@ -22,6 +22,7 @@ interface MapProps {
   housingPriceRadius: number;
   selectedPopupMode: string;
   showInfoPopup: boolean;
+  updateLoadingStatus: (status: string) => void;
 }
 
 interface ILocation {
@@ -39,10 +40,12 @@ const Map: React.FC<MapProps> = ({
   housingPriceRadius,
   selectedPopupMode,
   showInfoPopup,
+  updateLoadingStatus,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<IMap | null>(null);
   const [mapTheme, setMapTheme] = useState<string>("dark");
+  const [mapInitialized, setMapInitialized] = useState<boolean>(false);
 
   let popup: Popup | null = null;
 
@@ -123,6 +126,8 @@ const Map: React.FC<MapProps> = ({
       }) as IMap;
 
       mapInstance.on("load", () => {
+        setMapInitialized(true);
+        updateLoadingStatus("travelDistancesLoaded");
         if (selectedPopupMode === "Travel details") {
           // Add a GeoJSON source for the polyline
           mapInstance.addSource("polyline", {
@@ -196,6 +201,7 @@ const Map: React.FC<MapProps> = ({
             }),
           },
         });
+        updateLoadingStatus("travelDistancesLoaded");
 
         // Find the water layer in the map style
         let waterLayerId: string | undefined;
@@ -247,6 +253,8 @@ const Map: React.FC<MapProps> = ({
             "line-width": 25, // Adjust the width for the desired hitbox size
           },
         });
+
+        updateLoadingStatus("complete");
       });
 
       mapInstance.on("click", (e) => {
@@ -291,6 +299,7 @@ const Map: React.FC<MapProps> = ({
         }
       });
 
+      updateLoadingStatus("mapLoaded");
       setMap(mapInstance);
     }
 
@@ -332,7 +341,6 @@ const Map: React.FC<MapProps> = ({
       }
 
       if (showInfoPopup == false) {
-        console.log("No marker");
         removeSquareAroundMaker(map);
       }
     }

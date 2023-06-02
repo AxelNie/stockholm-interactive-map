@@ -1,9 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { LngLatLike } from "mapbox-gl";
 import InfoPopup from "./InfoPopup";
 import Map from "./Map";
 import OverlayControls from "./OverlayControls";
+import LoadingOverlay from "./LoadingOverlay";
 import "./MapContainer.scss";
 
 interface MapInstanceType extends mapboxgl.Map {
@@ -20,6 +21,13 @@ const MapContainer = () => {
   const InfoPopupModes = ["Travel details", "Housing prices"];
   const [selectedOption, setSelectedOption] = useState(InfoPopupModes[0]);
   const [housingPriceRadius, setHousingPriceRadius] = useState(1000);
+  const [loadingStatus, setLoadingStatus] = useState({
+    mapLoaded: false,
+    travelDistancesLoaded: false,
+    complete: false,
+  });
+
+  const [displayLoading, setDisplayLoading] = useState(true);
 
   const handleLegHover = (id: number | null, isHovering: boolean) => {
     setHoveredLegId(isHovering ? id : null);
@@ -38,8 +46,6 @@ const MapContainer = () => {
   const handleInfoPopupClose = () => {
     // Remove the marker from the map
     if (mapInstance && mapInstance.currentMarker) {
-      console.log("remove");
-
       mapInstance.currentMarker.remove();
     }
     // Hide the popup
@@ -47,6 +53,38 @@ const MapContainer = () => {
 
     // Remove the polyline
     setPolyline(null);
+  };
+
+  useEffect(() => {
+    let timeoutId: NodeJS.Timeout | undefined;
+    if (loadingStatus.complete) {
+      timeoutId = setTimeout(() => setDisplayLoading(false), 500);
+    } else {
+      setDisplayLoading(true);
+    }
+
+    return () => {
+      if (timeoutId) {
+        clearTimeout(timeoutId);
+      }
+    };
+  }, [loadingStatus.complete]);
+
+  const onUpdateMapLoadingStatus = (state: string) => {
+    console.log("state: ", state);
+    if (state === "mapLoaded") {
+      setLoadingStatus((prevState) => ({ ...prevState, mapLoaded: true }));
+    } else if (state === "travelDistancesLoaded") {
+      setLoadingStatus((prevState) => ({
+        ...prevState,
+        travelDistancesLoaded: true,
+      }));
+    } else if (state === "complete") {
+      setLoadingStatus((prevState) => ({
+        ...prevState,
+        complete: true,
+      }));
+    }
   };
 
   const handleInfoPopupModeToggle = () => {
@@ -59,11 +97,11 @@ const MapContainer = () => {
 
   const handlePolylineData = (polylineData: any) => {
     setPolyline(polylineData);
-    console.log("polylineData: ", polylineData);
   };
 
   return (
     <div className="main-map-container">
+      {displayLoading && <LoadingOverlay status={loadingStatus} />}
       <Map
         onMapClick={onMapClick}
         greenLimit={greenLimit}
@@ -73,6 +111,7 @@ const MapContainer = () => {
         housingPriceRadius={housingPriceRadius}
         selectedPopupMode={selectedOption}
         showInfoPopup={showInfoPopup}
+        updateLoadingStatus={onUpdateMapLoadingStatus}
       />
       {showInfoPopup && (
         <InfoPopup

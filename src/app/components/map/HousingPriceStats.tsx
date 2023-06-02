@@ -60,7 +60,6 @@ const HousingPriceStats: React.FC<IProps> = ({
       const data = await response.json();
 
       setHousingPriceData(data);
-      console.log(data);
     };
 
     if (locationData) {
