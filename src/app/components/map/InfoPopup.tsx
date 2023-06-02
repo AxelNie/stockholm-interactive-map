@@ -85,34 +85,42 @@ const InfoPopup: React.FC<InfoPopupProps> = ({
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await fetch(
-        `/api/getLocationData?coordinates=${encodeURIComponent(
-          JSON.stringify(coordinates)
-        )}`
-      );
-      const data: any = await response.json();
+      try {
+        const response = await fetch(
+          `/api/getLocationData?coordinates=${encodeURIComponent(
+            JSON.stringify(coordinates)
+          )}`
+        );
 
-      if (data.errorCode) {
-        const errorMessages: any = {
-          "1001": "Key is undefined.",
-          "1002": "Key is invalid.",
-          "1003": "Invalid API.",
-          "1004":
-            "This API is currently not available for keys with priority above 2.",
-          "1005": "Invalid API for key.",
-          "1006": "Too many requests per minute.",
-          "1007": "Too many requests per month.",
-        };
+        const data: any = await response.json();
+        setErrorMessage(null);
 
-        const errorMessage = errorMessages[data.errorCode] || "Unknown error.";
-        return errorMessage;
-      }
+        if (data.errorCode) {
+          const errorMessages: any = {
+            "1001": "Key is undefined.",
+            "1002": "Key is invalid.",
+            "1003": "Invalid API.",
+            "1004":
+              "This API is currently not available for keys with priority above 2.",
+            "1005": "Invalid API for key.",
+            "1006": "Too many requests per minute.",
+            "1007": "Too many requests per month.",
+          };
 
-      if (data.error) {
-        setErrorMessage(data.errorMessage);
-      } else {
-        setLocationData(data);
-        onPolylineData(extractPolylineData(data));
+          const errorMessage =
+            errorMessages[data.errorCode] || "Unknown error.";
+          throw new Error(errorMessage);
+        }
+
+        if (data.error) {
+          throw new Error(data.errorMessage);
+        } else {
+          setLocationData(data);
+          onPolylineData(extractPolylineData(data));
+        }
+      } catch (error: any) {
+        console.error(error);
+        setErrorMessage(error.message);
       }
     };
 
@@ -121,10 +129,13 @@ const InfoPopup: React.FC<InfoPopupProps> = ({
 
   return (
     <div className="info-popup-container">
-      {errorMessage && <div className="error-message">{errorMessage}</div>}
-
       <div className="loaded-content">
-        <Header adress={locationData?.startAddress} onClose={onClose} />
+        <Header
+          adress={locationData?.startAddress}
+          onClose={onClose}
+          error={errorMessage}
+        />
+
         <InfoPopupMenu selectedOption={selectedOption} onToggle={onToggle} />
         {selectedOption === "Travel details" ? (
           <TripDetails
@@ -134,6 +145,7 @@ const InfoPopup: React.FC<InfoPopupProps> = ({
           />
         ) : (
           <HousingPriceStats
+            coordinates={coordinates}
             locationData={locationData}
             housingPriceRadius={housingPriceRadius}
             handleSliderChange={handleSliderChange}
@@ -147,28 +159,41 @@ const InfoPopup: React.FC<InfoPopupProps> = ({
 interface HeaderProps {
   adress: string | undefined;
   onClose: () => void;
+  error: string | null;
 }
 
-const Header: React.FC<HeaderProps> = ({ adress, onClose }) => {
+const Header: React.FC<HeaderProps> = ({ adress, onClose, error }) => {
   const [city, street] = adress ? extractCityAndStreet(adress) : ["", ""];
-  return (
-    <div className="header">
-      <div className="text">
-        {adress ? (
-          <>
-            <h1 className="city">{city}</h1>
-            <h4 className="street">{street}</h4>
-          </>
-        ) : (
-          <div className="header-skeleton">
-            <GenericLoadingSkeleton height="38px" />
-            <GenericLoadingSkeleton height="18px" />
-          </div>
-        )}
+  if (error) {
+    return (
+      <div className="header">
+        <div className="text">
+          <h1 className="city">Error</h1>
+          <h4 className="street">Could not retrieve location</h4>
+        </div>
+        <MdOutlineClose className="close-icon" onClick={onClose} />
       </div>
-      <MdOutlineClose className="close-icon" onClick={onClose} />
-    </div>
-  );
+    );
+  } else {
+    return (
+      <div className="header">
+        <div className="text">
+          {adress ? (
+            <>
+              <h1 className="city">{city}</h1>
+              <h4 className="street">{street}</h4>
+            </>
+          ) : (
+            <div className="header-skeleton">
+              <GenericLoadingSkeleton height="38px" />
+              <GenericLoadingSkeleton height="18px" />
+            </div>
+          )}
+        </div>
+        <MdOutlineClose className="close-icon" onClick={onClose} />
+      </div>
+    );
+  }
 };
 
 export default InfoPopup;

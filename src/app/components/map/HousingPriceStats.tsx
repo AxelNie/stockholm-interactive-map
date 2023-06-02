@@ -35,12 +35,14 @@ type SliderChangeEvent = (
 ) => void;
 
 interface IProps {
+  coordinates: any;
   locationData: LocationDataType | null;
   housingPriceRadius: number;
   handleSliderChange: SliderChangeEvent;
 }
 
 const HousingPriceStats: React.FC<IProps> = ({
+  coordinates,
   locationData,
   housingPriceRadius,
   handleSliderChange,
@@ -55,17 +57,17 @@ const HousingPriceStats: React.FC<IProps> = ({
       setHousingPriceData(null);
 
       const response = await fetch(
-        `/api/getHousingPricesForArea?location=${locationData?.legs[0].startPosition.coordinates}&dim=${housingPriceRadius}`
+        `/api/getHousingPricesForArea?location=${coordinates}&dim=${housingPriceRadius}`
       );
       const data = await response.json();
 
       setHousingPriceData(data);
     };
 
-    if (locationData) {
+    if (coordinates) {
       fetchData();
     }
-  }, [locationData, housingPriceRadius]);
+  }, [coordinates, housingPriceRadius]);
 
   const dataForChart = housingPriceData
     ? Object.entries(housingPriceData.monthlyAvg)
