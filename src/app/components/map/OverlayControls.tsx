@@ -35,7 +35,7 @@ const OverlayControls: React.FC<OverlayControlsProps> = ({
   return (
     <div className="overlay-controls">
       <div className="adjust-interval-control">
-        <h3 className="title">Adjust intervals</h3>
+        <h3 className="title">Adjust time intervals</h3>
         <div className="separator" />
         <div className="controls">
           <div>
@@ -50,7 +50,7 @@ const OverlayControls: React.FC<OverlayControlsProps> = ({
                   className="color-line"
                   style={{ backgroundColor: colors[index] }}
                 ></div>
-                <span>{interval}</span>
+                <span>{interval}m</span>
               </div>
             ))}
           </div>

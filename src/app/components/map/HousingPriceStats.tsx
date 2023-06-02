@@ -117,7 +117,7 @@ const HousingPriceStats: React.FC<IProps> = ({
                   <MdError className="error-icon" />
                   <p>
                     Not enough monthly data for this area, try selecting larger
-                    area
+                    area size or another location
                   </p>
                 </div>
               )}

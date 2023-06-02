@@ -92,6 +92,10 @@
     align-items: center;
     flex-direction: column;
     margin: 1rem;
+
+    p{
+      text-align: center;  
+    }
 }
 
 .loading-graph{
