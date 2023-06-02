@@ -111,8 +111,10 @@ const Map: React.FC<MapProps> = ({
   useEffect(() => {
     async function initializeMap() {
       // Load travel time data
-
       const travelTimeData = await getTravelTime(true, 23);
+
+      const markerElement = document.createElement("div");
+      markerElement.className = "marker";
 
       // Create a new Mapbox GL JS map
       const mapInstance = new mapboxgl.Map({
@@ -266,7 +268,9 @@ const Map: React.FC<MapProps> = ({
         }
 
         // Create a new marker and add it to the map
-        const newMarker = new mapboxgl.Marker()
+        const newMarker = new mapboxgl.Marker({
+          color: `#1E232D`,
+        })
           .setLngLat(coordinates)
           .addTo(mapInstance);
 
