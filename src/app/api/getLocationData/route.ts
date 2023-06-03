@@ -5,8 +5,8 @@ export const dynamic = "force-dynamic";
 async function getTravelTime(
   originCoordinates: [number, number],
   destExtId: number,
-  date = "2023-04-24",
-  time = "08:00"
+  time = "08:00",
+  date = "2023-04-24"
 ): Promise<object | { error: string }> {
   const [originLng, originLat] = originCoordinates;
 
@@ -31,6 +31,12 @@ export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url);
     const coordinates = searchParams.get("coordinates");
+
+    let time = searchParams.get("time");
+
+    if (!time) {
+      time = "08:00";
+    }
 
     if (!coordinates) {
       return new Response(
@@ -69,7 +75,8 @@ export async function GET(request: Request) {
 
     const travelInfo: any = await getTravelTime(
       parsedCoordinates,
-      tCentralenDestId
+      tCentralenDestId,
+      time
     );
 
     if (typeof travelInfo === "string") {

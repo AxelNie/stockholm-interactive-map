@@ -21,7 +21,7 @@ const TravelTimeModeSelector: React.FC<TravelTimeModeSelectorProps> = ({
     setTravelTimeMode(event.target.value as string);
   };
   useEffect(() => {
-    setTravelTime(travelTimeMode === "direct" ? 7 : 23);
+    setTravelTime(travelTimeMode === "direct" ? 8 : 23);
   }, [travelTimeMode]);
 
   const handleTimeChange = (time: number) => {
@@ -98,12 +98,12 @@ const TravelTimeModeSelector: React.FC<TravelTimeModeSelectorProps> = ({
           <div className="button-container">
             <button
               className={
-                travelTime === 7 ? "time-button-active" : "time-button"
+                travelTime === 8 ? "time-button-active" : "time-button"
               }
               disabled={travelTimeMode === "avg_include_wait"}
-              onClick={() => handleTimeChange(7)}
+              onClick={() => handleTimeChange(8)}
             >
-              {travelTimeMode === "direct" ? "7:00" : "7:00-8:00"}
+              {travelTimeMode === "direct" ? "8:00" : "7:00-8:00"}
             </button>
             <button
               className={

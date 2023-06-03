@@ -28,7 +28,7 @@ const MapContainer = () => {
     complete: false,
   });
   const [travelTimeMode, setTravelTimeMode] = useState<string>("direct");
-  const [travelTime, setTravelTime] = useState<number>(7);
+  const [travelTime, setTravelTime] = useState<number>(8);
 
   const [displayLoading, setDisplayLoading] = useState(true);
 
@@ -129,6 +129,7 @@ const MapContainer = () => {
           selectedOption={selectedOption}
           housingPriceRadius={housingPriceRadius}
           handleSliderChange={handleSliderChange}
+          travelTime={travelTime}
         />
       )}
       <OverlayControls

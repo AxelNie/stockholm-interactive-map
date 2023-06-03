@@ -138,6 +138,26 @@
   }
 }
 
+
+
+.start-time-text{
+  position: relative;
+  padding: 0rem 0 0 1rem;;
+  font-size: 1rem;
+  color: $grey;
+  display: flex;
+  align-items: center;
+  background-color: $dark;
+  z-index: 1000;
+  top: 0.5rem;
+
+  .icon{
+    color: $grey;
+    font-size: 1rem;
+    margin-right: 0.3rem;
+  }
+}
+
 .header-skeleton{
   padding-top: 0.6rem;
   .generic-loading-skeleton:not(:last-child) {

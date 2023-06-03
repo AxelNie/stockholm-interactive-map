@@ -3,6 +3,7 @@ import React from "react";
 import TravelLeg from "./TravelLeg";
 import TravelTime from "./TravelTime";
 import GenericLoadingSkeleton from "./GenericLoadingSkeleton";
+import { TbClockFilled } from "react-icons/tb";
 
 const TripDetails = ({ locationData, onLegHover, hoveredLegId }: any) => {
   const handleLegHover = (id: number, isHovering: boolean) => {
@@ -14,6 +15,12 @@ const TripDetails = ({ locationData, onLegHover, hoveredLegId }: any) => {
       <div className="travel-legs scrollable">
         {locationData ? (
           <>
+            <div className="start-time-text-container">
+              <div className="start-time-text">
+                <TbClockFilled className="icon" />{" "}
+                <p>{locationData.legs[0].time.substring(0, 5)}</p>
+              </div>
+            </div>
             {locationData.legs.map((leg: any, index: number) => (
               <React.Fragment key={index}>
                 <TravelLeg
@@ -68,7 +75,13 @@ const TimeBetweenLeg = ({ leg, locationData, index }: any) => {
     const arrivalDate = new Date(
       prevDate.getTime() + travelTimeInMinutes * 60000
     );
-    const nextDate = new Date(`1970-01-01T${nextTime}`);
+    let nextDate = new Date(`1970-01-01T${nextTime}`);
+
+    // If nextTime is before the arrival time, add 24 hours to the nextDate
+    if (nextDate.getTime() < arrivalDate.getTime()) {
+      nextDate = new Date(nextDate.getTime() + 24 * 60 * 60000);
+    }
+
     const diffInMinutes = (nextDate.getTime() - arrivalDate.getTime()) / 60000;
 
     return diffInMinutes;

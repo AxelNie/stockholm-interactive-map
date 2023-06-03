@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import "./InfoPopup.scss";
 import TripDetails from "./TripDetails";
 import HousingPriceStats from "./HousingPriceStats";
@@ -25,15 +25,16 @@ interface ILocationData {
 }
 
 interface InfoPopupProps {
-  coordinates: any; // Define the appropriate type here
+  coordinates: any;
   onClose: () => void;
-  onPolylineData: any; // Define the appropriate type here
+  onPolylineData: any;
   onLegHover: (id: number, isHovering: boolean) => void;
   hoveredLegId: number | null;
   selectedOption: string;
-  onToggle: any; // Define the appropriate type here
+  onToggle: any;
   housingPriceRadius: number;
-  handleSliderChange: any; // Define the appropriate type here
+  handleSliderChange: any;
+  travelTime: number;
 }
 
 function extractCityAndStreet(input: string): [string, string] {
@@ -53,6 +54,7 @@ const InfoPopup: React.FC<InfoPopupProps> = ({
   onToggle,
   housingPriceRadius,
   handleSliderChange,
+  travelTime,
 }) => {
   const [locationData, setLocationData] = useState<ILocationData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -89,7 +91,7 @@ const InfoPopup: React.FC<InfoPopupProps> = ({
         const response = await fetch(
           `/api/getLocationData?coordinates=${encodeURIComponent(
             JSON.stringify(coordinates)
-          )}`
+          )}&time=${convertToTimeString(travelTime)}`
         );
 
         const data: any = await response.json();
@@ -125,7 +127,7 @@ const InfoPopup: React.FC<InfoPopupProps> = ({
     };
 
     fetchData();
-  }, [coordinates]);
+  }, [coordinates, travelTime]);
 
   return (
     <div className="info-popup-container">
@@ -195,5 +197,15 @@ const Header: React.FC<HeaderProps> = ({ adress, onClose, error }) => {
     );
   }
 };
+
+function convertToTimeString(input: number): string {
+  // Convert the number to string and pad with leading zeros
+  const paddedInput = input.toString().padStart(2, "0");
+
+  // Add ":00" suffix
+  const time = `${paddedInput}:00`;
+
+  return time;
+}
 
 export default InfoPopup;
