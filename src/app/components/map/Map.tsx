@@ -5,6 +5,7 @@ import { buffer, bbox, bboxPolygon, point } from "@turf/turf";
 import { getTravelTime } from "@/queries/getTravelTime";
 import "./Map.scss";
 import "mapbox-gl/dist/mapbox-gl.css";
+import ClipLoader from "react-spinners/ClipLoader";
 
 // Get your Mapbox access token from the environment variable
 mapboxgl.accessToken = process.env.NEXT_PUBLIC_MAPBOX_ACCESS_TOKEN as string;
@@ -23,6 +24,8 @@ interface MapProps {
   selectedPopupMode: string;
   showInfoPopup: boolean;
   updateLoadingStatus: (status: string) => void;
+  travelTimeMode: string;
+  travelTime: number;
 }
 
 interface ILocation {
@@ -41,11 +44,15 @@ const Map: React.FC<MapProps> = ({
   selectedPopupMode,
   showInfoPopup,
   updateLoadingStatus,
+  travelTimeMode,
+  travelTime,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<IMap | null>(null);
   const [mapTheme, setMapTheme] = useState<string>("dark");
   const [mapInitialized, setMapInitialized] = useState<boolean>(false);
+  const [loadingNewTravelData, setLoadingNewTravelData] =
+    useState<boolean>(false);
 
   let popup: Popup | null = null;
 
@@ -111,7 +118,10 @@ const Map: React.FC<MapProps> = ({
   useEffect(() => {
     async function initializeMap() {
       // Load travel time data
-      const travelTimeData = await getTravelTime(true, 23);
+      const travelTimeData = await getTravelTime(
+        travelTimeMode === "avg_include_wait",
+        travelTime
+      );
 
       const markerElement = document.createElement("div");
       markerElement.className = "marker";
@@ -312,6 +322,43 @@ const Map: React.FC<MapProps> = ({
     }
   }, [map, onMapClick, selectedPopupMode]);
 
+  // Update travel time overlay when mode or time changes
+  useEffect(() => {
+    async function updateTravelTimeData() {
+      // Fetch new travel time data
+      const newTravelTimeData = await getTravelTime(
+        travelTimeMode === "avg_include_wait",
+        travelTime
+      );
+
+      // Update the travel time data on the map
+      if (map && map.getSource("travelTimeData")) {
+        (map.getSource("travelTimeData") as mapboxgl.GeoJSONSource).setData({
+          type: "FeatureCollection",
+          features: newTravelTimeData.map((location: ILocation) => {
+            const center = point([location.lng, location.lat]);
+            const buffered = buffer(center, 65, { units: "meters" });
+            const squarePolygon = bboxPolygon(bbox(buffered));
+
+            return {
+              type: "Feature",
+              geometry: squarePolygon.geometry,
+              properties: {
+                fastestTime: location.fastestTime,
+              },
+            };
+          }),
+        });
+      }
+    }
+    setLoadingNewTravelData(true);
+    console.log("Updating travel time data");
+    updateTravelTimeData().then(() => {
+      setLoadingNewTravelData(false);
+      console.log("Finished updating travel time data");
+    });
+  }, [travelTime]);
+
   const limits = [greenLimit, 15 + greenLimit, 45 + greenLimit];
   const colors = ["#13C81A", "#C2D018", "#D1741F", "#BE3A1D"];
 
@@ -393,9 +440,22 @@ const Map: React.FC<MapProps> = ({
   }
 
   return (
-    <div className="container">
-      <div ref={mapContainerRef} className="map-container" />
-    </div>
+    <>
+      <div className="container">
+        {loadingNewTravelData && (
+          <div className="loading">
+            <ClipLoader
+              size={35}
+              color="#5ADF92"
+              speedMultiplier={0.7}
+              className="loader"
+            />
+            <p>Loading new travel time data...</p>
+          </div>
+        )}
+        <div ref={mapContainerRef} className="map-container" />
+      </div>
+    </>
   );
 };
 

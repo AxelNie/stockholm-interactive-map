@@ -1,9 +1,7 @@
 import React from "react";
 import MoonLoader from "react-spinners/MoonLoader";
-import BarLoader from "react-spinners/BarLoader";
 import "./LoadingOverlay.scss";
 import { BsCheck2 } from "react-icons/bs";
-import { InfinitySpin } from "react-loader-spinner";
 import Image from "next/image";
 
 interface IProps {

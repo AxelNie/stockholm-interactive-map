@@ -6,6 +6,7 @@ import Map from "./Map";
 import OverlayControls from "./OverlayControls";
 import LoadingOverlay from "./LoadingOverlay";
 import "./MapContainer.scss";
+import TravelTimeModeSelector from "./TravelTimeModeSelector";
 
 interface MapInstanceType extends mapboxgl.Map {
   currentMarker?: mapboxgl.Marker | null;
@@ -26,6 +27,8 @@ const MapContainer = () => {
     travelDistancesLoaded: false,
     complete: false,
   });
+  const [travelTimeMode, setTravelTimeMode] = useState<string>("direct");
+  const [travelTime, setTravelTime] = useState<number>(7);
 
   const [displayLoading, setDisplayLoading] = useState(true);
 
@@ -112,6 +115,8 @@ const MapContainer = () => {
         selectedPopupMode={selectedOption}
         showInfoPopup={showInfoPopup}
         updateLoadingStatus={onUpdateMapLoadingStatus}
+        travelTimeMode={travelTimeMode}
+        travelTime={travelTime}
       />
       {showInfoPopup && (
         <InfoPopup
@@ -129,6 +134,12 @@ const MapContainer = () => {
       <OverlayControls
         greenLimit={greenLimit}
         onGreenLimitChange={setGreenLimit}
+      />
+      <TravelTimeModeSelector
+        travelTimeMode={travelTimeMode}
+        setTravelTimeMode={setTravelTimeMode}
+        travelTime={travelTime}
+        setTravelTime={setTravelTime}
       />
     </div>
   );

@@ -1,0 +1,34 @@
+import React, { useState, useRef } from "react";
+import "./Tooltip.scss";
+
+interface TooltipProps {
+  children: React.ReactNode;
+  title: React.ReactNode;
+}
+
+const Tooltip: React.FC<TooltipProps> = ({ children, title }) => {
+  const [tooltipDisplay, setTooltipDisplay] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const showTooltip = () => {
+    setTooltipDisplay(true);
+  };
+
+  const hideTooltip = () => {
+    setTooltipDisplay(false);
+  };
+
+  return (
+    <div
+      className={`tooltip-container ${tooltipDisplay ? "active" : ""}`}
+      onMouseEnter={showTooltip}
+      onMouseLeave={hideTooltip}
+      ref={containerRef}
+    >
+      {children}
+      {tooltipDisplay && <div className="tooltip-text">{title}</div>}
+    </div>
+  );
+};
+
+export default Tooltip;
