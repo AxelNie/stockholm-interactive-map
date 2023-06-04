@@ -111,7 +111,7 @@
     font-size: 1rem;
     font-weight: 500;
     color: white;
-    margin: 1rem 0.25rem 0.25rem 0.25rem;
+    margin: 0.5rem 0.25rem 0.25rem 0.25rem;
 }
 
 .error-icon{
@@ -133,5 +133,20 @@
 
 .slider-container{
     margin: 0 0 0rem 0;
+}
+
+.booli-div{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    p{
+        font-size: 0.8rem;
+        font-weight: 500;
+        color: $grey;
+        margin: 0 0.3rem;
+    }
+    .booli-logo{
+        margin: 0;
+    }
 }
 

@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import "./HousingPriceStats.scss";
+import Image from "next/image";
 import {
   LineChart,
   Line,
@@ -14,6 +15,7 @@ import Slider from "@mui/material/Slider";
 import Box from "@mui/material/Box";
 import { MdError } from "react-icons/md";
 import GenericLoadingSkeleton from "./GenericLoadingSkeleton";
+import Link from "next/link";
 
 interface IHousingPriceData {
   monthlyAvg: {
@@ -88,30 +90,49 @@ const HousingPriceStats: React.FC<IProps> = ({
           {housingPriceData ? (
             <>
               {housingPriceData?.sufficientMonthlyData ? (
-                <ResponsiveContainer height={200}>
-                  <LineChart data={dataForChart} margin={{ right: 30 }}>
-                    <CartesianGrid stroke="#1E232D" />
-                    <XAxis
-                      dataKey="month"
-                      tickFormatter={formatXAxis}
-                      minTickGap={15}
-                      stroke="#59606E"
-                    />
-                    <YAxis
-                      tickFormatter={formatYAxis}
-                      width={45}
-                      color="#5ADF92"
-                      stroke="#59606E"
-                    />
-                    <Tooltip content={<CustomTooltip />} />
-                    <Line
-                      type="monotone"
-                      dataKey="price"
-                      stroke="#5ADF92"
-                      dot={false}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
+                <div>
+                  <ResponsiveContainer height={200}>
+                    <LineChart data={dataForChart} margin={{ right: 30 }}>
+                      <CartesianGrid stroke="#1E232D" />
+                      <XAxis
+                        dataKey="month"
+                        tickFormatter={formatXAxis}
+                        minTickGap={15}
+                        stroke="#59606E"
+                      />
+                      <YAxis
+                        tickFormatter={formatYAxis}
+                        width={45}
+                        color="#5ADF92"
+                        stroke="#59606E"
+                      />
+                      <Tooltip content={<CustomTooltip />} />
+                      <Line
+                        type="monotone"
+                        dataKey="price"
+                        stroke="#5ADF92"
+                        dot={false}
+                      />
+                    </LineChart>
+                  </ResponsiveContainer>
+                  <div className="booli-div">
+                    <p>Data powered by</p>
+
+                    <a
+                      href="https://www.booli.se/"
+                      target="_blank"
+                      rel="noopener noreferrer"
+                    >
+                      <Image
+                        src="/booli_logo_grey.svg"
+                        height={30}
+                        width={50}
+                        alt="Booli"
+                        className="booli-logo"
+                      />
+                    </a>
+                  </div>
+                </div>
               ) : (
                 <div className="error-graph-message">
                   <MdError className="error-icon" />
