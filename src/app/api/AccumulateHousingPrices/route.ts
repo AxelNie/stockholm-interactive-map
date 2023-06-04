@@ -1,4 +1,4 @@
-wsdimport { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
 import { connectToDb } from "../../../../db";
 
