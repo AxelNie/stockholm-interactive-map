@@ -1,5 +1,6 @@
 import "./globals.scss";
 import Head from "next/head";
+import { Analytics } from "@vercel/analytics/react";
 
 export const metadata = {
   title: "Restidkollen",
@@ -24,6 +25,7 @@ export default function RootLayout({
         />
       </Head>
       <body>{children}</body>
+      <Analytics />
     </html>
   );
 }
