@@ -56,65 +56,6 @@ const Map: React.FC<MapProps> = ({
 
   let popup: Popup | null = null;
 
-  const toggleTheme = () => {
-    setMapTheme((prevTheme) => (prevTheme === "light" ? "dark" : "light"));
-  };
-
-  // Update the useEffect to handle an array of polyline data
-  useEffect(() => {
-    if (map && polyline && selectedPopupMode === "Travel details") {
-      const source = map.getSource("polyline") as mapboxgl.GeoJSONSource;
-      const convertedPolylines = convertPolylines(polyline, hoveredLegId);
-      const geoJSONData: any = {
-        type: "FeatureCollection",
-        features: convertedPolylines.map(
-          ({ coordinates, isHovered }: any, index: any) => ({
-            type: "Feature",
-            geometry: {
-              type: "LineString",
-              coordinates,
-            },
-            properties: {
-              isHovered,
-              legId: index, // Set the legId property
-            },
-          })
-        ),
-      };
-      if (source) {
-        source.setData(geoJSONData);
-      }
-
-      // Handle the circle features
-      const circleSource = map.getSource("circle") as mapboxgl.GeoJSONSource;
-      const circleGeoJSONData: any = {
-        type: "FeatureCollection",
-        features: getCircleFeatures(convertedPolylines),
-      };
-      if (circleSource) {
-        circleSource.setData(circleGeoJSONData);
-      }
-    } else if (map) {
-      // Remove polyline features
-      const source = map.getSource("polyline") as mapboxgl.GeoJSONSource;
-      if (source) {
-        source.setData({
-          type: "FeatureCollection",
-          features: [],
-        });
-      }
-
-      // Remove circle features
-      const circleSource = map.getSource("circle") as mapboxgl.GeoJSONSource;
-      if (circleSource) {
-        circleSource.setData({
-          type: "FeatureCollection",
-          features: [],
-        });
-      }
-    }
-  }, [map, polyline, hoveredLegId, selectedPopupMode]);
-
   useEffect(() => {
     async function initializeMap() {
       // Load travel time data
@@ -321,6 +262,61 @@ const Map: React.FC<MapProps> = ({
       initializeMap();
     }
   }, [map, onMapClick, selectedPopupMode]);
+
+  // Update the useEffect to handle an array of polyline data
+  useEffect(() => {
+    if (map && polyline && selectedPopupMode === "Travel details") {
+      const source = map.getSource("polyline") as mapboxgl.GeoJSONSource;
+      const convertedPolylines = convertPolylines(polyline, hoveredLegId);
+      const geoJSONData: any = {
+        type: "FeatureCollection",
+        features: convertedPolylines.map(
+          ({ coordinates, isHovered }: any, index: any) => ({
+            type: "Feature",
+            geometry: {
+              type: "LineString",
+              coordinates,
+            },
+            properties: {
+              isHovered,
+              legId: index, // Set the legId property
+            },
+          })
+        ),
+      };
+      if (source) {
+        source.setData(geoJSONData);
+      }
+
+      // Handle the circle features
+      const circleSource = map.getSource("circle") as mapboxgl.GeoJSONSource;
+      const circleGeoJSONData: any = {
+        type: "FeatureCollection",
+        features: getCircleFeatures(convertedPolylines),
+      };
+      if (circleSource) {
+        circleSource.setData(circleGeoJSONData);
+      }
+    } else if (map) {
+      // Remove polyline features
+      const source = map.getSource("polyline") as mapboxgl.GeoJSONSource;
+      if (source) {
+        source.setData({
+          type: "FeatureCollection",
+          features: [],
+        });
+      }
+
+      // Remove circle features
+      const circleSource = map.getSource("circle") as mapboxgl.GeoJSONSource;
+      if (circleSource) {
+        circleSource.setData({
+          type: "FeatureCollection",
+          features: [],
+        });
+      }
+    }
+  }, [map, polyline, hoveredLegId, selectedPopupMode]);
 
   // Update travel time overlay when mode or time changes
   useEffect(() => {
