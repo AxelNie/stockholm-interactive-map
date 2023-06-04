@@ -1,7 +1,7 @@
 ## Project: Travel Time Visualization in Stockholm
 
-Video screencast (Project and code overview): https://youtu.be/2hN-kLf9SYw
-Link to website: https://www.restidkollen.se/
+- Video screencast (Project and code overview): https://youtu.be/2hN-kLf9SYw
+- Link to website: https://www.restidkollen.se/
 
 This project aims to build a web application that visualizes the travel time from various locations in Stockholm to T-Centralen (central Stockholm) using Next.js 13 and MongoDB. The core idea of the application is to assist users in exploring and comparing different areas in Stockholm based on their commute time to the city center. In addition to travel times, the project will explore the possibilities of incorporating additional relevant information that would be valuable for individuals considering a move to a new area, such as:
 
