@@ -2,7 +2,7 @@
 import "./TravelTime.scss";
 import GenericLoadingSkeleton from "./GenericLoadingSkeleton";
 interface ITravelTimeProps {
-  time: string | null;
+  time: string | null | undefined;
 }
 
 function convertTimeFormat(timeString: unknown): string {

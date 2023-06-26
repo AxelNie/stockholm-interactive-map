@@ -5,7 +5,12 @@ import TravelTime from "./TravelTime";
 import GenericLoadingSkeleton from "./GenericLoadingSkeleton";
 import { TbClockFilled } from "react-icons/tb";
 
-const TripDetails = ({ locationData, onLegHover, hoveredLegId }: any) => {
+const TripDetails = ({
+  locationData,
+  onLegHover,
+  hoveredLegId,
+  isMobileDevice,
+}: any) => {
   const handleLegHover = (id: number, isHovering: boolean) => {
     onLegHover(id, isHovering); // Call the onLegHover prop directly
   };
@@ -56,7 +61,7 @@ const TripDetails = ({ locationData, onLegHover, hoveredLegId }: any) => {
           </>
         )}
       </div>
-      <TravelTime time={locationData?.totalTravelTime} />
+      {!isMobileDevice && <TravelTime time={locationData?.totalTravelTime} />}
     </>
   );
 };

@@ -41,6 +41,8 @@ interface IProps {
   locationData: LocationDataType | null;
   housingPriceRadius: number;
   handleSliderChange: SliderChangeEvent;
+  onlyBottom?: boolean;
+  isMobileDevice: boolean;
 }
 
 const HousingPriceStats: React.FC<IProps> = ({
@@ -48,6 +50,8 @@ const HousingPriceStats: React.FC<IProps> = ({
   locationData,
   housingPriceRadius,
   handleSliderChange,
+  onlyBottom = false,
+  isMobileDevice,
 }) => {
   const [housingPriceData, setHousingPriceData] =
     useState<IHousingPriceData | null>(null);
@@ -85,118 +89,124 @@ const HousingPriceStats: React.FC<IProps> = ({
   return (
     <div className="housing-price-stats">
       <div className="loaded-content-wrapper">
-        <div className="graph">
-          <p className="description-graph">Price for appartments</p>
-          {housingPriceData ? (
-            <>
-              {housingPriceData?.sufficientMonthlyData ? (
-                <div>
-                  <ResponsiveContainer height={200}>
-                    <LineChart data={dataForChart} margin={{ right: 30 }}>
-                      <CartesianGrid stroke="#1E232D" />
-                      <XAxis
-                        dataKey="month"
-                        tickFormatter={formatXAxis}
-                        minTickGap={15}
-                        stroke="#59606E"
-                      />
-                      <YAxis
-                        tickFormatter={formatYAxis}
-                        width={45}
-                        color="#5ADF92"
-                        stroke="#59606E"
-                      />
-                      <Tooltip content={<CustomTooltip />} />
-                      <Line
-                        type="monotone"
-                        dataKey="price"
-                        stroke="#5ADF92"
-                        dot={false}
-                      />
-                    </LineChart>
-                  </ResponsiveContainer>
-                  <div className="booli-div">
-                    <p>Data powered by</p>
+        {!onlyBottom ? (
+          <div className="graph">
+            <p className="description-graph">Price for appartments</p>
+            {housingPriceData ? (
+              <>
+                {housingPriceData?.sufficientMonthlyData ? (
+                  <div>
+                    <ResponsiveContainer height={200}>
+                      <LineChart data={dataForChart} margin={{ right: 30 }}>
+                        <CartesianGrid stroke="#1E232D" />
+                        <XAxis
+                          dataKey="month"
+                          tickFormatter={formatXAxis}
+                          minTickGap={15}
+                          stroke="#59606E"
+                        />
+                        <YAxis
+                          tickFormatter={formatYAxis}
+                          width={45}
+                          color="#5ADF92"
+                          stroke="#59606E"
+                        />
+                        <Tooltip content={<CustomTooltip />} />
+                        <Line
+                          type="monotone"
+                          dataKey="price"
+                          stroke="#5ADF92"
+                          dot={false}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                    <div className="booli-div">
+                      <p>Data powered by</p>
 
-                    <a
-                      href="https://www.booli.se/"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <Image
-                        src="/booli_logo_grey.svg"
-                        height={30}
-                        width={50}
-                        alt="Booli"
-                        className="booli-logo"
-                      />
-                    </a>
+                      <a
+                        href="https://www.booli.se/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        <Image
+                          src="/booli_logo_grey.svg"
+                          height={30}
+                          width={50}
+                          alt="Booli"
+                          className="booli-logo"
+                        />
+                      </a>
+                    </div>
                   </div>
-                </div>
-              ) : (
-                <div className="error-graph-message">
-                  <MdError className="error-icon" />
-                  <p>
-                    Not enough monthly data for this area, try selecting larger
-                    area size or another location
-                  </p>
-                </div>
-              )}
-            </>
-          ) : (
-            <div className="loading-graph">
-              <GenericLoadingSkeleton height="200px" />
-            </div>
-          )}
-          <div className="slider-container">
-            <p className="slider-title">Set area size</p>
-            <div className="slider-component">
-              <Slider
-                value={displayRadius}
-                min={200}
-                max={2000}
-                step={100}
-                onChange={(event, newValue) => {
-                  if (typeof newValue === "number") {
-                    setDisplayRadius(newValue);
-                  }
-                }}
-                onChangeCommitted={handleSliderChange}
-                aria-labelledby="range-slider"
-                sx={{
-                  color: "#5ADF92",
-                  "& .MuiSlider-thumb": {
-                    "&:hover, &.Mui-focusVisible": {
-                      boxShadow: "0 0 0 0.4rem rgba(90, 223, 146, 0.1)",
+                ) : (
+                  <div className="error-graph-message">
+                    <MdError className="error-icon" />
+                    <p>
+                      Not enough monthly data for this area, try selecting
+                      larger area size or another location
+                    </p>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="loading-graph">
+                <GenericLoadingSkeleton height="200px" />
+              </div>
+            )}
+            <div className="slider-container">
+              <p className="slider-title">Set area size</p>
+              <div className="slider-component">
+                <Slider
+                  value={displayRadius}
+                  min={200}
+                  max={2000}
+                  step={100}
+                  onChange={(event, newValue) => {
+                    if (typeof newValue === "number") {
+                      setDisplayRadius(newValue);
+                    }
+                  }}
+                  onChangeCommitted={handleSliderChange}
+                  aria-labelledby="range-slider"
+                  sx={{
+                    color: "#5ADF92",
+                    "& .MuiSlider-thumb": {
+                      "&:hover, &.Mui-focusVisible": {
+                        boxShadow: "0 0 0 0.4rem rgba(90, 223, 146, 0.1)",
+                      },
                     },
-                  },
-                }}
-              />
-              <Box className="slider-value-box" sx={{ ml: 2 }}>
-                {displayRadius}m
-              </Box>
-            </div>
-          </div>
-        </div>
-        <div className="avg-price-container">
-          {housingPriceData ? (
-            <div className="avg-price-bg">
-              <div className="avg-price">
-                <p className="avg-price-label">Average price for one year: </p>
-
-                <p className="price-per-sqrmeter">
-                  {`${formatPriceWithSpaces(
-                    housingPriceData?.overallAvg
-                  )} kr/kvm`}
-                </p>
+                  }}
+                />
+                <Box className="slider-value-box" sx={{ ml: 2 }}>
+                  {displayRadius}m
+                </Box>
               </div>
             </div>
-          ) : (
-            <div className="loading-avg-price-bg">
-              <GenericLoadingSkeleton height="79px" />
-            </div>
-          )}
-        </div>
+          </div>
+        ) : null}
+        {isMobileDevice && !onlyBottom ? null : (
+          <div className="avg-price-container">
+            {housingPriceData ? (
+              <div className="avg-price-bg">
+                <div className="avg-price">
+                  <p className="avg-price-label">
+                    Average price for one year:{" "}
+                  </p>
+
+                  <p className="price-per-sqrmeter">
+                    {`${formatPriceWithSpaces(
+                      housingPriceData?.overallAvg
+                    )} kr/kvm`}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="loading-avg-price-bg">
+                <GenericLoadingSkeleton height="79px" />
+              </div>
+            )}
+          </div>
+        )}
       </div>
     </div>
   );

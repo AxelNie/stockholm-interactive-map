@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, use } from "react";
 import { LngLatLike } from "mapbox-gl";
 import InfoPopup from "./InfoPopup";
 import Map from "./Map";
@@ -7,6 +7,7 @@ import OverlayControls from "./OverlayControls";
 import LoadingOverlay from "./LoadingOverlay";
 import "./MapContainer.scss";
 import TravelTimeModeSelector from "./TravelTimeModeSelector";
+import SlideUpComponent from "./SlideUpComponent";
 
 interface MapInstanceType extends mapboxgl.Map {
   currentMarker?: mapboxgl.Marker | null;
@@ -29,8 +30,37 @@ const MapContainer = () => {
   });
   const [travelTimeMode, setTravelTimeMode] = useState<string>("direct");
   const [travelTime, setTravelTime] = useState<number>(8);
+  const [displayLoading, setDisplayLoading] = useState<boolean>(true);
+  const [isMobileDevice, setIsMobileDevice] = useState<boolean>(false);
 
-  const [displayLoading, setDisplayLoading] = useState(true);
+  useEffect(() => {
+    // Add a click event listener to the document when the component mounts
+    const onClick = (event: Event) => {
+      console.log("Clicked element:", event.target);
+    };
+
+    document.addEventListener("click", onClick);
+
+    // Remove the event listener when the component unmounts
+    return () => {
+      document.removeEventListener("click", onClick);
+    };
+  }, []); // Empty dependency array means this effect runs once on mount and cleanup on unmount
+
+  useEffect(() => {
+    // Note: window.innerWidth is not reliable in all situations, you may need a more robust method for some cases.
+    setIsMobileDevice(window.innerWidth < 760);
+
+    const handleResize = () => {
+      setIsMobileDevice(window.innerWidth < 760);
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   const handleLegHover = (id: number | null, isHovering: boolean) => {
     setHoveredLegId(isHovering ? id : null);
@@ -130,17 +160,20 @@ const MapContainer = () => {
           housingPriceRadius={housingPriceRadius}
           handleSliderChange={handleSliderChange}
           travelTime={travelTime}
+          isMobileDevice={isMobileDevice}
         />
       )}
       <OverlayControls
         greenLimit={greenLimit}
         onGreenLimitChange={setGreenLimit}
+        isMobileDevice={isMobileDevice}
       />
       <TravelTimeModeSelector
         travelTimeMode={travelTimeMode}
         setTravelTimeMode={setTravelTimeMode}
         travelTime={travelTime}
         setTravelTime={setTravelTime}
+        isMobileDevice={isMobileDevice}
       />
     </div>
   );

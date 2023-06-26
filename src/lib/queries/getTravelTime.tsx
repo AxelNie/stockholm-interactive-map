@@ -15,7 +15,6 @@ export async function getTravelTime(
       "&time=" +
       time;
 
-    console.log("apiUrl", apiUrl);
     const response = await fetch(apiUrl);
     const data = await response.json();
 

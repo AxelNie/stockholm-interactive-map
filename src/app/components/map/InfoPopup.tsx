@@ -6,6 +6,8 @@ import HousingPriceStats from "./HousingPriceStats";
 import { MdOutlineClose } from "react-icons/md";
 import InfoPopupMenu from "./InfoPopupMenu";
 import GenericLoadingSkeleton from "./GenericLoadingSkeleton";
+import SlideUpComponent from "./SlideUpComponent";
+import TravelTime from "./TravelTime";
 
 interface ILocationData {
   startAddress: string;
@@ -35,6 +37,7 @@ interface InfoPopupProps {
   housingPriceRadius: number;
   handleSliderChange: any;
   travelTime: number;
+  isMobileDevice: boolean;
 }
 
 function extractCityAndStreet(input: string): [string, string] {
@@ -55,6 +58,7 @@ const InfoPopup: React.FC<InfoPopupProps> = ({
   housingPriceRadius,
   handleSliderChange,
   travelTime,
+  isMobileDevice,
 }) => {
   const [locationData, setLocationData] = useState<ILocationData | null>(null);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -130,31 +134,91 @@ const InfoPopup: React.FC<InfoPopupProps> = ({
   }, [coordinates, travelTime]);
 
   return (
-    <div className="info-popup-container">
-      <div className="loaded-content">
-        <Header
-          adress={locationData?.startAddress}
+    <>
+      {isMobileDevice ? (
+        <SlideUpComponent
+          selectedOption={selectedOption}
+          top={
+            <Header
+              adress={locationData?.startAddress}
+              onClose={onClose}
+              error={errorMessage}
+            />
+          }
+          middle={
+            <>
+              <InfoPopupMenu
+                selectedOption={selectedOption}
+                onToggle={onToggle}
+              />
+              {selectedOption === "Travel details" ? (
+                <TripDetails
+                  locationData={locationData}
+                  onLegHover={handleLegHover}
+                  hoveredLegId={hoveredLegId}
+                  isMobileDevice={isMobileDevice}
+                />
+              ) : (
+                <HousingPriceStats
+                  coordinates={coordinates}
+                  locationData={locationData}
+                  housingPriceRadius={housingPriceRadius}
+                  handleSliderChange={handleSliderChange}
+                  onlyBottom={false}
+                  isMobileDevice={isMobileDevice}
+                />
+              )}
+            </>
+          }
+          bottom={
+            selectedOption === "Travel details" ? (
+              <TravelTime time={locationData?.totalTravelTime} />
+            ) : (
+              <HousingPriceStats
+                coordinates={coordinates}
+                locationData={locationData}
+                housingPriceRadius={housingPriceRadius}
+                handleSliderChange={handleSliderChange}
+                onlyBottom={true}
+                isMobileDevice={isMobileDevice}
+              />
+            )
+          }
           onClose={onClose}
-          error={errorMessage}
         />
+      ) : (
+        <div className="info-popup-container">
+          <div className="loaded-content">
+            <Header
+              adress={locationData?.startAddress}
+              onClose={onClose}
+              error={errorMessage}
+            />
 
-        <InfoPopupMenu selectedOption={selectedOption} onToggle={onToggle} />
-        {selectedOption === "Travel details" ? (
-          <TripDetails
-            locationData={locationData}
-            onLegHover={handleLegHover}
-            hoveredLegId={hoveredLegId}
-          />
-        ) : (
-          <HousingPriceStats
-            coordinates={coordinates}
-            locationData={locationData}
-            housingPriceRadius={housingPriceRadius}
-            handleSliderChange={handleSliderChange}
-          />
-        )}
-      </div>
-    </div>
+            <InfoPopupMenu
+              selectedOption={selectedOption}
+              onToggle={onToggle}
+            />
+            {selectedOption === "Travel details" ? (
+              <TripDetails
+                locationData={locationData}
+                onLegHover={handleLegHover}
+                hoveredLegId={hoveredLegId}
+              />
+            ) : (
+              <HousingPriceStats
+                coordinates={coordinates}
+                locationData={locationData}
+                housingPriceRadius={housingPriceRadius}
+                handleSliderChange={handleSliderChange}
+                onlyBottom={false}
+                isMobileDevice={isMobileDevice}
+              />
+            )}
+          </div>
+        </div>
+      )}
+    </>
   );
 };
 

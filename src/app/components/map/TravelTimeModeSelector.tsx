@@ -9,6 +9,7 @@ interface TravelTimeModeSelectorProps {
   setTravelTimeMode: React.Dispatch<React.SetStateAction<string>>;
   travelTime: number;
   setTravelTime: React.Dispatch<React.SetStateAction<number>>;
+  isMobileDevice: boolean;
 }
 
 const TravelTimeModeSelector: React.FC<TravelTimeModeSelectorProps> = ({
@@ -16,6 +17,7 @@ const TravelTimeModeSelector: React.FC<TravelTimeModeSelectorProps> = ({
   setTravelTimeMode,
   travelTime,
   setTravelTime,
+  isMobileDevice,
 }) => {
   const handleModeChange = (event: any) => {
     setTravelTimeMode(event.target.value as string);
@@ -59,64 +61,66 @@ const TravelTimeModeSelector: React.FC<TravelTimeModeSelectorProps> = ({
 
   return (
     <div className="full-site-width">
-      <div className="selector-container">
-        <div className="dropdown-container">
-          <div className="travel-time-mode-label-container">
-            <p>Travel time visualization mode</p>
-            <Tooltip title={text()}>
-              <div>
-                <RiQuestionFill className="help-icon" />
-              </div>
-            </Tooltip>
-          </div>
-          <Select
-            value={travelTimeMode}
-            onChange={handleModeChange}
-            className="custom-select"
-            MenuProps={{
-              PaperProps: {
-                style: {
-                  backgroundColor: "#1E232D",
-                  color: "white",
-                  width: "200px",
-                  maxHeight: "300px",
+      {isMobileDevice ? null : (
+        <div className="selector-container">
+          <div className="dropdown-container">
+            <div className="travel-time-mode-label-container">
+              <p>Travel time visualization mode</p>
+              <Tooltip title={text()}>
+                <div>
+                  <RiQuestionFill className="help-icon" />
+                </div>
+              </Tooltip>
+            </div>
+            <Select
+              value={travelTimeMode}
+              onChange={handleModeChange}
+              className="custom-select"
+              MenuProps={{
+                PaperProps: {
+                  style: {
+                    backgroundColor: "#1E232D",
+                    color: "white",
+                    width: "200px",
+                    maxHeight: "300px",
+                  },
                 },
-              },
-              classes: {
-                list: "custom-list",
-              },
-            }}
-          >
-            <MenuItem value="direct">Direct travel time</MenuItem>
-            <MenuItem value="avg_include_wait">
-              Avg. travel time incl. wait
-            </MenuItem>
-          </Select>
-        </div>
-        <div className="time-selector-container">
-          <p>Time</p>
-          <div className="button-container">
-            <button
-              className={
-                travelTime === 8 ? "time-button-active" : "time-button"
-              }
-              disabled={travelTimeMode === "avg_include_wait"}
-              onClick={() => handleTimeChange(8)}
+                classes: {
+                  list: "custom-list",
+                },
+              }}
             >
-              {travelTimeMode === "direct" ? "8:00" : "7:00-8:00"}
-            </button>
-            <button
-              className={
-                travelTime === 23 ? "time-button-active" : "time-button"
-              }
-              disabled={travelTimeMode === "direct"}
-              onClick={() => handleTimeChange(23)}
-            >
-              {travelTimeMode === "direct" ? "23:00" : "23:00-00:00"}
-            </button>
+              <MenuItem value="direct">Direct travel time</MenuItem>
+              <MenuItem value="avg_include_wait">
+                Avg. travel time incl. wait
+              </MenuItem>
+            </Select>
+          </div>
+          <div className="time-selector-container">
+            <p>Time</p>
+            <div className="button-container">
+              <button
+                className={
+                  travelTime === 8 ? "time-button-active" : "time-button"
+                }
+                disabled={travelTimeMode === "avg_include_wait"}
+                onClick={() => handleTimeChange(8)}
+              >
+                {travelTimeMode === "direct" ? "8:00" : "7:00-8:00"}
+              </button>
+              <button
+                className={
+                  travelTime === 23 ? "time-button-active" : "time-button"
+                }
+                disabled={travelTimeMode === "direct"}
+                onClick={() => handleTimeChange(23)}
+              >
+                {travelTimeMode === "direct" ? "23:00" : "23:00-00:00"}
+              </button>
+            </div>
           </div>
         </div>
-      </div>
+      )}
     </div>
   );
 };
