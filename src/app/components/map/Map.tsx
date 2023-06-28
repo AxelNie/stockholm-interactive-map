@@ -35,6 +35,7 @@ interface ILocation {
 }
 
 let firstMapIdle: boolean = true;
+let firstTimeInitializingMap: boolean = true;
 
 const Map: React.FC<MapProps> = ({
   onMapClick,
@@ -58,13 +59,21 @@ const Map: React.FC<MapProps> = ({
 
   let popup: Popup | null = null;
 
+  let travelTimeData: ILocation[] = [];
+  let initiatedLoadingTravelTimeData: boolean = false;
+
   useEffect(() => {
     async function initializeMap() {
-      // Load travel time data
-      const travelTimeData = await getTravelTime(
-        travelTimeMode === "avg_include_wait",
-        travelTime
-      );
+      console.log("Initializing map");
+
+      console.log("travelTimeData.length", travelTimeData.length);
+      if (!initiatedLoadingTravelTimeData) {
+        initiatedLoadingTravelTimeData = true;
+        travelTimeData = await getTravelTime(
+          travelTimeMode === "avg_include_wait",
+          travelTime
+        );
+      }
 
       const markerElement = document.createElement("div");
       markerElement.className = "marker";
@@ -80,12 +89,15 @@ const Map: React.FC<MapProps> = ({
         zoom: 11,
       }) as IMap;
 
-      mapInstance.on("idle", () => {
+      const idleListener = () => {
         if (!firstMapIdle) {
           updateLoadingStatus("complete");
+          mapInstance.off("idle", idleListener);
         }
         firstMapIdle = false;
-      });
+      };
+
+      mapInstance.on("idle", idleListener);
 
       mapInstance.on("load", () => {
         setMapInitialized(true);
@@ -142,6 +154,7 @@ const Map: React.FC<MapProps> = ({
           });
         }
 
+        console.log("travelTimeData", travelTimeData);
         // Add a GeoJSON source for the travel time data
         mapInstance.addSource("travelTimeData", {
           type: "geojson",
@@ -285,7 +298,7 @@ const Map: React.FC<MapProps> = ({
             },
             properties: {
               isHovered,
-              legId: index, // Set the legId property
+              legId: index,
             },
           })
         ),
@@ -294,7 +307,6 @@ const Map: React.FC<MapProps> = ({
         source.setData(geoJSONData);
       }
 
-      // Handle the circle features
       const circleSource = map.getSource("circle") as mapboxgl.GeoJSONSource;
       const circleGeoJSONData: any = {
         type: "FeatureCollection",

@@ -139,18 +139,20 @@ const InfoPopup: React.FC<InfoPopupProps> = ({
         <SlideUpComponent
           selectedOption={selectedOption}
           top={
-            <Header
-              adress={locationData?.startAddress}
-              onClose={onClose}
-              error={errorMessage}
-            />
-          }
-          middle={
             <>
+              <Header
+                adress={locationData?.startAddress}
+                onClose={onClose}
+                error={errorMessage}
+              />
               <InfoPopupMenu
                 selectedOption={selectedOption}
                 onToggle={onToggle}
               />
+            </>
+          }
+          middle={
+            <>
               {selectedOption === "Travel details" ? (
                 <TripDetails
                   locationData={locationData}

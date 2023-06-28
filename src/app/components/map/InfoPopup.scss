@@ -144,8 +144,6 @@
   }
 }
 
-
-
 .start-time-text{
   position: relative;
   padding: 0rem 0 0 1rem;;
@@ -168,5 +166,15 @@
   padding-top: 0.6rem;
   .generic-loading-skeleton:not(:last-child) {
     margin-bottom: 10px;  // adjust this value as per your needs
+  }
+}
+
+.slide-up-container{
+  .header{
+    margin-top: 0.5rem;
+  }
+
+  .close-icon{
+    font-size: 20px;
   }
 }

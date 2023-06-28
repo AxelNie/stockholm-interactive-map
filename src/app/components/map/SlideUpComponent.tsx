@@ -46,9 +46,9 @@ const SlideUpComponent: React.FC<IProps> = ({
           open={isOpen}
           header={top}
           footer={bottom}
-          onDismiss={handleDismiss}
           snapPoints={({ footerHeight, headerHeight, maxHeight }: any) => [
             footerHeight + headerHeight - 1,
+            maxHeight / 2,
             maxHeight,
           ]}
           defaultSnap={({ lastSnap, snapPoints }: any) =>
