@@ -145,6 +145,7 @@ const MapContainer = () => {
         selectedPopupMode={selectedOption}
         showInfoPopup={showInfoPopup}
         updateLoadingStatus={onUpdateMapLoadingStatus}
+        loadingStatus={loadingStatus}
         travelTimeMode={travelTimeMode}
         travelTime={travelTime}
       />

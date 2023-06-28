@@ -24,6 +24,7 @@ interface MapProps {
   selectedPopupMode: string;
   showInfoPopup: boolean;
   updateLoadingStatus: (status: string) => void;
+  loadingStatus: any;
   travelTimeMode: string;
   travelTime: number;
 }
@@ -47,6 +48,7 @@ const Map: React.FC<MapProps> = ({
   selectedPopupMode,
   showInfoPopup,
   updateLoadingStatus,
+  loadingStatus,
   travelTimeMode,
   travelTime,
 }) => {
@@ -67,8 +69,13 @@ const Map: React.FC<MapProps> = ({
       console.log("Initializing map");
 
       console.log("travelTimeData.length", travelTimeData.length);
+      console.log(
+        "initiatedLoadingTravelTimeData: ",
+        initiatedLoadingTravelTimeData
+      );
       if (!initiatedLoadingTravelTimeData) {
         initiatedLoadingTravelTimeData = true;
+        console.log("Loading travel time data 74");
         travelTimeData = await getTravelTime(
           travelTimeMode === "avg_include_wait",
           travelTime
@@ -90,7 +97,8 @@ const Map: React.FC<MapProps> = ({
       }) as IMap;
 
       const idleListener = () => {
-        if (!firstMapIdle) {
+        console.log("idleListener");
+        if (firstMapIdle) {
           updateLoadingStatus("complete");
           mapInstance.off("idle", idleListener);
         }
@@ -101,58 +109,6 @@ const Map: React.FC<MapProps> = ({
 
       mapInstance.on("load", () => {
         setMapInitialized(true);
-        if (selectedPopupMode === "Travel details") {
-          // Add a GeoJSON source for the polyline
-          mapInstance.addSource("polyline", {
-            type: "geojson",
-            data: {
-              type: "FeatureCollection",
-              features: [],
-            },
-          });
-
-          // Add the polyline layer
-          mapInstance.addLayer({
-            id: "polyline",
-            type: "line",
-            source: "polyline",
-            paint: {
-              "line-color": [
-                "case",
-                ["boolean", ["get", "isHovered"], false],
-                "#ffffff", // White color for the hovered polyline
-                "#ff0000", // Default color for other polylines
-              ],
-              "line-width": 5,
-            },
-          });
-
-          // Polyline circle, travel path
-          mapInstance.addSource("circle", {
-            type: "geojson",
-            data: {
-              type: "FeatureCollection",
-              features: [],
-            },
-          });
-
-          // Polyline circle, travel path
-          // Add the circle layer for the start and end of each polyline
-          mapInstance.addLayer({
-            id: "circle",
-            type: "circle",
-            source: "circle",
-            paint: {
-              "circle-radius": 6,
-              "circle-color": [
-                "case",
-                ["boolean", ["get", "isHovered"], false],
-                "#ffffff", // Color for hovered circles
-                "#ff0000", // Default color for circles
-              ],
-            },
-          });
-        }
 
         console.log("travelTimeData", travelTimeData);
         // Add a GeoJSON source for the travel time data
@@ -229,42 +185,6 @@ const Map: React.FC<MapProps> = ({
         });
       });
 
-      mapInstance.on("click", (e) => {
-        const coordinates: LngLatLike = [e.lngLat.lng, e.lngLat.lat];
-
-        // Remove the previous marker if it exists
-        if (mapInstance.hasOwnProperty("currentMarker")) {
-          (mapInstance as any).currentMarker.remove();
-        }
-
-        // Create a new marker and add it to the map
-        const newMarker = new mapboxgl.Marker({
-          color: `#1E232D`,
-        })
-          .setLngLat(coordinates)
-          .addTo(mapInstance);
-
-        // Store the new marker directly on the map instance
-        (mapInstance as any).currentMarker = newMarker;
-
-        onMapClick(coordinates, mapInstance as IMap);
-
-        // Logging positon time for testing
-
-        // Query the travel time data at the clicked position
-        const featuresAtPosition: any = mapInstance.queryRenderedFeatures(
-          e.point,
-          {
-            layers: ["travelTimeGrid"],
-          }
-        );
-
-        // If there's a feature at the clicked position, log its travel time data
-        if (featuresAtPosition.length > 0) {
-          const travelTimeData = featuresAtPosition[0].properties.fastestTime;
-        }
-      });
-
       // Add a 'mouseleave' event listener for the travelTimeGrid layer to remove the popup
       mapInstance.on("mouseleave", "travelTimeGrid", () => {
         if (popup) {
@@ -280,7 +200,99 @@ const Map: React.FC<MapProps> = ({
     if (!map) {
       initializeMap();
     }
-  }, [map, onMapClick, selectedPopupMode]);
+  }, [map /*onMapClick, selectedPopupMode*/]);
+
+  useEffect(() => {
+    if (map) {
+      map.on("load", () => {
+        if (selectedPopupMode === "Travel details") {
+          // Add a GeoJSON source for the polyline
+          map.addSource("polyline", {
+            type: "geojson",
+            data: {
+              type: "FeatureCollection",
+              features: [],
+            },
+          });
+
+          // Add the polyline layer
+          map.addLayer({
+            id: "polyline",
+            type: "line",
+            source: "polyline",
+            paint: {
+              "line-color": [
+                "case",
+                ["boolean", ["get", "isHovered"], false],
+                "#ffffff", // White color for the hovered polyline
+                "#ff0000", // Default color for other polylines
+              ],
+              "line-width": 5,
+            },
+          });
+
+          // Polyline circle, travel path
+          map.addSource("circle", {
+            type: "geojson",
+            data: {
+              type: "FeatureCollection",
+              features: [],
+            },
+          });
+
+          // Polyline circle, travel path
+          // Add the circle layer for the start and end of each polyline
+          map.addLayer({
+            id: "circle",
+            type: "circle",
+            source: "circle",
+            paint: {
+              "circle-radius": 6,
+              "circle-color": [
+                "case",
+                ["boolean", ["get", "isHovered"], false],
+                "#ffffff", // Color for hovered circles
+                "#ff0000", // Default color for circles
+              ],
+            },
+          });
+        }
+
+        map.on("click", (e) => {
+          const coordinates: LngLatLike = [e.lngLat.lng, e.lngLat.lat];
+
+          // Remove the previous marker if it exists
+          if (map.hasOwnProperty("currentMarker")) {
+            (map as any).currentMarker.remove();
+          }
+
+          // Create a new marker and add it to the map
+          const newMarker = new mapboxgl.Marker({
+            color: `#1E232D`,
+          })
+            .setLngLat(coordinates)
+            .addTo(map);
+
+          // Store the new marker directly on the map instance
+          (map as any).currentMarker = newMarker;
+
+          onMapClick(coordinates, map as IMap);
+
+          // Logging positon time for testing
+
+          // Query the travel time data at the clicked position
+          const featuresAtPosition: any = map.queryRenderedFeatures(e.point, {
+            layers: ["travelTimeGrid"],
+          });
+
+          // If there's a feature at the clicked position, log its travel time data
+          if (featuresAtPosition.length > 0) {
+            const travelTimeData = featuresAtPosition[0].properties.fastestTime;
+          }
+        });
+      });
+    }
+  }, [map, selectedPopupMode]);
 
   // Update the useEffect to handle an array of polyline data
   useEffect(() => {
@@ -340,6 +352,7 @@ const Map: React.FC<MapProps> = ({
   useEffect(() => {
     async function updateTravelTimeData() {
       // Fetch new travel time data
+      console.log("Fetching new travel time data 347");
       const newTravelTimeData = await getTravelTime(
         travelTimeMode === "avg_include_wait",
         travelTime
@@ -365,12 +378,15 @@ const Map: React.FC<MapProps> = ({
         });
       }
     }
-    setLoadingNewTravelData(true);
-    console.log("Updating travel time data");
-    updateTravelTimeData().then(() => {
-      setLoadingNewTravelData(false);
-      console.log("Finished updating travel time data");
-    });
+    console.log("Loading status: ", loadingStatus.complete);
+    if (loadingStatus.complete) {
+      setLoadingNewTravelData(true);
+      console.log("Updating travel time data");
+      updateTravelTimeData().then(() => {
+        setLoadingNewTravelData(false);
+        console.log("Finished updating travel time data");
+      });
+    }
   }, [travelTime]);
 
   const limits = [greenLimit, 15 + greenLimit, 45 + greenLimit];
