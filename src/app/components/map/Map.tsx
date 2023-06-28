@@ -34,6 +34,8 @@ interface ILocation {
   fastestTime: number;
 }
 
+let firstMapIdle: boolean = true;
+
 const Map: React.FC<MapProps> = ({
   onMapClick,
   greenLimit,
@@ -78,9 +80,15 @@ const Map: React.FC<MapProps> = ({
         zoom: 11,
       }) as IMap;
 
+      mapInstance.on("idle", () => {
+        if (!firstMapIdle) {
+          updateLoadingStatus("complete");
+        }
+        firstMapIdle = false;
+      });
+
       mapInstance.on("load", () => {
         setMapInitialized(true);
-        updateLoadingStatus("travelDistancesLoaded");
         if (selectedPopupMode === "Travel details") {
           // Add a GeoJSON source for the polyline
           mapInstance.addSource("polyline", {
@@ -206,8 +214,6 @@ const Map: React.FC<MapProps> = ({
             "line-width": 25, // Adjust the width for the desired hitbox size
           },
         });
-
-        updateLoadingStatus("complete");
       });
 
       mapInstance.on("click", (e) => {

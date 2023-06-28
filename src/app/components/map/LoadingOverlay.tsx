@@ -56,6 +56,18 @@ const LoadingOverlay: React.FC<IProps> = ({ status }) => (
             Loading travel distances
           </p>
         </li>
+        <li>
+          <i className="loading-checkmark-container">
+            {status.complete ? (
+              <BsCheck2 className="loading-checkmark" />
+            ) : (
+              <MoonLoader size={15} color="#59606E" />
+            )}
+          </i>
+          <p className={status.complete ? "loading-text-done" : "loading-text"}>
+            Rendering travel time overlay
+          </p>
+        </li>
       </ul>
     </div>
   </div>
