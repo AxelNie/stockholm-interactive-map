@@ -145,7 +145,7 @@ async function fetchDataForCoordinate(
   let iterations = 0;
   while (shouldContinue && iterations < max_iterations) {
     iterations++;
-    const url = `https://api.booli.se/sold?center=${coordinates.lng},${coordinates.lat}&dim=${sizeOfArea},${sizeOfArea}&objectType=lägenhet&offset=${offset}&limit=500&callerId=${process.env.NEXT_PUBLIC_BOOLI_PUBLIC_KEY}&time=${timestamp}&unique=${unique}&hash=${hashed}&
+    const url = `https://api.booli.se/sold?center=${coordinates.lng},${coordinates.lat}&dim=${sizeOfArea},${sizeOfArea}&objectType=lägenhet&offset=${offset}&limit=1000&callerId=${process.env.NEXT_PUBLIC_BOOLI_PUBLIC_KEY}&time=${timestamp}&unique=${unique}&hash=${hashed}&
     `;
 
     try {
