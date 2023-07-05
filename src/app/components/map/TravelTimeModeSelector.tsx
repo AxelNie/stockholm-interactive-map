@@ -42,18 +42,18 @@ const TravelTimeModeSelector: React.FC<TravelTimeModeSelectorProps> = ({
         <p>
           Displays the direct commuting time excluding any waiting time. This
           represents the duration of the journey itself, from the moment you
-          board your transport to the moment you arrive at Stockholm
-          city/T-centralen.
+          need to leave your current location to the moment you arrive at
+          Stockholm city/T-centralen.
         </p>
         <h3>Average travel time including wait</h3>
         <p>
           Displays the average commuting time, including waiting time, between
           two specified hours. This represents the expected total time it would
           take to reach central Stockholm within this period. For example, if
-          the metro departs from a station every 30 minutes and takes 10 minutes
-          to reach Stockholm city/T-centralen, the average commute time will be
-          25 minutes (15 minutes average wait time + 10 minutes actual travel
-          time).
+          the metro is always the fastest option and it departs from a station
+          every 30 minutes and takes 10 minutes to reach Stockholm
+          city/T-centralen, the average commute time will be 25 minutes (15
+          minutes average wait time + 10 minutes travel time for the metro).
         </p>
       </div>
     );
