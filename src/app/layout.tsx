@@ -15,6 +15,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <Head>
+        <meta name="color-scheme" content="light dark" />
         <link
           rel="stylesheet"
           href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"
