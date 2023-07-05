@@ -16,9 +16,18 @@ button, input[type="submit"], input[type="reset"] {
 }
 
 body {
+	margin: 0;
+	overflow: auto;
+	font-family: 'Inter', sans-serif;
+  }
+
+@media (prefers-color-scheme: dark) {
+ 
+body {
   margin: 0;
   overflow: auto;
   font-family: 'Inter', sans-serif;
+}
 }
 
 :root {
