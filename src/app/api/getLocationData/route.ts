@@ -30,8 +30,8 @@ async function getTravelTime(
   try {
     const apiUrl = `https://api.sl.se/api2/TravelplannerV3_1/trip.json?key=${process.env.NEXT_PUBLIC_SL_TRAVELPLANNER_API_KEY}&originCoordLat=${originLat}&originCoordLong=${originLng}&destExtId=${destExtId}&date=${date}&time=${time}&poly=1`;
 
+    console.log("apiUrl: ", apiUrl);
     const response = await fetch(apiUrl);
-    console.log("url: ", apiUrl);
     const data = await response.json();
 
     const result = data.Trip[0];
