@@ -2,11 +2,28 @@ import { NextRequest, NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+function getDefaultWeekday(): string {
+  const today = new Date();
+  let dayOfWeek = today.getDay();
+
+  if (dayOfWeek === 6) {
+    today.setDate(today.getDate() + 2);
+  } else if (dayOfWeek === 0) {
+    today.setDate(today.getDate() + 1);
+  }
+
+  const year = today.getFullYear();
+  const month = (today.getMonth() + 1).toString().padStart(2, "0");
+  const day = today.getDate().toString().padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
+}
+
 async function getTravelTime(
   originCoordinates: [number, number],
   destExtId: number,
   time = "08:00",
-  date = "2023-04-24"
+  date = getDefaultWeekday()
 ): Promise<object | { error: string }> {
   const [originLng, originLat] = originCoordinates;
 
@@ -14,6 +31,7 @@ async function getTravelTime(
     const apiUrl = `https://api.sl.se/api2/TravelplannerV3_1/trip.json?key=${process.env.NEXT_PUBLIC_SL_TRAVELPLANNER_API_KEY}&originCoordLat=${originLat}&originCoordLong=${originLng}&destExtId=${destExtId}&date=${date}&time=${time}&poly=1`;
 
     const response = await fetch(apiUrl);
+    console.log("url: ", apiUrl);
     const data = await response.json();
 
     const result = data.Trip[0];
