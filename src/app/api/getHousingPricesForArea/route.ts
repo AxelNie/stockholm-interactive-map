@@ -29,15 +29,11 @@ export async function GET(req: NextRequest) {
     lng: parseFloat(location.split(",")[1]),
   };
 
-  console.log(coordinates);
-
   try {
     const housingPriceData = await fetchDataForCoordinate(
       coordinates,
       parseInt(sizeOfArea || "0")
     );
-
-    console.log("avg data: ", getMonthlyAveragePrices(housingPriceData));
 
     return new Response(
       JSON.stringify(getMonthlyAveragePrices(housingPriceData)),
@@ -97,7 +93,6 @@ function getMonthlyAveragePrices(data: ApartmentData[]) {
 
   const monthlyAvgAverages: Record<string, number> = {};
 
-  // Compute averages
   Object.keys(monthlyAvg).forEach((key) => {
     if (monthlyAvg[key].count !== 0) {
       monthlyAvgAverages[key] = Math.round(
@@ -109,8 +104,6 @@ function getMonthlyAveragePrices(data: ApartmentData[]) {
   const overallAvg = Math.round(totalSum / totalCount);
 
   let sufficientMonthlyData = true;
-  console.log(monthlyAvgAverages);
-  console.log(Object.keys(monthlyAvgAverages).length);
   if (Object.keys(monthlyAvgAverages).length < 10) {
     sufficientMonthlyData = false;
   }

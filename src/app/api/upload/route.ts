@@ -19,15 +19,12 @@ export async function GET(request: Request) {
 }
 
 function processTravelData(data: any) {
-  // Convert travelDistancesGrid array to an array with only the int values
   const travelTimes = data.averageTravelTimes.map((item: any) =>
     Math.floor(item.averageFastestTime)
   );
 
-  // Remove the "averageFastestTime" text
   delete data.averageTravelTimes;
 
-  // Change the name of the array to travelTimes
   data.travelTimes = travelTimes;
 
   return data;

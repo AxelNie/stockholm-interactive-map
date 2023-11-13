@@ -66,8 +66,6 @@ const HousingPriceStats: React.FC<IProps> = ({
         `/api/getHousingPricesForArea?location=${coordinates}&dim=${housingPriceRadius}`
       );
       const data = await response.json();
-      console.log("data", data);
-
       setHousingPriceData(data);
     };
 

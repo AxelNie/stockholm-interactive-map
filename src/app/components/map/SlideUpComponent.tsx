@@ -37,10 +37,7 @@ const SlideUpComponent: React.FC<IProps> = ({
 
   return (
     <>
-      <div
-        className="slide-up-container"
-        onClick={() => console.log("slide-up-container")}
-      >
+      <div className="slide-up-container">
         <BottomSheet
           className="slide-up-container"
           open={isOpen}

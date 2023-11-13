@@ -7,7 +7,6 @@ import OverlayControls from "./OverlayControls";
 import LoadingOverlay from "./LoadingOverlay";
 import "./MapContainer.scss";
 import TravelTimeModeSelector from "./TravelTimeModeSelector";
-import SlideUpComponent from "./SlideUpComponent";
 
 interface MapInstanceType extends mapboxgl.Map {
   currentMarker?: mapboxgl.Marker | null;
@@ -34,21 +33,16 @@ const MapContainer = () => {
   const [isMobileDevice, setIsMobileDevice] = useState<boolean>(false);
 
   useEffect(() => {
-    // Add a click event listener to the document when the component mounts
-    const onClick = (event: Event) => {
-      console.log("Clicked element:", event.target);
-    };
+    const onClick = (event: Event) => {};
 
     document.addEventListener("click", onClick);
 
-    // Remove the event listener when the component unmounts
     return () => {
       document.removeEventListener("click", onClick);
     };
-  }, []); // Empty dependency array means this effect runs once on mount and cleanup on unmount
+  }, []);
 
   useEffect(() => {
-    // Note: window.innerWidth is not reliable in all situations, you may need a more robust method for some cases.
     setIsMobileDevice(window.innerWidth < 760);
 
     const handleResize = () => {
@@ -77,14 +71,11 @@ const MapContainer = () => {
   };
 
   const handleInfoPopupClose = () => {
-    // Remove the marker from the map
     if (mapInstance && mapInstance.currentMarker) {
       mapInstance.currentMarker.remove();
     }
-    // Hide the popup
     setShowInfoPopup(false);
 
-    // Remove the polyline
     setPolyline(null);
   };
 
@@ -104,7 +95,6 @@ const MapContainer = () => {
   }, [loadingStatus.complete]);
 
   const onUpdateMapLoadingStatus = (state: string) => {
-    console.log("state: ", state);
     if (state === "mapLoaded") {
       setLoadingStatus((prevState) => ({ ...prevState, mapLoaded: true }));
     } else if (state === "travelDistancesLoaded") {

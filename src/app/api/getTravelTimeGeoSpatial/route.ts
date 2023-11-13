@@ -36,10 +36,8 @@ export async function POST(req: NextRequest) {
   try {
     const data: PositionsRequest = await req.json();
 
-    // If no positions are provided, use a default position
     const defaultPosition: Coordinate[] = [{ lat: 59.522565, lng: 17.965865 }];
 
-    // Make sure the 'positions' property exists in the data object and is an array
     if (!Array.isArray(data.positions)) {
       data.positions = defaultPosition;
     }

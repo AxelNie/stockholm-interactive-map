@@ -35,7 +35,6 @@ function convertTimeFormat(timeString: unknown): string {
 }
 
 const TravelTime = ({ time }: ITravelTimeProps) => {
-  console.log(time);
   return (
     <div className="travel-time-container">
       {time ? (

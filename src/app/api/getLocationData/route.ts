@@ -34,7 +34,6 @@ async function getTravelTime(
 
     const result = data.Trip[0];
 
-    // Return the travel information
     return result;
   } catch (error: any) {
     console.log("Error getting travel time.");
