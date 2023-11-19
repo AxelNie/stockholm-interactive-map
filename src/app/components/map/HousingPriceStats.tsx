@@ -188,9 +188,7 @@ const HousingPriceStats: React.FC<IProps> = ({
             {housingPriceData ? (
               <div className="avg-price-bg">
                 <div className="avg-price">
-                  <p className="avg-price-label">
-                    Average price for one year:{" "}
-                  </p>
+                  <p className="avg-price-label">Average price last year: </p>
 
                   <p className="price-per-sqrmeter">
                     {`${formatPriceWithSpaces(
