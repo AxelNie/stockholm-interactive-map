@@ -36,12 +36,30 @@ const MapContainer = () => {
     useState<string>("time");
 
   useEffect(() => {
-    const onClick = (event: Event) => {};
+    const onClick = (event: Event) => { };
 
     document.addEventListener("click", onClick);
 
     return () => {
       document.removeEventListener("click", onClick);
+    };
+  }, []);
+
+  useEffect(() => {
+    const handleKeyPress = (event: any) => {
+      if (event.key === 'P' || event.key === 'p') {
+        setMapVisualisationMode("price");
+      } else if (event.key === 'T' || event.key === 't') {
+        setMapVisualisationMode("time");
+      }
+    };
+
+    // Add event listener for keydown
+    window.addEventListener('keydown', handleKeyPress);
+
+    // Cleanup event listener
+    return () => {
+      window.removeEventListener('keydown', handleKeyPress);
     };
   }, []);
 

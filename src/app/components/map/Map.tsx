@@ -435,6 +435,8 @@ const Map: React.FC<MapProps> = ({
   } else {
     limits = [40000, 80000, 120000];
   }
+
+  console.log("limits: ", limits)
   const colors = ["#13C81A", "#C2D018", "#D1741F", "#BE3A1D"];
 
   // Update heatmap layer's paint property when greenLimit changes
@@ -456,7 +458,7 @@ const Map: React.FC<MapProps> = ({
     }
 
     updateMap();
-  }, [map, greenLimit]);
+  }, [map, greenLimit, mapVisualisationMode]);
 
   useEffect(() => {
     if (map) {
@@ -687,7 +689,7 @@ const removeSquareAroundMaker = (map: any) => {
       map.removeLayer("square-fill");
       map.removeLayer("square-border");
     }
-  } catch (e) {}
+  } catch (e) { }
 };
 
 function doesLayerExist(layerId: string, map: any) {
