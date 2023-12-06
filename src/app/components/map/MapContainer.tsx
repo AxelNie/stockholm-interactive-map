@@ -47,8 +47,9 @@ const MapContainer = () => {
 
   useEffect(() => {
     const handleKeyPress = (event: any) => {
+      console.log("key pressed: ", event.key);
       if (event.key === 'P' || event.key === 'p') {
-        setMapVisualisationMode("price");
+        setMapVisualisationMode("money");
       } else if (event.key === 'T' || event.key === 't') {
         setMapVisualisationMode("time");
       }

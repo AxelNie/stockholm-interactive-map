@@ -65,7 +65,10 @@ const OverlayControls: React.FC<OverlayControlsProps> = ({
                     className="color-line"
                     style={{ backgroundColor: colors[index] }}
                   ></div>
-                  <span>{interval}/m^2</span>
+                  {mapVisualisationMode === "money" ?
+                    <span>{interval}/m^2</span> :
+                    <span>{interval}m</span>
+                  }
                 </div>
               ))}
             </div>

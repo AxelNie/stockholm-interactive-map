@@ -429,6 +429,10 @@ const Map: React.FC<MapProps> = ({
     }
   }, [travelTime, mapVisualisationMode, appartmentPriceData]);
 
+
+
+  //const [limits, setLimits] = useState<number[]>([greenLimit, 15 + greenLimit, 45 + greenLimit]);
+
   let limits = [greenLimit, 15 + greenLimit, 45 + greenLimit];
 
   if (mapVisualisationMode === "time") {
@@ -441,6 +445,7 @@ const Map: React.FC<MapProps> = ({
 
   // Update heatmap layer's paint property when greenLimit changes
   useEffect(() => {
+    console.log("update heatmap colors: ", limits);
     if (map && map.getLayer("travelTimeGrid")) {
       map.setPaintProperty("travelTimeGrid", "fill-color", [
         "interpolate",
@@ -458,7 +463,7 @@ const Map: React.FC<MapProps> = ({
     }
 
     updateMap();
-  }, [map, greenLimit, mapVisualisationMode]);
+  }, [map, greenLimit, limits]);
 
   useEffect(() => {
     if (map) {
