@@ -7,6 +7,7 @@ import OverlayControls from "./OverlayControls";
 import LoadingOverlay from "./LoadingOverlay";
 import "./MapContainer.scss";
 import TravelTimeModeSelector from "./TravelTimeModeSelector";
+import MapVisualisationModeSelector from "./MapVisualisationModeSelector";
 
 interface MapInstanceType extends mapboxgl.Map {
   currentMarker?: mapboxgl.Marker | null;
@@ -31,6 +32,8 @@ const MapContainer = () => {
   const [travelTime, setTravelTime] = useState<number>(8);
   const [displayLoading, setDisplayLoading] = useState<boolean>(true);
   const [isMobileDevice, setIsMobileDevice] = useState<boolean>(false);
+  const [mapVisualisationMode, setMapVisualisationMode] =
+    useState<string>("time");
 
   useEffect(() => {
     const onClick = (event: Event) => {};
@@ -41,6 +44,14 @@ const MapContainer = () => {
       document.removeEventListener("click", onClick);
     };
   }, []);
+
+  useEffect(() => {
+    if (mapVisualisationMode === "time") {
+      setGreenLimit(15);
+    } else {
+      setGreenLimit(100000);
+    }
+  }, [mapVisualisationMode]);
 
   useEffect(() => {
     setIsMobileDevice(window.innerWidth < 760);
@@ -138,6 +149,7 @@ const MapContainer = () => {
         loadingStatus={loadingStatus}
         travelTimeMode={travelTimeMode}
         travelTime={travelTime}
+        mapVisualisationMode={mapVisualisationMode}
       />
       {showInfoPopup && (
         <InfoPopup
@@ -157,6 +169,11 @@ const MapContainer = () => {
       <OverlayControls
         greenLimit={greenLimit}
         onGreenLimitChange={setGreenLimit}
+        isMobileDevice={isMobileDevice}
+      />
+      <MapVisualisationModeSelector
+        mapVisualisationMode={mapVisualisationMode}
+        setMapVisualisationMode={setMapVisualisationMode}
         isMobileDevice={isMobileDevice}
       />
       <TravelTimeModeSelector

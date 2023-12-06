@@ -1,4 +1,3 @@
-"use client";
 import React from "react";
 import "./OverlayControls.scss";
 
@@ -13,6 +12,10 @@ const OverlayControls: React.FC<OverlayControlsProps> = ({
   onGreenLimitChange,
   isMobileDevice,
 }) => {
+  const formatNumber = (num: number): string => {
+    return num >= 1000 ? `${Math.round(num / 1000)}k` : num.toString();
+  };
+
   const increaseLimit = () => {
     onGreenLimitChange(greenLimit + 5);
   };
@@ -28,10 +31,10 @@ const OverlayControls: React.FC<OverlayControlsProps> = ({
   const colors = ["#13C81A", "#C2D018", "#D1741F", "#BE3A1D"];
 
   const displayIntervals = [
-    `<${limits[0]}`,
-    `${limits[0]}-${limits[1]}`,
-    `${limits[1]}-${limits[2]}`,
-    `>${limits[2]}`,
+    `<${formatNumber(limits[0])}`,
+    `${formatNumber(limits[0])}-${formatNumber(limits[1])}`,
+    `${formatNumber(limits[1])}-${formatNumber(limits[2])}`,
+    `>${formatNumber(limits[2])}`,
   ];
 
   return (

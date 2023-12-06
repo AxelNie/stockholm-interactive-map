@@ -3,6 +3,7 @@ import { useState, useEffect, useRef } from "react";
 import mapboxgl, { LngLatLike, Popup } from "mapbox-gl";
 import { buffer, bbox, bboxPolygon, point } from "@turf/turf";
 import { getTravelTime } from "@/queries/getTravelTime";
+import { getPricesWithLocations } from "@/queries/getAppartmentPrices";
 import "./Map.scss";
 import "mapbox-gl/dist/mapbox-gl.css";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -26,12 +27,19 @@ interface MapProps {
   loadingStatus: any;
   travelTimeMode: string;
   travelTime: number;
+  mapVisualisationMode: string;
 }
 
 interface ILocation {
   lng: number;
   lat: number;
   fastestTime: number;
+}
+
+interface ILocationPrice {
+  lng: number;
+  lat: number;
+  averagePrice: number;
 }
 
 let firstMapIdle: boolean = true;
@@ -50,6 +58,7 @@ const Map: React.FC<MapProps> = ({
   loadingStatus,
   travelTimeMode,
   travelTime,
+  mapVisualisationMode,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<IMap | null>(null);
@@ -57,11 +66,33 @@ const Map: React.FC<MapProps> = ({
   const [mapInitialized, setMapInitialized] = useState<boolean>(false);
   const [loadingNewTravelData, setLoadingNewTravelData] =
     useState<boolean>(false);
+  const [appartmentPriceData, setAppartmentPriceData] = useState<
+    ILocationPrice[]
+  >([]);
 
   let popup: Popup | null = null;
 
   let travelTimeData: ILocation[] = [];
   let initiatedLoadingTravelTimeData: boolean = false;
+
+  useEffect(() => {
+    const fetchPrices = async () => {
+      if (
+        mapVisualisationMode === "money" &&
+        appartmentPriceData.length === 0
+      ) {
+        try {
+          const pricesData = await getPricesWithLocations();
+          setAppartmentPriceData(pricesData);
+          console.log("pricesData", pricesData);
+        } catch (error) {
+          console.error("Error fetching prices:", error);
+        }
+      }
+    };
+
+    fetchPrices();
+  }, [mapVisualisationMode, appartmentPriceData.length]);
 
   useEffect(() => {
     async function initializeMap() {
@@ -71,6 +102,7 @@ const Map: React.FC<MapProps> = ({
           travelTimeMode === "avg_include_wait",
           travelTime
         );
+        console.log("travelTimeData", travelTimeData);
       }
 
       const markerElement = document.createElement("div");
@@ -120,6 +152,28 @@ const Map: React.FC<MapProps> = ({
           },
         });
         updateLoadingStatus("travelDistancesLoaded");
+
+        if (appartmentPriceData.length > 0) {
+          mapInstance.addSource("averagePriceData", {
+            type: "geojson",
+            data: {
+              type: "FeatureCollection",
+              features: appartmentPriceData.map((location: ILocationPrice) => {
+                const center = point([location.lng, location.lat]);
+                const buffered = buffer(center, 65, { units: "meters" });
+                const squarePolygon = bboxPolygon(bbox(buffered));
+
+                return {
+                  type: "Feature",
+                  geometry: squarePolygon.geometry,
+                  properties: {
+                    fastestTime: location.averagePrice,
+                  },
+                };
+              }),
+            },
+          });
+        }
 
         // Find water layer
         let waterLayerId: string | undefined;
@@ -329,22 +383,42 @@ const Map: React.FC<MapProps> = ({
       );
 
       if (map && map.getSource("travelTimeData")) {
-        (map.getSource("travelTimeData") as mapboxgl.GeoJSONSource).setData({
-          type: "FeatureCollection",
-          features: newTravelTimeData.map((location: ILocation) => {
-            const center = point([location.lng, location.lat]);
-            const buffered = buffer(center, 65, { units: "meters" });
-            const squarePolygon = bboxPolygon(bbox(buffered));
+        if (mapVisualisationMode === "time") {
+          (map.getSource("travelTimeData") as mapboxgl.GeoJSONSource).setData({
+            type: "FeatureCollection",
+            features: newTravelTimeData.map((location: ILocation) => {
+              const center = point([location.lng, location.lat]);
+              const buffered = buffer(center, 65, { units: "meters" });
+              const squarePolygon = bboxPolygon(bbox(buffered));
 
-            return {
-              type: "Feature",
-              geometry: squarePolygon.geometry,
-              properties: {
-                fastestTime: location.fastestTime,
-              },
-            };
-          }),
-        });
+              return {
+                type: "Feature",
+                geometry: squarePolygon.geometry,
+                properties: {
+                  fastestTime: location.fastestTime,
+                },
+              };
+            }),
+          });
+        } else if (mapVisualisationMode === "money") {
+          console.log("appartmentPriceData", appartmentPriceData);
+          (map.getSource("travelTimeData") as mapboxgl.GeoJSONSource).setData({
+            type: "FeatureCollection",
+            features: appartmentPriceData.map((location: ILocationPrice) => {
+              const center = point([location.lng, location.lat]);
+              const buffered = buffer(center, 200, { units: "meters" });
+              const squarePolygon = bboxPolygon(bbox(buffered));
+
+              return {
+                type: "Feature",
+                geometry: squarePolygon.geometry,
+                properties: {
+                  fastestTime: location.averagePrice,
+                },
+              };
+            }),
+          });
+        }
       }
     }
     if (loadingStatus.complete) {
@@ -353,9 +427,14 @@ const Map: React.FC<MapProps> = ({
         setLoadingNewTravelData(false);
       });
     }
-  }, [travelTime]);
+  }, [travelTime, mapVisualisationMode, appartmentPriceData]);
 
-  const limits = [greenLimit, 15 + greenLimit, 45 + greenLimit];
+  let limits = [greenLimit, 15 + greenLimit, 45 + greenLimit];
+
+  if (mapVisualisationMode === "time") {
+  } else {
+    limits = [40000, 70000, 100000];
+  }
   const colors = ["#13C81A", "#C2D018", "#D1741F", "#BE3A1D"];
 
   // Update heatmap layer's paint property when greenLimit changes
