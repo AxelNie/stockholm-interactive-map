@@ -46,14 +46,6 @@ const MapContainer = () => {
   }, []);
 
   useEffect(() => {
-    if (mapVisualisationMode === "time") {
-      setGreenLimit(15);
-    } else {
-      setGreenLimit(100000);
-    }
-  }, [mapVisualisationMode]);
-
-  useEffect(() => {
     setIsMobileDevice(window.innerWidth < 760);
 
     const handleResize = () => {
@@ -170,6 +162,7 @@ const MapContainer = () => {
         greenLimit={greenLimit}
         onGreenLimitChange={setGreenLimit}
         isMobileDevice={isMobileDevice}
+        mapVisualisationMode={mapVisualisationMode}
       />
       <MapVisualisationModeSelector
         mapVisualisationMode={mapVisualisationMode}

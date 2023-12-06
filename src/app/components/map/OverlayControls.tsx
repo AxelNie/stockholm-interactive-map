@@ -5,12 +5,14 @@ interface OverlayControlsProps {
   greenLimit: number;
   onGreenLimitChange: (newLimit: number) => void;
   isMobileDevice: boolean;
+  mapVisualisationMode: any;
 }
 
 const OverlayControls: React.FC<OverlayControlsProps> = ({
   greenLimit,
   onGreenLimitChange,
   isMobileDevice,
+  mapVisualisationMode,
 }) => {
   const formatNumber = (num: number): string => {
     return num >= 1000 ? `${Math.round(num / 1000)}k` : num.toString();
@@ -26,7 +28,11 @@ const OverlayControls: React.FC<OverlayControlsProps> = ({
     }
   };
 
-  const limits = [greenLimit, 15 + greenLimit, 45 + greenLimit];
+  let limits = [greenLimit, 15 + greenLimit, 45 + greenLimit];
+
+  if (mapVisualisationMode === "money") {
+    limits = [40000, 80000, 120000];
+  }
 
   const colors = ["#13C81A", "#C2D018", "#D1741F", "#BE3A1D"];
 
