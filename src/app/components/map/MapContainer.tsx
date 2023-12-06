@@ -182,11 +182,11 @@ const MapContainer = () => {
         isMobileDevice={isMobileDevice}
         mapVisualisationMode={mapVisualisationMode}
       />
-      <MapVisualisationModeSelector
+      {/* <MapVisualisationModeSelector
         mapVisualisationMode={mapVisualisationMode}
         setMapVisualisationMode={setMapVisualisationMode}
         isMobileDevice={isMobileDevice}
-      />
+      /> */}
       <TravelTimeModeSelector
         travelTimeMode={travelTimeMode}
         setTravelTimeMode={setTravelTimeMode}
