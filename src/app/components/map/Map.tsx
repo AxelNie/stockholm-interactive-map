@@ -433,7 +433,7 @@ const Map: React.FC<MapProps> = ({
 
   if (mapVisualisationMode === "time") {
   } else {
-    limits = [4000, 80000, 120000];
+    limits = [40000, 80000, 120000];
   }
   const colors = ["#13C81A", "#C2D018", "#D1741F", "#BE3A1D"];
 
