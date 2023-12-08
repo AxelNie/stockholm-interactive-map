@@ -34,6 +34,7 @@ interface ILocation {
   lng: number;
   lat: number;
   fastestTime: number;
+  averagePrice?: number;
 }
 
 interface ILocationPrice {
@@ -132,6 +133,9 @@ const Map: React.FC<MapProps> = ({
       mapInstance.on("load", () => {
         setMapInitialized(true);
 
+        console.log("traveltimedata: ", travelTimeData);
+        console.log("appartmentPriceData: ", appartmentPriceData);
+
         mapInstance.addSource("travelTimeData", {
           type: "geojson",
           data: {
@@ -152,28 +156,6 @@ const Map: React.FC<MapProps> = ({
           },
         });
         updateLoadingStatus("travelDistancesLoaded");
-
-        if (appartmentPriceData.length > 0) {
-          mapInstance.addSource("averagePriceData", {
-            type: "geojson",
-            data: {
-              type: "FeatureCollection",
-              features: appartmentPriceData.map((location: ILocationPrice) => {
-                const center = point([location.lng, location.lat]);
-                const buffered = buffer(center, 65, { units: "meters" });
-                const squarePolygon = bboxPolygon(bbox(buffered));
-
-                return {
-                  type: "Feature",
-                  geometry: squarePolygon.geometry,
-                  properties: {
-                    fastestTime: location.averagePrice,
-                  },
-                };
-              }),
-            },
-          });
-        }
 
         // Find water layer
         let waterLayerId: string | undefined;
@@ -388,7 +370,7 @@ const Map: React.FC<MapProps> = ({
             type: "FeatureCollection",
             features: newTravelTimeData.map((location: ILocation) => {
               const center = point([location.lng, location.lat]);
-              const buffered = buffer(center, 65, { units: "meters" });
+              const buffered = buffer(center, 50, { units: "meters" });
               const squarePolygon = bboxPolygon(bbox(buffered));
 
               return {
@@ -703,6 +685,12 @@ function doesLayerExist(layerId: string, map: any) {
 }
 
 function doesSourceExist(sourceId: string, map: any) {
+  const sources = map.getStyle().sources;
+  return sources.hasOwnProperty(sourceId);
+}
+
+
+function fetchAppertmentPriceData() {
   const sources = map.getStyle().sources;
   return sources.hasOwnProperty(sourceId);
 }
