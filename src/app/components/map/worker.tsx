@@ -9,6 +9,7 @@ interface ILocation {
 
 // worker.ts
 addEventListener("message", async (event: MessageEvent) => {
+  console.log("worker.ts: addEventListener");
   const locations: ILocation[] = event.data;
   const pricesData = await getPricesWithLocations();
   const result = locations.map((location) => ({
@@ -16,6 +17,7 @@ addEventListener("message", async (event: MessageEvent) => {
     averagePrice: findClosestPrice(location, pricesData).averagePrice,
   }));
 
+  console.log("done");
   postMessage(result);
 });
 

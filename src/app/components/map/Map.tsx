@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import mapboxgl, { LngLatLike, Popup } from "mapbox-gl";
 import { buffer, bbox, bboxPolygon, point } from "@turf/turf";
 import { getTravelTime } from "@/queries/getTravelTime";
@@ -74,7 +74,26 @@ const Map: React.FC<MapProps> = ({
   let popup: Popup | null = null;
 
   let travelTimeData: ILocation[] = [];
+  let allDataFetched: boolean = false;
   let initiatedLoadingTravelTimeData: boolean = false;
+
+  const workerRef = useRef<Worker>();
+
+  useEffect(() => {
+    workerRef.current = new Worker(new URL("worker.tsx", import.meta.url));
+    workerRef.current.onmessage = (event: MessageEvent<ILocation[]>) => {
+      console.log("WebWorker Response Type:", typeof event.data);
+      console.log("WebWorker Response:", event.data);
+    };
+
+    return () => {
+      workerRef.current?.terminate();
+    };
+  }, []);
+
+  const handleWork = useCallback(async (data: ILocation[]) => {
+    workerRef.current?.postMessage(data);
+  }, []);
 
   useEffect(() => {
     const fetchPrices = async () => {
@@ -103,6 +122,10 @@ const Map: React.FC<MapProps> = ({
           travelTimeMode === "avg_include_wait",
           travelTime
         );
+
+        //fetchAppertmentPriceData(travelTimeData);
+        handleWork(travelTimeData);
+
         console.log("travelTimeData", travelTimeData);
       }
 
@@ -142,7 +165,7 @@ const Map: React.FC<MapProps> = ({
             type: "FeatureCollection",
             features: travelTimeData.map((location: ILocation) => {
               const center = point([location.lng, location.lat]);
-              const buffered = buffer(center, 65, { units: "meters" });
+              const buffered = buffer(center, 60, { units: "meters" });
               const squarePolygon = bboxPolygon(bbox(buffered));
 
               return {
@@ -370,7 +393,7 @@ const Map: React.FC<MapProps> = ({
             type: "FeatureCollection",
             features: newTravelTimeData.map((location: ILocation) => {
               const center = point([location.lng, location.lat]);
-              const buffered = buffer(center, 50, { units: "meters" });
+              const buffered = buffer(center, 20, { units: "meters" });
               const squarePolygon = bboxPolygon(bbox(buffered));
 
               return {
@@ -411,8 +434,6 @@ const Map: React.FC<MapProps> = ({
     }
   }, [travelTime, mapVisualisationMode, appartmentPriceData]);
 
-
-
   //const [limits, setLimits] = useState<number[]>([greenLimit, 15 + greenLimit, 45 + greenLimit]);
 
   let limits = [greenLimit, 15 + greenLimit, 45 + greenLimit];
@@ -422,7 +443,7 @@ const Map: React.FC<MapProps> = ({
     limits = [40000, 80000, 120000];
   }
 
-  console.log("limits: ", limits)
+  console.log("limits: ", limits);
   const colors = ["#13C81A", "#C2D018", "#D1741F", "#BE3A1D"];
 
   // Update heatmap layer's paint property when greenLimit changes
@@ -676,7 +697,7 @@ const removeSquareAroundMaker = (map: any) => {
       map.removeLayer("square-fill");
       map.removeLayer("square-border");
     }
-  } catch (e) { }
+  } catch (e) {}
 };
 
 function doesLayerExist(layerId: string, map: any) {
@@ -689,8 +710,18 @@ function doesSourceExist(sourceId: string, map: any) {
   return sources.hasOwnProperty(sourceId);
 }
 
-
-function fetchAppertmentPriceData() {
-  const sources = map.getStyle().sources;
-  return sources.hasOwnProperty(sourceId);
+function fetchAppertmentPriceData(data: ILocation[]) {
+  // console.log("fetchAppertmentPriceData");
+  // if (window.Worker && data.length > 0) {
+  //   const myWorker = new Worker("worker.tsx", { type: `module` });
+  //   myWorker.postMessage(data); // Skicka data till workern
+  //   myWorker.onmessage = (event: MessageEvent) => {
+  //     const result = event.data;
+  //     console.log("Resultat från worker: ", result);
+  //     // Uppdatera UI eller vidta andra åtgärder med resultatet
+  //   };
+  //   myWorker.onerror = (error: ErrorEvent) => {
+  //     console.error("Worker error: ", error);
+  //   };
+  // }
 }
