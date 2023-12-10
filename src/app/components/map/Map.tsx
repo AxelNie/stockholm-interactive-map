@@ -35,7 +35,6 @@ interface ILocation {
 }
 
 let firstMapIdle: boolean = true;
-let firstTimeInitializingMap: boolean = true;
 
 const Map: React.FC<MapProps> = ({
   onMapClick,
