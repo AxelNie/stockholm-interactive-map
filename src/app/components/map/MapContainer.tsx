@@ -8,6 +8,7 @@ import LoadingOverlay from "./LoadingOverlay";
 import "./MapContainer.scss";
 import TravelTimeModeSelector from "./TravelTimeModeSelector";
 import MapVisualisationModeSelector from "./MapVisualisationModeSelector";
+import Filter from "./Filter";
 
 interface MapInstanceType extends mapboxgl.Map {
   currentMarker?: mapboxgl.Marker | null;
@@ -36,7 +37,7 @@ const MapContainer = () => {
     useState<string>("time");
 
   useEffect(() => {
-    const onClick = (event: Event) => { };
+    const onClick = (event: Event) => {};
 
     document.addEventListener("click", onClick);
 
@@ -48,19 +49,19 @@ const MapContainer = () => {
   useEffect(() => {
     const handleKeyPress = (event: any) => {
       console.log("key pressed: ", event.key);
-      if (event.key === 'P' || event.key === 'p') {
+      if (event.key === "P" || event.key === "p") {
         setMapVisualisationMode("money");
-      } else if (event.key === 'T' || event.key === 't') {
+      } else if (event.key === "T" || event.key === "t") {
         setMapVisualisationMode("time");
       }
     };
 
     // Add event listener for keydown
-    window.addEventListener('keydown', handleKeyPress);
+    window.addEventListener("keydown", handleKeyPress);
 
     // Cleanup event listener
     return () => {
-      window.removeEventListener('keydown', handleKeyPress);
+      window.removeEventListener("keydown", handleKeyPress);
     };
   }, []);
 
@@ -195,6 +196,7 @@ const MapContainer = () => {
         setTravelTime={setTravelTime}
         isMobileDevice={isMobileDevice}
       />
+      <Filter />
     </div>
   );
 };

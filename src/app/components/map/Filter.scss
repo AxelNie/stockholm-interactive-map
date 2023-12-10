@@ -1,0 +1,107 @@
+@import '@/app/variables.module.scss';
+
+
+.filter-container{
+position: fixed;
+  right: 0;
+  bottom: 10px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 400;
+  background-color: $dark;
+  border-radius: 5px;
+  color: white;
+
+    button{
+        font-size: 2rem;
+        padding: 0.5rem;
+
+    }
+
+    .expanded-container{
+        width: 420px;
+        padding: 0.5rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+
+        .close-container{
+            width: 100%;
+            font-size: 1.5rem;
+            display: flex;
+            justify-content: end;
+        }
+
+        button{
+            width: 100%;
+            background-color: $semi-dark;
+            font-size: 1rem;
+        }
+
+        .slider-container{
+
+            .custom-checkbox {
+                appearance: none;
+                background-color: white;
+                margin: 4px;
+                padding: 9px;
+                border-radius: 3px;
+                display: inline-block;
+                position: relative;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 -15px 10px rgba(0, 0, 0, 0.05);
+                cursor: pointer;
+              
+                &:checked {
+                  background-color: $accent;
+                  box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0 -15px 10px rgba(0,0,0,0.1);
+                  &:after {
+                    content: '\2714';
+                    font-size: 14px;
+                    position: absolute;
+                    top: 0;
+                    left: 3px;
+                    color: $dark;
+                  }
+                }
+              }
+              
+              .checkbox-container {
+                display: flex;
+                align-items: center;
+                margin-bottom: 10px;
+              
+                label {
+                  margin-left: 8px;
+                  cursor: pointer;
+                }
+              }              
+            
+            
+            .range-container{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                margin: 0.75rem 0;
+                color: $grey;
+
+                .range-slider{
+                    margin: 0 1rem;
+                    width: 250px;
+                }
+            }
+
+            .range-slider__thumb{
+                background-color: $accent;
+            }
+            .range-slider__range{
+                background-color: $accent;
+                opacity: 0.5;
+            }
+
+            .range-slider{
+                background-color: $semi-dark;
+            }
+        }
+    }
+}

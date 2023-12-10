@@ -18,6 +18,8 @@ export async function getTravelTime(
     const response = await fetch(apiUrl);
     const data = await response.json();
 
+    console.log(data.document);
+
     const listOfTravelTimes = getListOfLocationTravelTimes(data.document);
 
     return listOfTravelTimes;

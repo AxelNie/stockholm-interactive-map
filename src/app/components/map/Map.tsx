@@ -74,7 +74,8 @@ const Map: React.FC<MapProps> = ({
   let popup: Popup | null = null;
 
   let travelTimeData: ILocation[] = [];
-  let allDataFetched: boolean = false;
+  let travelTimeAndPriceData: ILocation[] = [];
+
   let initiatedLoadingTravelTimeData: boolean = false;
 
   const workerRef = useRef<Worker>();
@@ -84,6 +85,7 @@ const Map: React.FC<MapProps> = ({
     workerRef.current.onmessage = (event: MessageEvent<ILocation[]>) => {
       console.log("WebWorker Response Type:", typeof event.data);
       console.log("WebWorker Response:", event.data);
+      travelTimeData = event.data;
     };
 
     return () => {
@@ -91,8 +93,30 @@ const Map: React.FC<MapProps> = ({
     };
   }, []);
 
-  const handleWork = useCallback(async (data: ILocation[]) => {
-    workerRef.current?.postMessage(data);
+  const handleWork = useCallback((data: ILocation[]): Promise<ILocation[]> => {
+    return new Promise((resolve, reject) => {
+      if (!workerRef.current) {
+        reject(new Error("Worker is not initialized"));
+        return;
+      }
+
+      // Hantera meddelande från workern
+      const handleMessage = (event: MessageEvent<ILocation[]>) => {
+        resolve(event.data); // Löser promiset med datan från workern
+        workerRef.current?.removeEventListener("message", handleMessage);
+      };
+
+      // Hantera fel
+      const handleError = (error: ErrorEvent) => {
+        reject(new Error("Worker error: " + error.message));
+        workerRef.current?.removeEventListener("error", handleError);
+      };
+
+      workerRef.current.addEventListener("message", handleMessage);
+      workerRef.current.addEventListener("error", handleError);
+
+      workerRef.current.postMessage(data); // Skicka data till workern
+    });
   }, []);
 
   useEffect(() => {
@@ -104,7 +128,6 @@ const Map: React.FC<MapProps> = ({
         try {
           const pricesData = await getPricesWithLocations();
           setAppartmentPriceData(pricesData);
-          console.log("pricesData", pricesData);
         } catch (error) {
           console.error("Error fetching prices:", error);
         }
@@ -122,11 +145,6 @@ const Map: React.FC<MapProps> = ({
           travelTimeMode === "avg_include_wait",
           travelTime
         );
-
-        //fetchAppertmentPriceData(travelTimeData);
-        handleWork(travelTimeData);
-
-        console.log("travelTimeData", travelTimeData);
       }
 
       const markerElement = document.createElement("div");
@@ -156,16 +174,13 @@ const Map: React.FC<MapProps> = ({
       mapInstance.on("load", () => {
         setMapInitialized(true);
 
-        console.log("traveltimedata: ", travelTimeData);
-        console.log("appartmentPriceData: ", appartmentPriceData);
-
         mapInstance.addSource("travelTimeData", {
           type: "geojson",
           data: {
             type: "FeatureCollection",
             features: travelTimeData.map((location: ILocation) => {
               const center = point([location.lng, location.lat]);
-              const buffered = buffer(center, 60, { units: "meters" });
+              const buffered = buffer(center, 65, { units: "meters" });
               const squarePolygon = bboxPolygon(bbox(buffered));
 
               return {
@@ -389,39 +404,68 @@ const Map: React.FC<MapProps> = ({
 
       if (map && map.getSource("travelTimeData")) {
         if (mapVisualisationMode === "time") {
-          (map.getSource("travelTimeData") as mapboxgl.GeoJSONSource).setData({
-            type: "FeatureCollection",
-            features: newTravelTimeData.map((location: ILocation) => {
-              const center = point([location.lng, location.lat]);
-              const buffered = buffer(center, 20, { units: "meters" });
-              const squarePolygon = bboxPolygon(bbox(buffered));
+          handleWork(newTravelTimeData).then((result) => {
+            travelTimeAndPriceData = result;
 
-              return {
-                type: "Feature",
-                geometry: squarePolygon.geometry,
-                properties: {
-                  fastestTime: location.fastestTime,
-                },
-              };
-            }),
+            console.log("travelTimeAndPriceData: ", travelTimeAndPriceData);
+            (map.getSource("travelTimeData") as mapboxgl.GeoJSONSource).setData(
+              {
+                type: "FeatureCollection",
+                features: travelTimeAndPriceData
+                  .filter(
+                    (location: ILocation) =>
+                      location.averagePrice !== undefined &&
+                      location.averagePrice > 50000 &&
+                      location.averagePrice < 70000 &&
+                      location.fastestTime < 25
+                  )
+                  .map((location: ILocation) => {
+                    const center = point([location.lng, location.lat]);
+                    const buffered = buffer(center, 200, { units: "meters" });
+                    const squarePolygon = bboxPolygon(bbox(buffered));
+
+                    return {
+                      type: "Feature",
+                      geometry: squarePolygon.geometry,
+                      properties: {
+                        fastestTime: location.fastestTime,
+                      },
+                    };
+                  }),
+              }
+            );
           });
         } else if (mapVisualisationMode === "money") {
-          console.log("appartmentPriceData", appartmentPriceData);
-          (map.getSource("travelTimeData") as mapboxgl.GeoJSONSource).setData({
-            type: "FeatureCollection",
-            features: appartmentPriceData.map((location: ILocationPrice) => {
-              const center = point([location.lng, location.lat]);
-              const buffered = buffer(center, 200, { units: "meters" });
-              const squarePolygon = bboxPolygon(bbox(buffered));
+          handleWork(newTravelTimeData).then((result) => {
+            travelTimeAndPriceData = result;
 
-              return {
-                type: "Feature",
-                geometry: squarePolygon.geometry,
-                properties: {
-                  fastestTime: location.averagePrice,
-                },
-              };
-            }),
+            console.log("travelTimeAndPriceData: ", travelTimeAndPriceData);
+            (map.getSource("travelTimeData") as mapboxgl.GeoJSONSource).setData(
+              {
+                type: "FeatureCollection",
+                features: travelTimeAndPriceData
+                  .filter(
+                    (location: ILocation) =>
+                      location.averagePrice !== undefined &&
+                      location.averagePrice > 50000 &&
+                      location.averagePrice < 70000 &&
+                      location.fastestTime < 25
+                  )
+                  .map((location: ILocation) => {
+                    const center = point([location.lng, location.lat]);
+                    const buffered = buffer(center, 200, { units: "meters" });
+                    const squarePolygon = bboxPolygon(bbox(buffered));
+
+                    return {
+                      type: "Feature",
+                      geometry: squarePolygon.geometry,
+                      properties: {
+                        fastestTime: location.averagePrice,
+                      },
+                    };
+                  }),
+              }
+            );
           });
         }
       }
@@ -443,12 +487,10 @@ const Map: React.FC<MapProps> = ({
     limits = [40000, 80000, 120000];
   }
 
-  console.log("limits: ", limits);
   const colors = ["#13C81A", "#C2D018", "#D1741F", "#BE3A1D"];
 
   // Update heatmap layer's paint property when greenLimit changes
   useEffect(() => {
-    console.log("update heatmap colors: ", limits);
     if (map && map.getLayer("travelTimeGrid")) {
       map.setPaintProperty("travelTimeGrid", "fill-color", [
         "interpolate",
