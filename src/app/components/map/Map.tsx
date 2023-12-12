@@ -4,6 +4,7 @@ import mapboxgl, { LngLatLike, Popup } from "mapbox-gl";
 import { buffer, bbox, bboxPolygon, point } from "@turf/turf";
 import { getTravelTime } from "@/queries/getTravelTime";
 import { getPricesWithLocations } from "@/queries/getAppartmentPrices";
+import { fetchApartmentsPriceData } from "@/helper/fetchApartmentsPriceData";
 import "./Map.scss";
 import "mapbox-gl/dist/mapbox-gl.css";
 import ClipLoader from "react-spinners/ClipLoader";
@@ -28,6 +29,15 @@ interface MapProps {
   travelTimeMode: string;
   travelTime: number;
   mapVisualisationMode: string;
+  priceState: mapFilter;
+  timeState: mapFilter;
+}
+
+interface mapFilter {
+  range: number[];
+  active: boolean;
+  savedActive: boolean;
+  savedRange: number[];
 }
 
 interface ILocation {
@@ -60,6 +70,8 @@ const Map: React.FC<MapProps> = ({
   travelTimeMode,
   travelTime,
   mapVisualisationMode,
+  priceState,
+  timeState,
 }) => {
   const mapContainerRef = useRef<HTMLDivElement>(null);
   const [map, setMap] = useState<IMap | null>(null);
@@ -394,78 +406,86 @@ const Map: React.FC<MapProps> = ({
     }
   }, [map, polyline, hoveredLegId, selectedPopupMode]);
 
+  let newTravelTimeData: ILocation[] = [];
+
   // Update travel time overlay when mode or time changes
   useEffect(() => {
     async function updateTravelTimeData() {
-      const newTravelTimeData = await getTravelTime(
-        travelTimeMode === "avg_include_wait",
-        travelTime
-      );
+      if (newTravelTimeData.length === 0) {
+        newTravelTimeData = await getTravelTime(
+          travelTimeMode === "avg_include_wait",
+          travelTime
+        );
+      }
 
       if (map && map.getSource("travelTimeData")) {
         if (mapVisualisationMode === "time") {
-          handleWork(newTravelTimeData).then((result) => {
-            travelTimeAndPriceData = result;
+          travelTimeAndPriceData = (await fetchApartmentsPriceData(
+            newTravelTimeData,
+            travelTimeAndPriceData
+          )) as ILocation[];
 
-            console.log("travelTimeAndPriceData: ", travelTimeAndPriceData);
-            (map.getSource("travelTimeData") as mapboxgl.GeoJSONSource).setData(
-              {
-                type: "FeatureCollection",
-                features: travelTimeAndPriceData
-                  .filter(
-                    (location: ILocation) =>
-                      location.averagePrice !== undefined &&
-                      location.averagePrice > 50000 &&
-                      location.averagePrice < 70000 &&
-                      location.fastestTime < 25
-                  )
-                  .map((location: ILocation) => {
-                    const center = point([location.lng, location.lat]);
-                    const buffered = buffer(center, 200, { units: "meters" });
-                    const squarePolygon = bboxPolygon(bbox(buffered));
+          console.log("travelTimeAndPriceData: ", travelTimeAndPriceData);
+          (map.getSource("travelTimeData") as mapboxgl.GeoJSONSource).setData({
+            type: "FeatureCollection",
+            features: travelTimeAndPriceData
+              .filter(
+                (location: ILocation) =>
+                  (!priceState.savedActive ||
+                    (location.averagePrice !== undefined &&
+                      location.averagePrice >= priceState.savedRange[0] &&
+                      location.averagePrice <= priceState.savedRange[1])) &&
+                  (!timeState.savedActive ||
+                    (location.fastestTime >= timeState.savedRange[0] &&
+                      location.fastestTime <= timeState.savedRange[1]))
+              )
+              .map((location: ILocation) => {
+                const center = point([location.lng, location.lat]);
+                const buffered = buffer(center, 200, { units: "meters" });
+                const squarePolygon = bboxPolygon(bbox(buffered));
 
-                    return {
-                      type: "Feature",
-                      geometry: squarePolygon.geometry,
-                      properties: {
-                        fastestTime: location.fastestTime,
-                      },
-                    };
-                  }),
-              }
-            );
+                return {
+                  type: "Feature",
+                  geometry: squarePolygon.geometry,
+                  properties: {
+                    fastestTime: location.fastestTime,
+                  },
+                };
+              }),
           });
-        } else if (mapVisualisationMode === "money") {
-          handleWork(newTravelTimeData).then((result) => {
-            travelTimeAndPriceData = result;
+        } else if (mapVisualisationMode === "money" && priceState.savedActive) {
+          travelTimeAndPriceData = (await fetchApartmentsPriceData(
+            newTravelTimeData,
+            travelTimeAndPriceData
+          )) as ILocation[];
 
-            console.log("travelTimeAndPriceData: ", travelTimeAndPriceData);
-            (map.getSource("travelTimeData") as mapboxgl.GeoJSONSource).setData(
-              {
-                type: "FeatureCollection",
-                features: travelTimeAndPriceData
-                  .filter(
-                    (location: ILocation) =>
-                      location.averagePrice !== undefined &&
-                      location.averagePrice > 50000 &&
-                      location.averagePrice < 70000 &&
-                      location.fastestTime < 25
-                  )
-                  .map((location: ILocation) => {
-                    const center = point([location.lng, location.lat]);
-                    const buffered = buffer(center, 200, { units: "meters" });
-                    const squarePolygon = bboxPolygon(bbox(buffered));
+          console.log("travelTimeAndPriceData: ", travelTimeAndPriceData);
+          (map.getSource("travelTimeData") as mapboxgl.GeoJSONSource).setData({
+            type: "FeatureCollection",
+            features: travelTimeAndPriceData
+              .filter(
+                (location: ILocation) =>
+                  (!priceState.savedActive ||
+                    (location.averagePrice !== undefined &&
+                      location.averagePrice >= priceState.savedRange[0] &&
+                      location.averagePrice <= priceState.savedRange[1])) &&
+                  (!timeState.savedActive ||
+                    (location.fastestTime >= timeState.savedRange[0] &&
+                      location.fastestTime <= timeState.savedRange[1]))
+              )
+              .map((location: ILocation) => {
+                const center = point([location.lng, location.lat]);
+                const buffered = buffer(center, 200, { units: "meters" });
+                const squarePolygon = bboxPolygon(bbox(buffered));
 
-                    return {
-                      type: "Feature",
-                      geometry: squarePolygon.geometry,
-                      properties: {
-                        fastestTime: location.averagePrice,
-                      },
-                    };
-                  }),
-              }
-            );
+                return {
+                  type: "Feature",
+                  geometry: squarePolygon.geometry,
+                  properties: {
+                    fastestTime: location.averagePrice,
+                  },
+                };
+              }),
           });
         }
       }
@@ -476,7 +496,15 @@ const Map: React.FC<MapProps> = ({
         setLoadingNewTravelData(false);
       });
     }
-  }, [travelTime, mapVisualisationMode, appartmentPriceData]);
+  }, [
+    travelTime,
+    mapVisualisationMode,
+    appartmentPriceData,
+    priceState.savedRange,
+    priceState.savedActive,
+    timeState.savedRange,
+    timeState.savedActive,
+  ]);
 
   //const [limits, setLimits] = useState<number[]>([greenLimit, 15 + greenLimit, 45 + greenLimit]);
 
@@ -750,20 +778,4 @@ function doesLayerExist(layerId: string, map: any) {
 function doesSourceExist(sourceId: string, map: any) {
   const sources = map.getStyle().sources;
   return sources.hasOwnProperty(sourceId);
-}
-
-function fetchAppertmentPriceData(data: ILocation[]) {
-  // console.log("fetchAppertmentPriceData");
-  // if (window.Worker && data.length > 0) {
-  //   const myWorker = new Worker("worker.tsx", { type: `module` });
-  //   myWorker.postMessage(data); // Skicka data till workern
-  //   myWorker.onmessage = (event: MessageEvent) => {
-  //     const result = event.data;
-  //     console.log("Resultat från worker: ", result);
-  //     // Uppdatera UI eller vidta andra åtgärder med resultatet
-  //   };
-  //   myWorker.onerror = (error: ErrorEvent) => {
-  //     console.error("Worker error: ", error);
-  //   };
-  // }
 }

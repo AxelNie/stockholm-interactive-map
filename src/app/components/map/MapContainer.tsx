@@ -14,6 +14,13 @@ interface MapInstanceType extends mapboxgl.Map {
   currentMarker?: mapboxgl.Marker | null;
 }
 
+type RangeState = {
+  range: number[];
+  active: boolean;
+  savedActive: boolean;
+  savedRange: number[];
+};
+
 const MapContainer = () => {
   const [mapInstance, setMapInstance] = useState<MapInstanceType | null>(null);
   const [showInfoPopup, setShowInfoPopup] = useState(false);
@@ -35,6 +42,23 @@ const MapContainer = () => {
   const [isMobileDevice, setIsMobileDevice] = useState<boolean>(false);
   const [mapVisualisationMode, setMapVisualisationMode] =
     useState<string>("time");
+  const minValuePrice = 10000;
+  const maxValuePrice = 120000;
+  const minValueTime = 0;
+  const maxValueTime = 90;
+  const [priceState, setPriceState] = useState<RangeState>({
+    range: [10000, 120000],
+    active: false,
+    savedActive: false,
+    savedRange: [10000, 120000],
+  });
+
+  const [timeState, setTimeState] = useState<RangeState>({
+    range: [minValueTime, maxValueTime],
+    active: false,
+    savedActive: false,
+    savedRange: [minValueTime, maxValueTime],
+  });
 
   useEffect(() => {
     const onClick = (event: Event) => {};
@@ -162,6 +186,8 @@ const MapContainer = () => {
         travelTimeMode={travelTimeMode}
         travelTime={travelTime}
         mapVisualisationMode={mapVisualisationMode}
+        priceState={priceState}
+        timeState={timeState}
       />
       {showInfoPopup && (
         <InfoPopup
@@ -196,7 +222,16 @@ const MapContainer = () => {
         setTravelTime={setTravelTime}
         isMobileDevice={isMobileDevice}
       />
-      <Filter />
+      <Filter
+        priceState={priceState}
+        setPriceState={setPriceState}
+        timeState={timeState}
+        setTimeState={setTimeState}
+        minValuePrice={minValuePrice}
+        maxValuePrice={maxValuePrice}
+        minValueTime={minValueTime}
+        maxValueTime={maxValueTime}
+      />
     </div>
   );
 };

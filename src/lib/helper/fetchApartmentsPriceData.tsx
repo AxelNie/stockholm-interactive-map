@@ -1,5 +1,4 @@
 import { getPricesWithLocations } from "@/queries/getAppartmentPrices";
-import { stringify } from "querystring";
 
 interface ILocation {
   lng: number;
@@ -15,27 +14,10 @@ interface IGridInfo {
   height: number;
 }
 
-// worker.ts
-addEventListener("message", async (event: MessageEvent) => {
-  const travelData: ILocation[] = event.data;
-  const pricesData = await getPricesWithLocations();
-  const result = mergeTravelTimeWithPrice(
-    travelData,
-    pricesData,
-    {
-      lat: 0.0011304507918993496,
-      lng: 0.002246879123034939,
-    },
-    { height: 454, width: 348 }
-  );
-
-  postMessage(result);
-});
-
 export async function fetchApartmentsPriceData(
   travelData: ILocation[],
   pricesData: ILocation[]
-) {
+): Promise<ILocation[]> {
   if (pricesData.length === 0) {
     const prices = await getPricesWithLocations();
     const result = mergeTravelTimeWithPrice(
@@ -47,7 +29,7 @@ export async function fetchApartmentsPriceData(
       },
       { height: 454, width: 348 }
     );
-
+    travelData = result;
     return result;
   }
   return pricesData;

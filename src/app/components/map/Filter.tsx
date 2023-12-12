@@ -19,47 +19,79 @@ interface ILocation {
   averagePrice?: number;
 }
 
-const FilterComponent: React.FC = () => {
-  // Price
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [rangePrice, setRangePrice] = useState([10000, 120000]);
-  const [rangePriceActive, setRangePriceActive] = useState(false);
-  const [rangePriceSaved, setRangePriceSaved] = useState(false);
-  const [rangeSavedPrice, setRangeSavedPrice] = useState([10000, 120000]);
-  const minValuePrice = 10000;
-  const maxValuePrice = 120000;
+interface FilterComponentProps {
+  priceState: {
+    range: number[];
+    active: boolean;
+    savedActive: boolean;
+    savedRange: number[];
+  };
+  timeState: {
+    range: number[];
+    active: boolean;
+    savedActive: boolean;
+    savedRange: number[];
+  };
+  setPriceState: React.Dispatch<
+    React.SetStateAction<{
+      range: number[];
+      active: boolean;
+      savedActive: boolean;
+      savedRange: number[];
+    }>
+  >;
+  setTimeState: React.Dispatch<
+    React.SetStateAction<{
+      range: number[];
+      active: boolean;
+      savedActive: boolean;
+      savedRange: number[];
+    }>
+  >;
+  minValuePrice: number;
+  maxValuePrice: number;
+  minValueTime: number;
+  maxValueTime: number;
+}
 
-  // Time
-  const minValueTime = 0;
-  const maxValueTime = 90;
-  const [rangeTime, setRangeTime] = useState([minValueTime, maxValueTime]);
-  const [rangeTimeActive, setRangeTimeActive] = useState(false);
-  const [rangeTimeSaved, setRangeTimeSaved] = useState(false);
-  const [rangeSavedTime, setRangeSavedTime] = useState([
-    minValueTime,
-    maxValueTime,
-  ]);
+const FilterComponent: React.FC<FilterComponentProps> = ({
+  priceState,
+  setPriceState,
+  timeState,
+  setTimeState,
+  minValuePrice,
+  maxValuePrice,
+  minValueTime,
+  maxValueTime,
+}) => {
+  const [isExpanded, setIsExpanded] = useState(false);
 
   const applyFilter = () => {
-    console.log(
-      `Filter applied with price range: ${rangePrice[0]} - ${rangePrice[1]}`
-    );
-    console.log(
-      `Filter applied with time range: ${rangeTime[0]} - ${rangeTime[1]}`
-    );
-    setRangeSavedPrice(rangePrice);
-    setRangeSavedTime(rangeTime);
-    setRangePriceSaved(rangePriceActive);
-    setRangeTimeSaved(rangeTimeActive);
+    setPriceState({
+      ...priceState,
+      savedActive: priceState.active,
+      savedRange: priceState.range,
+    });
+    setTimeState({
+      ...timeState,
+      savedActive: timeState.active,
+      savedRange: timeState.range,
+    });
     setIsExpanded(false);
   };
 
   const onClose = () => {
     setIsExpanded(false);
-    setRangePrice(rangeSavedPrice);
-    setRangeTime(rangeSavedTime);
-    setRangePriceActive(rangePriceSaved);
-    setRangeTimeActive(rangeTimeSaved);
+    setPriceState({
+      ...priceState,
+      range: priceState.savedRange,
+      active: priceState.savedActive,
+    });
+    setTimeState({
+      ...timeState,
+      range: timeState.savedRange,
+      active: timeState.savedActive,
+    });
   };
 
   return (
@@ -80,24 +112,28 @@ const FilterComponent: React.FC = () => {
                 id="priceCheckbox"
                 type="checkbox"
                 className="custom-checkbox"
-                checked={rangePriceActive}
-                onChange={(e) => setRangePriceActive(e.target.checked)}
+                checked={priceState.active}
+                onChange={(e) =>
+                  setPriceState({ ...priceState, active: e.target.checked })
+                }
               />
               <label htmlFor="priceCheckbox">Select price interval</label>
             </div>
 
             <div className="range-container">
-              <p>{rangePrice[0]}</p>
+              <p>{priceState.range[0]}</p>
               <RangeSlider
                 className="range-slider"
                 min={minValuePrice}
                 max={maxValuePrice}
-                disabled={!rangePriceActive}
+                disabled={!priceState.active}
                 step={5000}
-                value={rangePrice}
-                onInput={(values: number[]) => setRangePrice(values)}
+                value={priceState.range}
+                onInput={(values: number[]) =>
+                  setPriceState({ ...priceState, range: values })
+                }
               />
-              <p>{rangePrice[1]}</p>
+              <p>{priceState.range[1]}</p>
             </div>
           </div>
           <div className="slider-container">
@@ -106,24 +142,28 @@ const FilterComponent: React.FC = () => {
                 id="timeCheckbox"
                 type="checkbox"
                 className="custom-checkbox"
-                checked={rangeTimeActive}
-                onChange={(e) => setRangeTimeActive(e.target.checked)}
+                checked={timeState.active}
+                onChange={(e) =>
+                  setTimeState({ ...timeState, active: e.target.checked })
+                }
               />
               <label htmlFor="timeCheckbox">Select time interval</label>
             </div>
 
             <div className="range-container">
-              <p>{rangeTime[0]}</p>
+              <p>{timeState.range[0]}</p>
               <RangeSlider
                 className="range-slider"
                 min={minValueTime}
                 max={maxValueTime}
-                disabled={!rangeTimeActive}
+                disabled={!timeState.active}
                 step={5}
-                value={rangeTime}
-                onInput={(values: number[]) => setRangeTime(values)}
+                value={timeState.range}
+                onInput={(values: number[]) =>
+                  setTimeState({ ...timeState, range: values })
+                }
               />
-              <p>{rangeTime[1]}</p>
+              <p>{timeState.range[1]}</p>
             </div>
           </div>
           <button onClick={applyFilter}>Apply</button>
