@@ -72,7 +72,6 @@ const MapContainer = () => {
 
   useEffect(() => {
     const handleKeyPress = (event: any) => {
-      console.log("key pressed: ", event.key);
       if (event.key === "P" || event.key === "p") {
         setMapVisualisationMode("money");
       } else if (event.key === "T" || event.key === "t") {
