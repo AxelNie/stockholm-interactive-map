@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./Filter.scss";
 import { IoFilter } from "react-icons/io5";
 import { MdOutlineClose } from "react-icons/md";
-import RangeSlider from "react-range-slider-input";
+import RangeSlider from 'react-range-slider-input';
 import "react-range-slider-input/dist/style.css";
 
 interface IGridInfo {
