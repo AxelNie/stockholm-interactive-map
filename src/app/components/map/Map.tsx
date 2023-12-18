@@ -17,7 +17,7 @@ interface IMap extends mapboxgl.Map {
 
 interface MapProps {
   onMapClick: (coordinates: LngLatLike, map: IMap) => void;
-  greenLimit: number;
+  limits: number[];
   polyline: Array<Array<number> | number[]>;
   hoveredLegId: number | null;
   onLegHover: (legId: number | null, isHovering: boolean) => void;
@@ -58,7 +58,7 @@ let firstTimeInitializingMap: boolean = true;
 
 const Map: React.FC<MapProps> = ({
   onMapClick,
-  greenLimit,
+  limits,
   polyline,
   hoveredLegId,
   onLegHover,
@@ -543,16 +543,15 @@ const Map: React.FC<MapProps> = ({
     mapVisualisationMode,
   ]);
 
-  let limits = [greenLimit, 15 + greenLimit, 45 + greenLimit];
-
-  if (mapVisualisationMode === "time") {
-  } else {
-    limits = [40000, 80000, 120000];
-  }
+  // if (mapVisualisationMode === "time") {
+  // } else {
+  //   limits = [40000, 80000, 120000];
+  // }
+  console.log("limits", limits);
 
   const colors = ["#13C81A", "#C2D018", "#D1741F", "#BE3A1D"];
 
-  // Update heatmap layer's paint property when greenLimit changes
+  // Update heatmap layer's paint property when Limits changes
   useEffect(() => {
     if (map && map.getLayer("travelTimeGrid")) {
       map.setPaintProperty("travelTimeGrid", "fill-color", [
@@ -571,7 +570,7 @@ const Map: React.FC<MapProps> = ({
     }
 
     updateMap();
-  }, [map, greenLimit, limits]);
+  }, [map, limits]);
 
   useEffect(() => {
     if (map) {
@@ -638,7 +637,7 @@ const Map: React.FC<MapProps> = ({
               speedMultiplier={0.7}
               className="loader"
             />
-            <p>Loading new travel time data...</p>
+            <p>Loading new map data...</p>
           </div>
         )}
         <div ref={mapContainerRef} className="map-container" />
@@ -802,7 +801,7 @@ const removeSquareAroundMaker = (map: any) => {
       map.removeLayer("square-fill");
       map.removeLayer("square-border");
     }
-  } catch (e) {}
+  } catch (e) { }
 };
 
 function doesLayerExist(layerId: string, map: any) {

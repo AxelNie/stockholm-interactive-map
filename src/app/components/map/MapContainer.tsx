@@ -7,8 +7,8 @@ import OverlayControls from "./OverlayControls";
 import LoadingOverlay from "./LoadingOverlay";
 import "./MapContainer.scss";
 import TravelTimeModeSelector from "./TravelTimeModeSelector";
-import MapVisualisationModeSelector from "./MapVisualisationModeSelector";
 import Filter from "./Filter";
+import MapModeSelector from "./MapModeSelector";
 
 interface MapInstanceType extends mapboxgl.Map {
   currentMarker?: mapboxgl.Marker | null;
@@ -25,7 +25,7 @@ const MapContainer = () => {
   const [mapInstance, setMapInstance] = useState<MapInstanceType | null>(null);
   const [showInfoPopup, setShowInfoPopup] = useState(false);
   const [clickedCoordinates, setClickedCoordinates] = useState<any>(null);
-  const [greenLimit, setGreenLimit] = useState(15);
+  const [limits, setLimits] = useState<number[]>([15, 30, 60]);
   const [polyline, setPolyline] = useState<any>(null);
   const [hoveredLegId, setHoveredLegId] = useState<number | null>(null);
   const InfoPopupModes = ["Travel details", "Housing prices"];
@@ -52,16 +52,17 @@ const MapContainer = () => {
     savedActive: false,
     savedRange: [10000, 120000],
   });
-
   const [timeState, setTimeState] = useState<RangeState>({
     range: [minValueTime, maxValueTime],
     active: false,
     savedActive: false,
     savedRange: [minValueTime, maxValueTime],
   });
+  const [isFilterExpanded, setIsFilterExpanded] = useState(false);
+  const [isMapModeSelectorExpanded, setIsMapModeSelectorExpanded] = useState(false);
 
   useEffect(() => {
-    const onClick = (event: Event) => {};
+    const onClick = (event: Event) => { };
 
     document.addEventListener("click", onClick);
 
@@ -69,6 +70,18 @@ const MapContainer = () => {
       document.removeEventListener("click", onClick);
     };
   }, []);
+
+  useEffect(() => {
+    if (isMapModeSelectorExpanded) {
+      setIsFilterExpanded(false);
+    }
+  }, [isMapModeSelectorExpanded]);
+
+  useEffect(() => {
+    if (isFilterExpanded) {
+      setIsMapModeSelectorExpanded(false);
+    }
+  }, [isFilterExpanded]);
 
   useEffect(() => {
     const handleKeyPress = (event: any) => {
@@ -114,6 +127,8 @@ const MapContainer = () => {
     setShowInfoPopup(true);
     setClickedCoordinates(coordinates);
     setMapInstance(map);
+    setIsFilterExpanded(false);
+    setIsMapModeSelectorExpanded(false);
   };
 
   const handleInfoPopupClose = () => {
@@ -173,7 +188,7 @@ const MapContainer = () => {
       {displayLoading && <LoadingOverlay status={loadingStatus} />}
       <Map
         onMapClick={onMapClick}
-        greenLimit={greenLimit}
+        limits={limits}
         polyline={polyline}
         hoveredLegId={hoveredLegId}
         onLegHover={handleLegHover}
@@ -204,22 +219,28 @@ const MapContainer = () => {
         />
       )}
       <OverlayControls
-        greenLimit={greenLimit}
-        onGreenLimitChange={setGreenLimit}
+        limits={limits}
+        setLimits={setLimits}
         isMobileDevice={isMobileDevice}
         mapVisualisationMode={mapVisualisationMode}
       />
-      {/* <MapVisualisationModeSelector
-        mapVisualisationMode={mapVisualisationMode}
-        setMapVisualisationMode={setMapVisualisationMode}
-        isMobileDevice={isMobileDevice}
-      /> */}
       <TravelTimeModeSelector
         travelTimeMode={travelTimeMode}
         setTravelTimeMode={setTravelTimeMode}
         travelTime={travelTime}
         setTravelTime={setTravelTime}
         isMobileDevice={isMobileDevice}
+      />
+      <MapModeSelector
+        priceState={priceState}
+        setPriceState={setPriceState}
+        timeState={timeState}
+        setTimeState={setTimeState}
+        isMobileDevice={isMobileDevice}
+        mapVisualisationMode={mapVisualisationMode}
+        setMapVisualisationMode={setMapVisualisationMode}
+        isMapModeSelectorExpanded={isMapModeSelectorExpanded}
+        setIsMapModeSelectorExpanded={setIsMapModeSelectorExpanded}
       />
       <Filter
         priceState={priceState}
@@ -230,6 +251,9 @@ const MapContainer = () => {
         maxValuePrice={maxValuePrice}
         minValueTime={minValueTime}
         maxValueTime={maxValueTime}
+        isMobileDevice={isMobileDevice}
+        isFilterExpanded={isFilterExpanded}
+        setIsFilterExpanded={setIsFilterExpanded}
       />
     </div>
   );
