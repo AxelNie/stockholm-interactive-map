@@ -90,7 +90,7 @@ const Map: React.FC<MapProps> = ({
 
   let travelTimeAndPriceData: ILocation[] = [];
 
-  let initiatedLoadingTravelTimeData: boolean = false;
+  const [initiatedLoadingTravelTimeData, setInitiatedLoadingTravelTimeData] = useState<boolean>(false);
 
   useEffect(() => {
     console.log("mapVisualisationMode", mapVisualisationMode);
@@ -119,7 +119,7 @@ const Map: React.FC<MapProps> = ({
       let travelTimeDataLocal: ILocation[] = [];
 
       if (!initiatedLoadingTravelTimeData) {
-        initiatedLoadingTravelTimeData = true;
+        setInitiatedLoadingTravelTimeData(true)
         travelTimeDataLocal = await getTravelTime(
           travelTimeMode === "avg_include_wait",
           travelTime
