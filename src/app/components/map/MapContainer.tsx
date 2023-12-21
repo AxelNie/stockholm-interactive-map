@@ -224,13 +224,15 @@ const MapContainer = () => {
         isMobileDevice={isMobileDevice}
         mapVisualisationMode={mapVisualisationMode}
       />
-      <TravelTimeModeSelector
-        travelTimeMode={travelTimeMode}
-        setTravelTimeMode={setTravelTimeMode}
-        travelTime={travelTime}
-        setTravelTime={setTravelTime}
-        isMobileDevice={isMobileDevice}
-      />
+      {mapVisualisationMode === "time" ?
+        <TravelTimeModeSelector
+          travelTimeMode={travelTimeMode}
+          setTravelTimeMode={setTravelTimeMode}
+          travelTime={travelTime}
+          setTravelTime={setTravelTime}
+          isMobileDevice={isMobileDevice}
+        />
+        : null}
       <MapModeSelector
         priceState={priceState}
         setPriceState={setPriceState}

@@ -86,15 +86,12 @@ const Map: React.FC<MapProps> = ({
   const [newTravelTimeData, setNewTravelTimeData] = useState<ILocation[]>([]);
   const [travelTimeData, setTravelTimeData] = useState<ILocation[]>([]);
 
+
   let popup: Popup | null = null;
 
   let travelTimeAndPriceData: ILocation[] = [];
 
   const [initiatedLoadingTravelTimeData, setInitiatedLoadingTravelTimeData] = useState<boolean>(false);
-
-  useEffect(() => {
-    console.log("mapVisualisationMode", mapVisualisationMode);
-  }, [mapVisualisationMode]);
 
   useEffect(() => {
     const fetchPrices = async () => {
@@ -126,6 +123,22 @@ const Map: React.FC<MapProps> = ({
         );
 
         setTravelTimeData(travelTimeDataLocal);
+
+        const temp = travelTimeDataLocal.map((location: ILocation) => {
+          const center = point([location.lng, location.lat]);
+          const buffered = buffer(center, 65, { units: "meters" });
+          const squarePolygon = bboxPolygon(bbox(buffered));
+
+          return {
+            type: "Feature",
+            geometry: squarePolygon.geometry,
+            properties: {
+              fastestTime: location.fastestTime,
+            },
+          };
+        })
+
+        console.log("temp", temp);
       }
 
       const markerElement = document.createElement("div");
@@ -140,10 +153,12 @@ const Map: React.FC<MapProps> = ({
             : "mapbox://styles/axeln/clgp2ccxh00gs01pc0iat3y1d",
         center: [18.0686, 59.3293],
         zoom: 11,
+        minZoom: 11,
+        maxZoom: 16,
       }) as IMap;
 
       const idleListener = () => {
-        if (firstMapIdle) {
+        if (!firstMapIdle) {
           updateLoadingStatus("complete");
           mapInstance.off("idle", idleListener);
         }
@@ -214,7 +229,7 @@ const Map: React.FC<MapProps> = ({
           },
           waterLayerId // the travel time layer before the first symbol layer
         );
-      });
+      })
 
       mapInstance.on("mouseleave", "travelTimeGrid", () => {
         if (popup) {
@@ -386,8 +401,6 @@ const Map: React.FC<MapProps> = ({
 
       if (map && map.getSource("travelTimeData")) {
         if (mapVisualisationMode === "time") {
-          console.log("1");
-
           travelTimeAndPriceData = (await fetchApartmentsPriceData(
             travelTimeDataTemp,
             travelTimeAndPriceData
@@ -421,8 +434,6 @@ const Map: React.FC<MapProps> = ({
               }),
           });
         } else if (mapVisualisationMode === "money" && priceState.savedActive) {
-          console.log("2");
-
           travelTimeAndPriceData = (await fetchApartmentsPriceData(
             travelTimeDataTemp,
             travelTimeAndPriceData
@@ -467,12 +478,9 @@ const Map: React.FC<MapProps> = ({
   }, [travelTime, appartmentPriceData]);
 
   useEffect(() => {
-    console.log("mapVisualisationMode", mapVisualisationMode);
     async function updateTravelTimeData() {
       if (map && map.getSource("travelTimeData")) {
-        console.log("abc");
         if (mapVisualisationMode === "time") {
-          console.log("3");
           travelTimeAndPriceData = (await fetchApartmentsPriceData(
             travelTimeData,
             travelTimeAndPriceData
@@ -499,7 +507,6 @@ const Map: React.FC<MapProps> = ({
               }),
           });
         } else if (mapVisualisationMode === "money") {
-          console.log("4");
           travelTimeAndPriceData = (await fetchApartmentsPriceData(
             travelTimeData,
             travelTimeAndPriceData
@@ -528,7 +535,6 @@ const Map: React.FC<MapProps> = ({
         }
       }
     }
-    console.log("loadingStatus.complete", loadingStatus.complete);
     if (loadingStatus.complete) {
       setLoadingNewTravelData(true);
       updateTravelTimeData().then(() => {
@@ -542,12 +548,6 @@ const Map: React.FC<MapProps> = ({
     timeState.savedActive,
     mapVisualisationMode,
   ]);
-
-  // if (mapVisualisationMode === "time") {
-  // } else {
-  //   limits = [40000, 80000, 120000];
-  // }
-  console.log("limits", limits);
 
   const colors = ["#13C81A", "#C2D018", "#D1741F", "#BE3A1D"];
 
@@ -849,3 +849,5 @@ function mapFilterBool(
 
   return isPriceInRange && isTimeInRange;
 }
+
+
