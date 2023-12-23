@@ -134,10 +134,13 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
     <div className={isMobileDevice ? "filter-container mobile" : "filter-container"}>
       {(!isFilterExpanded || isMobileDevice) && (
         <button onClick={() => setIsFilterExpanded(!isFilterExpanded)} className={isFilterExpanded ? "filter-button active" : "filter-button"}>
-          <MdFilterListAlt className="filter-icon" />
-          {timeState.active || priceState.active ?
-            <div className="circle">{getNumberOfFiltersApplied()}</div>
-            : null}
+          <div className="filter-icon-wrapper">
+            <MdFilterListAlt className="filter-icon" />
+            {timeState.active || priceState.active ?
+              <div className="circle">{getNumberOfFiltersApplied()}</div>
+              : null}
+          </div>
+          <h1>Filter</h1>
         </button>
       )}
       {isFilterExpanded && (

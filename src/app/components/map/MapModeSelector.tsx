@@ -81,8 +81,11 @@ const MapModeSelector: React.FC<MapModeSelectorComponentProps> = ({
         <div className={isMobileDevice ? "map-selector-container mobile" : "map-selector-container"}>
             {(!isMapModeSelectorExpanded || isMobileDevice) && (
                 <button onClick={() => setIsMapModeSelectorExpanded(!isMapModeSelectorExpanded)} className={isMapModeSelectorExpanded ? "map-mode-button active" : "filter-button"}>
-                    <FaMap className="map-icon" />
-                    <div className="circle">{getIcon()}</div>
+                    <div className="map-icon-wrapper">
+                        <FaMap className="map-icon" />
+                        <div className="circle">{getIcon()}</div>
+                    </div>
+                    <h1>Map mode</h1>
                 </button>
             )}
             {isMapModeSelectorExpanded && (

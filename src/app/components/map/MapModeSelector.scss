@@ -4,7 +4,7 @@
 .map-selector-container{
 position: absolute;
   bottom: 0px;
-  right: 55px;
+  right: 0px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -15,7 +15,7 @@ position: absolute;
 
   &.mobile{
     right: 0px;
-    top: 55px;
+    top: 0px;
     bottom: unset;
     }
 
@@ -66,17 +66,34 @@ position: absolute;
     font-size: 0.75rem;
     font-weight: 600;
     position: absolute;
-    bottom: 8px;
-    right: 8px;
+    bottom: 0px;
+    right: 0px;
   }
 
     button{
-        font-size: 2rem;
-        padding: 0.5rem;
+      font-size: 2rem;
+      padding: 0.5rem;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      color: white;
+
+      h1{
+        margin: 0 0 0 0.25rem;
+        font-size: 0.9rem;
+        font-weight: 400;
+      }
+
+      .map-icon-wrapper{
+        position: relative;
         display: flex;
         justify-content: center;
         align-items: center;
-        color: white;
+      }
+
+      .map-icon{
+        margin: 0 0.5rem; // Fix for icon not having same margin as other icon
+      }
     }
 
     .expanded-container{

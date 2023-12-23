@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef, useCallback } from "react";
+import { useState, useEffect, useRef } from "react";
 import mapboxgl, { LngLatLike, Popup } from "mapbox-gl";
 import { buffer, bbox, bboxPolygon, point } from "@turf/turf";
 import { getTravelTime } from "@/queries/getTravelTime";
@@ -54,7 +54,6 @@ interface ILocationPrice {
 }
 
 let firstMapIdle: boolean = true;
-let firstTimeInitializingMap: boolean = true;
 
 const Map: React.FC<MapProps> = ({
   onMapClick,
@@ -153,7 +152,7 @@ const Map: React.FC<MapProps> = ({
             : "mapbox://styles/axeln/clgp2ccxh00gs01pc0iat3y1d",
         center: [18.0686, 59.3293],
         zoom: 11,
-        minZoom: 11,
+        minZoom: 9,
         maxZoom: 16,
       }) as IMap;
 
@@ -389,6 +388,7 @@ const Map: React.FC<MapProps> = ({
   // Update travel time overlay when mode or time changes
   useEffect(() => {
     async function updateTravelTimeData() {
+      console.log("function updateTravelTimeData");
       let travelTimeDataTemp: ILocation[] = travelTimeData;
 
       if (newTravelTimeData.length === 0) {
@@ -479,6 +479,7 @@ const Map: React.FC<MapProps> = ({
 
   useEffect(() => {
     async function updateTravelTimeData() {
+      console.log("function updateTravelTimeData 2");
       if (map && map.getSource("travelTimeData")) {
         if (mapVisualisationMode === "time") {
           travelTimeAndPriceData = (await fetchApartmentsPriceData(
