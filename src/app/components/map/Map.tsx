@@ -94,20 +94,20 @@ const Map: React.FC<MapProps> = ({
 
   useEffect(() => {
     const fetchPrices = async () => {
-      if (
-        mapVisualisationMode === "money" &&
-        appartmentPriceData.length === 0
-      ) {
-        try {
-          const pricesData = await getPricesWithLocations();
-          setAppartmentPriceData(pricesData);
-        } catch (error) {
-          console.error("Error fetching prices:", error);
-        }
+      console.log("function fetchPrices")
+      try {
+        const pricesData = await getPricesWithLocations();
+        setAppartmentPriceData(pricesData);
+      } catch (error) {
+        console.error("Error fetching prices:", error);
       }
     };
 
-    fetchPrices();
+    if (
+      mapVisualisationMode === "money" &&
+      appartmentPriceData.length === 0
+    ) { fetchPrices() }
+
   }, [mapVisualisationMode, appartmentPriceData.length]);
 
   useEffect(() => {
@@ -122,22 +122,6 @@ const Map: React.FC<MapProps> = ({
         );
 
         setTravelTimeData(travelTimeDataLocal);
-
-        const temp = travelTimeDataLocal.map((location: ILocation) => {
-          const center = point([location.lng, location.lat]);
-          const buffered = buffer(center, 65, { units: "meters" });
-          const squarePolygon = bboxPolygon(bbox(buffered));
-
-          return {
-            type: "Feature",
-            geometry: squarePolygon.geometry,
-            properties: {
-              fastestTime: location.fastestTime,
-            },
-          };
-        })
-
-        console.log("temp", temp);
       }
 
       const markerElement = document.createElement("div");
