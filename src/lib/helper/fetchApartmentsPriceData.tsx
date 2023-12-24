@@ -18,6 +18,7 @@ export async function fetchApartmentsPriceData(
   travelData: ILocation[],
   pricesData: ILocation[]
 ): Promise<ILocation[]> {
+  console.log("function fetchApartmentsPriceData");
   if (pricesData.length === 0) {
     const prices = await getPricesWithLocations();
     const result = mergeTravelTimeWithPrice(

@@ -599,16 +599,6 @@ const Map: React.FC<MapProps> = ({
     }
   }, [map]);
 
-  useEffect(() => {
-    if (map) {
-      map.setStyle(
-        mapTheme === "light"
-          ? "mapbox://styles/mapbox/streets-v11"
-          : "mapbox://styles/axeln/clgp2ccxh00gs01pc0iat3y1d"
-      );
-    }
-  }, [map, mapTheme]);
-
   const updateMap = () => {
     if (map) {
       map.resize();
