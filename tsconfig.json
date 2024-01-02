@@ -25,8 +25,9 @@
       "@/lib/*": ["./src/lib/*"],
       "@/data/*": ["./src/lib/data*"],
       "@/queries/*": ["./src/lib/queries/*"],
+      "@/helper/*": ["./src/lib/helper/*"],
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/api/getTravelTimeGeoSpatial"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "src/app/api/getTravelTimeGeoSpatial", "src/app/components/map/worker.js"],
   "exclude": ["node_modules"]
 }

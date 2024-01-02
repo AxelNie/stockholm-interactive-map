@@ -1,80 +1,121 @@
-"use client";
-import React, { useState, useCallback } from "react";
+import React, { useState } from "react";
 import "./MapModeSelector.scss";
+import { FaMap } from "react-icons/fa";
+import { MdOutlineClose } from "react-icons/md";
+import { MdAttachMoney } from "react-icons/md";
+import { MdTimer } from "react-icons/md";
+import "react-range-slider-input/dist/style.css";
 
-type MapMode = "light" | "dark";
 
-interface MapModeSelectorProps {
-  onChange: (mode: MapMode) => void;
+interface MapModeSelectorComponentProps {
+    priceState: {
+        range: number[];
+        active: boolean;
+        savedActive: boolean;
+        savedRange: number[];
+    };
+    timeState: {
+        range: number[];
+        active: boolean;
+        savedActive: boolean;
+        savedRange: number[];
+    };
+    setPriceState: React.Dispatch<
+        React.SetStateAction<{
+            range: number[];
+            active: boolean;
+            savedActive: boolean;
+            savedRange: number[];
+        }>
+    >;
+    setTimeState: React.Dispatch<
+        React.SetStateAction<{
+            range: number[];
+            active: boolean;
+            savedActive: boolean;
+            savedRange: number[];
+        }>
+    >;
+    isMobileDevice: boolean;
+    mapVisualisationMode: string;
+    setMapVisualisationMode: React.Dispatch<React.SetStateAction<string>>
+    isMapModeSelectorExpanded: boolean;
+    setIsMapModeSelectorExpanded: React.Dispatch<React.SetStateAction<boolean>>;
 }
 
-const MapModeSelector: React.FC<MapModeSelectorProps> = ({ onChange }) => {
-  const [currentMode, setCurrentMode] = useState<MapMode>("light");
-  const [isMenuOpen, setIsMenuOpen] = useState<boolean>(false);
+const MapModeSelector: React.FC<MapModeSelectorComponentProps> = ({
+    priceState,
+    setPriceState,
+    timeState,
+    setTimeState,
+    isMobileDevice,
+    mapVisualisationMode,
+    setMapVisualisationMode,
+    isMapModeSelectorExpanded,
+    setIsMapModeSelectorExpanded,
+}) => {
 
-  const mapModes: Array<{ mode: MapMode; imgSrc: string; label: string }> = [
-    {
-      mode: "light",
-      imgSrc: "/light.jpg",
-      label: "Light Mode",
-    },
-    {
-      mode: "dark",
-      imgSrc: "/dark.jpg",
-      label: "Dark Mode",
-    },
-  ];
+    const onClose = () => {
+        setIsMapModeSelectorExpanded(false);
+        setPriceState({
+            ...priceState,
+            range: priceState.savedRange,
+            active: priceState.savedActive,
+        });
+        setTimeState({
+            ...timeState,
+            range: timeState.savedRange,
+            active: timeState.savedActive,
+        });
+    };
 
-  const handleMouseEnter = useCallback(() => {
-    setIsMenuOpen(true);
-  }, []);
+    const getIcon = () => {
+        if (mapVisualisationMode === "money") {
+            return <MdAttachMoney />;
+        }
+        return <MdTimer />;
 
-  const handleMouseLeave = useCallback(() => {
-    setIsMenuOpen(false);
-  }, []);
+    }
 
-  const handleModeChange = useCallback(
-    (mode: MapMode) => {
-      setCurrentMode(mode);
-      setIsMenuOpen(false);
-      onChange(mode);
-    },
-    [onChange]
-  );
-
-  return (
-    <div className="map-mode-selector-wrapper">
-      <div
-        className="map-mode-selector"
-        onMouseEnter={handleMouseEnter}
-        onMouseLeave={handleMouseLeave}
-      >
-        <div className="current-mode">
-          <img
-            src={mapModes.find((m) => m.mode === currentMode)?.imgSrc}
-            alt="Current mode"
-          />
-          <div className="label-mode-selector">
-            {isMenuOpen ? currentMode : "Mode"}
-          </div>
+    return (
+        <div className={isMobileDevice ? "map-selector-container mobile" : "map-selector-container"}>
+            {(!isMapModeSelectorExpanded || isMobileDevice) && (
+                <button onClick={() => setIsMapModeSelectorExpanded(!isMapModeSelectorExpanded)} className={isMapModeSelectorExpanded ? "map-mode-button active" : "filter-button"}>
+                    <div className="map-icon-wrapper">
+                        <FaMap className="map-icon" />
+                        <div className="circle">{getIcon()}</div>
+                    </div>
+                    <h1>Map mode</h1>
+                </button>
+            )}
+            {isMapModeSelectorExpanded && (
+                <div className="expanded-container">
+                    <div className="close-container">
+                        <MdOutlineClose onClick={() => onClose()} className="close-icon" />
+                    </div>
+                    <h1>Select map mode</h1>
+                    <div className={mapVisualisationMode === "time" ? "mode-container selected" : "mode-container"} onClick={() => { setMapVisualisationMode("time"); setIsMapModeSelectorExpanded(false) }}>
+                        <div className="mode-icon">
+                            <MdTimer />
+                        </div>
+                        <div className="text">
+                            <h1>Travel Time</h1>
+                            <p>Travel time are represented as colors on the map.</p>
+                        </div>
+                    </div>
+                    <div className={mapVisualisationMode === "money" ? "mode-container selected" : "mode-container"} onClick={() => { setMapVisualisationMode("money"); setIsMapModeSelectorExpanded(false) }}>
+                        <div className="mode-icon">
+                            <MdAttachMoney />
+                        </div>
+                        <div className="text">
+                            <h1>Price Per Square Meter</h1>
+                            <p>Average price price per square meter for appartments are are represented as colors on the map.</p>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
-        {isMenuOpen && (
-          <div className="menu">
-            {mapModes.map((mapMode) => (
-              <div
-                key={mapMode.mode}
-                className="menu-item"
-                onClick={() => handleModeChange(mapMode.mode)}
-              >
-                <img src={mapMode.imgSrc} alt={mapMode.label} />
-                <div className="label">{mapMode.label}</div>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
+    );
 };
 
 export default MapModeSelector;

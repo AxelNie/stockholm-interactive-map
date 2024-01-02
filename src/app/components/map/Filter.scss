@@ -1,0 +1,247 @@
+@import '@/app/variables.module.scss';
+
+
+.filter-container{
+  position: absolute;
+  right: 150px;
+  bottom: 0px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: 400;
+  background-color: $dark;
+  border-radius: 5px;
+  color: white;
+
+  &.mobile{
+    right: 0px;
+    top: 55px;
+    bottom: unset;
+}
+
+  .filter-button{
+    z-index: 1;
+
+    &.active{
+      color: $accent;
+    }
+
+  }
+
+  h1{
+    margin: 0 0 1rem 0;
+    font-size: 1.5rem;
+  }
+
+  .range-container:hover .filter-hover-overlay{
+    display: flex;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.2);
+    justify-content: center;
+    align-items: center;
+    color: white;
+    cursor: pointer;
+  } 
+
+  .filter-hover-overlay{
+    display: none;
+  }
+
+  
+
+  &:hover{
+    background-color: $dark-hover;
+  }
+
+  .circle{
+    background-color: $accent;
+    border-radius: 20px;
+    width: 16px;
+    height: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: $dark;
+    font-size: 0.75rem;
+    font-weight: 600;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+  }
+
+    button{
+        font-size: 2rem;
+        padding: 0.5rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        color: white;   
+        
+        h1{
+          margin: 0 0 0 0.25rem;
+          font-size: 0.9rem;
+          font-weight: 400;
+        }
+
+        .filter-icon-wrapper{
+          position: relative;
+          display: flex;
+          justify-content: center;
+          align-items: center;
+        }
+    }
+
+    .expanded-container{
+        width: 420px;
+        padding: 0.75rem;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background-color: $dark;
+        z-index: 2;
+
+        .apply{
+          color: $grey;
+          cursor: default
+        }
+
+        .apply.active{
+          color: white;
+          cursor: pointer;
+        }
+
+        .close-container{
+            width: 100%;
+            font-size: 1.5rem;
+            display: flex;
+            justify-content: end;
+
+            .filter-close-icon{
+                color: white;
+                cursor: pointer;
+
+                &:hover{
+                    color: $accent;
+                }
+            }
+        }
+
+        button{
+            width: 100%;
+            background-color: $semi-dark;
+            font-size: 1rem;
+        }
+
+        .slider-container{
+            margin-bottom: 1rem;
+
+            .custom-checkbox {
+                appearance: none;
+                background-color: white;
+                margin: 4px;
+                padding: 9px;
+                border-radius: 3px;
+                display: inline-block;
+                position: relative;
+                box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05), inset 0 -15px 10px rgba(0, 0, 0, 0.05);
+                cursor: pointer;
+              
+                &:checked {
+                  background-color: $accent;
+                  box-shadow: 0 1px 2px rgba(0,0,0,0.05), inset 0 -15px 10px rgba(0,0,0,0.1);
+                  &:after {
+                    content: '';
+                    width: 50%; 
+                    height: 50%; 
+                    border-radius: 3px;
+                    background-color: $semi-dark; 
+                    position: absolute;
+                    top: 25%; 
+                    left: 25%; 
+                  }
+                }
+              }
+              
+              .checkbox-container {
+                display: flex;
+                align-items: center;
+                margin-bottom: 0.25rem;
+              
+                label {
+                  margin-left: 5px;
+                  cursor: pointer;
+                }
+              }              
+            
+            .range-container{
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                color: $grey;
+                background-color: $semi-dark;
+                padding: 0.75rem;
+                position: relative;
+
+                .range-slider{
+                    margin: 0 1rem;
+                    width: 250px;
+                }
+
+                p{
+                  background-color: #0F1319;
+                  font-weight: 600;
+                  display: flex;
+                  justify-content: center;
+                  align-items: center;
+                  padding: 0.5rem;
+                  border-radius: 5px;
+                }
+            }
+
+            .active{
+              p{
+                color: white;
+              }
+            }
+
+            .range-slider__thumb{
+                background-color: $accent;
+                height: 20px;
+                width: 20px;
+            }
+            .range-slider__range{
+                background-color: $accent;
+            }
+
+            .range-slider{
+                background-color: #356B53;
+                height: 4px;
+            }
+        }
+    }
+}
+
+.filter-container.mobile{
+  .expanded-container{
+    position: fixed;
+    width: calc(100% - 2rem);
+    bottom: 0;
+    left: 0;
+    padding: 1rem;
+    z-index: 2;
+  }
+
+  .filter-hover-overlay{
+    display: flex;
+    position: absolute;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.3);
+    justify-content: center;
+    align-items: center;
+    color: white;
+    cursor: pointer;
+  }
+}

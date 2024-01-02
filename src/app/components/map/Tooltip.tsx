@@ -4,9 +4,10 @@ import "./Tooltip.scss";
 interface TooltipProps {
   children: React.ReactNode;
   title: React.ReactNode;
+  position?: 'top' | 'bottom'; // Optional prop to specify the position
 }
 
-const Tooltip: React.FC<TooltipProps> = ({ children, title }) => {
+const Tooltip: React.FC<TooltipProps> = ({ children, title, position = "bottom" }) => {
   const [tooltipDisplay, setTooltipDisplay] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -26,7 +27,9 @@ const Tooltip: React.FC<TooltipProps> = ({ children, title }) => {
       ref={containerRef}
     >
       {children}
-      {tooltipDisplay && <div className="tooltip-text">{title}</div>}
+      {tooltipDisplay && (
+        <div className={`tooltip-text ${position}`}>{title}</div>
+      )}
     </div>
   );
 };

@@ -7,16 +7,25 @@ import OverlayControls from "./OverlayControls";
 import LoadingOverlay from "./LoadingOverlay";
 import "./MapContainer.scss";
 import TravelTimeModeSelector from "./TravelTimeModeSelector";
+import Filter from "./Filter";
+import MapModeSelector from "./MapModeSelector";
 
 interface MapInstanceType extends mapboxgl.Map {
   currentMarker?: mapboxgl.Marker | null;
 }
 
+type RangeState = {
+  range: number[];
+  active: boolean;
+  savedActive: boolean;
+  savedRange: number[];
+};
+
 const MapContainer = () => {
   const [mapInstance, setMapInstance] = useState<MapInstanceType | null>(null);
   const [showInfoPopup, setShowInfoPopup] = useState(false);
   const [clickedCoordinates, setClickedCoordinates] = useState<any>(null);
-  const [greenLimit, setGreenLimit] = useState(15);
+  const [limits, setLimits] = useState<number[]>([15, 30, 60]);
   const [polyline, setPolyline] = useState<any>(null);
   const [hoveredLegId, setHoveredLegId] = useState<number | null>(null);
   const InfoPopupModes = ["Travel details", "Housing prices"];
@@ -31,14 +40,64 @@ const MapContainer = () => {
   const [travelTime, setTravelTime] = useState<number>(8);
   const [displayLoading, setDisplayLoading] = useState<boolean>(true);
   const [isMobileDevice, setIsMobileDevice] = useState<boolean>(false);
+  const [mapVisualisationMode, setMapVisualisationMode] =
+    useState<string>("time");
+  const minValuePrice = 10000;
+  const maxValuePrice = 120000;
+  const minValueTime = 0;
+  const maxValueTime = 90;
+  const [priceState, setPriceState] = useState<RangeState>({
+    range: [10000, 120000],
+    active: false,
+    savedActive: false,
+    savedRange: [10000, 120000],
+  });
+  const [timeState, setTimeState] = useState<RangeState>({
+    range: [minValueTime, maxValueTime],
+    active: false,
+    savedActive: false,
+    savedRange: [minValueTime, maxValueTime],
+  });
+  const [isFilterExpanded, setIsFilterExpanded] = useState(false);
+  const [isMapModeSelectorExpanded, setIsMapModeSelectorExpanded] = useState(false);
 
   useEffect(() => {
-    const onClick = (event: Event) => {};
+    const onClick = (event: Event) => { };
 
     document.addEventListener("click", onClick);
 
     return () => {
       document.removeEventListener("click", onClick);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (isMapModeSelectorExpanded) {
+      setIsFilterExpanded(false);
+    }
+  }, [isMapModeSelectorExpanded]);
+
+  useEffect(() => {
+    if (isFilterExpanded) {
+      setIsMapModeSelectorExpanded(false);
+    }
+  }, [isFilterExpanded]);
+
+  useEffect(() => {
+    const handleKeyPress = (event: any) => {
+      if (event.key === "P" || event.key === "p") {
+        setMapVisualisationMode("money");
+      } else if (event.key === "T" || event.key === "t") {
+        setMapVisualisationMode("time");
+      }
+    };
+
+    // Add event listener for keydown
+    window.addEventListener("keydown", handleKeyPress);
+
+    // Cleanup event listener
+    return () => {
+      window.removeEventListener("keydown", handleKeyPress);
     };
   }, []);
 
@@ -68,6 +127,8 @@ const MapContainer = () => {
     setShowInfoPopup(true);
     setClickedCoordinates(coordinates);
     setMapInstance(map);
+    setIsFilterExpanded(false);
+    setIsMapModeSelectorExpanded(false);
   };
 
   const handleInfoPopupClose = () => {
@@ -127,7 +188,7 @@ const MapContainer = () => {
       {displayLoading && <LoadingOverlay status={loadingStatus} />}
       <Map
         onMapClick={onMapClick}
-        greenLimit={greenLimit}
+        limits={limits}
         polyline={polyline}
         hoveredLegId={hoveredLegId}
         onLegHover={handleLegHover}
@@ -138,6 +199,9 @@ const MapContainer = () => {
         loadingStatus={loadingStatus}
         travelTimeMode={travelTimeMode}
         travelTime={travelTime}
+        mapVisualisationMode={mapVisualisationMode}
+        priceState={priceState}
+        timeState={timeState}
       />
       {showInfoPopup && (
         <InfoPopup
@@ -155,16 +219,43 @@ const MapContainer = () => {
         />
       )}
       <OverlayControls
-        greenLimit={greenLimit}
-        onGreenLimitChange={setGreenLimit}
+        limits={limits}
+        setLimits={setLimits}
         isMobileDevice={isMobileDevice}
+        mapVisualisationMode={mapVisualisationMode}
       />
-      <TravelTimeModeSelector
-        travelTimeMode={travelTimeMode}
-        setTravelTimeMode={setTravelTimeMode}
-        travelTime={travelTime}
-        setTravelTime={setTravelTime}
+      {mapVisualisationMode === "time" ?
+        <TravelTimeModeSelector
+          travelTimeMode={travelTimeMode}
+          setTravelTimeMode={setTravelTimeMode}
+          travelTime={travelTime}
+          setTravelTime={setTravelTime}
+          isMobileDevice={isMobileDevice}
+        />
+        : null}
+      <MapModeSelector
+        priceState={priceState}
+        setPriceState={setPriceState}
+        timeState={timeState}
+        setTimeState={setTimeState}
         isMobileDevice={isMobileDevice}
+        mapVisualisationMode={mapVisualisationMode}
+        setMapVisualisationMode={setMapVisualisationMode}
+        isMapModeSelectorExpanded={isMapModeSelectorExpanded}
+        setIsMapModeSelectorExpanded={setIsMapModeSelectorExpanded}
+      />
+      <Filter
+        priceState={priceState}
+        setPriceState={setPriceState}
+        timeState={timeState}
+        setTimeState={setTimeState}
+        minValuePrice={minValuePrice}
+        maxValuePrice={maxValuePrice}
+        minValueTime={minValueTime}
+        maxValueTime={maxValueTime}
+        isMobileDevice={isMobileDevice}
+        isFilterExpanded={isFilterExpanded}
+        setIsFilterExpanded={setIsFilterExpanded}
       />
     </div>
   );
