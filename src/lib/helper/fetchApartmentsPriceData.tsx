@@ -18,7 +18,6 @@ export async function fetchApartmentsPriceData(
   travelData: ILocation[],
   pricesData: ILocation[]
 ): Promise<ILocation[]> {
-  console.log("function fetchApartmentsPriceData");
   if (pricesData.length === 0) {
     const prices = await getPricesWithLocations();
     const result = mergeTravelTimeWithPrice(
@@ -76,7 +75,6 @@ function mergeTravelTimeWithPrice(
     });
   });
 
-  console.log("added: ", added);
   return result;
 }
 
@@ -102,12 +100,10 @@ function isWithinPriceCell(
   lngStep: number
 ) {
   if (travelTime?.lat === undefined) {
-    console.log("undefined traveltime: ", travelTime);
     return false;
   }
 
   if (priceCell?.lat === undefined) {
-    console.log("undefined pricecell: ", priceCell);
     return false;
   }
 

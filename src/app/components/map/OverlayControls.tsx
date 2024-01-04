@@ -32,25 +32,21 @@ const OverlayControls: React.FC<OverlayControlsProps> = ({
         const updatedLimits = limits.map((number: number) => number - step);
         setLimits(updatedLimits);
       }
-    }
-
-    else if (mapVisualisationMode === "time") {
+    } else if (mapVisualisationMode === "time") {
       if (limits[0] > 5) {
         const updatedLimits = limits.map((number: number) => number - step);
         setLimits(updatedLimits);
       }
     }
-
   };
 
   useEffect(() => {
     if (mapVisualisationMode === "money") {
-      setLimits([40000, 80000, 120000])
+      setLimits([40000, 80000, 120000]);
       setStep(10000);
     }
     if (mapVisualisationMode === "time") {
-      console.log("setting price 1")
-      setLimits([15, 30, 60])
+      setLimits([15, 30, 60]);
       setStep(5);
     }
   }, [mapVisualisationMode]);
@@ -65,16 +61,17 @@ const OverlayControls: React.FC<OverlayControlsProps> = ({
   ];
 
   return (
-    <div className={isMobileDevice ? "overlay-controls mobile" : "overlay-controls"}>
+    <div
+      className={
+        isMobileDevice ? "overlay-controls mobile" : "overlay-controls"
+      }
+    >
       <div className="adjust-interval-control">
         <h3 className="title">Adjust time intervals</h3>
         <div className="separator" />
         <div className="controls">
           <div>
-            <button
-              className="control-button"
-              onClick={() => decreaseLimit()}
-            >
+            <button className="control-button" onClick={() => decreaseLimit()}>
               <FiMinus />
             </button>
           </div>
@@ -85,20 +82,17 @@ const OverlayControls: React.FC<OverlayControlsProps> = ({
                   className="color-line"
                   style={{ backgroundColor: colors[index] }}
                 ></div>
-                {mapVisualisationMode === "money" ?
-                  <span>{interval}/m^2</span> :
+                {mapVisualisationMode === "money" ? (
+                  <span>{interval}/m^2</span>
+                ) : (
                   <span>{interval}m</span>
-                }
+                )}
               </div>
             ))}
           </div>
           <div>
-            <button
-              className="control-button"
-              onClick={() => increaseLimit()}
-            >
+            <button className="control-button" onClick={() => increaseLimit()}>
               <FiPlus />
-
             </button>
           </div>
         </div>

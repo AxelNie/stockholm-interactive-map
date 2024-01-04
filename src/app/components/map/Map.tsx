@@ -85,16 +85,15 @@ const Map: React.FC<MapProps> = ({
   const [newTravelTimeData, setNewTravelTimeData] = useState<ILocation[]>([]);
   const [travelTimeData, setTravelTimeData] = useState<ILocation[]>([]);
 
-
   let popup: Popup | null = null;
 
   let travelTimeAndPriceData: ILocation[] = [];
 
-  const [initiatedLoadingTravelTimeData, setInitiatedLoadingTravelTimeData] = useState<boolean>(false);
+  const [initiatedLoadingTravelTimeData, setInitiatedLoadingTravelTimeData] =
+    useState<boolean>(false);
 
   useEffect(() => {
     const fetchPrices = async () => {
-      console.log("function fetchPrices")
       try {
         const pricesData = await getPricesWithLocations();
         setAppartmentPriceData(pricesData);
@@ -103,11 +102,9 @@ const Map: React.FC<MapProps> = ({
       }
     };
 
-    if (
-      mapVisualisationMode === "money" &&
-      appartmentPriceData.length === 0
-    ) { fetchPrices() }
-
+    if (mapVisualisationMode === "money" && appartmentPriceData.length === 0) {
+      fetchPrices();
+    }
   }, [mapVisualisationMode, appartmentPriceData.length]);
 
   useEffect(() => {
@@ -115,7 +112,7 @@ const Map: React.FC<MapProps> = ({
       let travelTimeDataLocal: ILocation[] = [];
 
       if (!initiatedLoadingTravelTimeData) {
-        setInitiatedLoadingTravelTimeData(true)
+        setInitiatedLoadingTravelTimeData(true);
         travelTimeDataLocal = await getTravelTime(
           travelTimeMode === "avg_include_wait",
           travelTime
@@ -212,7 +209,7 @@ const Map: React.FC<MapProps> = ({
           },
           waterLayerId // the travel time layer before the first symbol layer
         );
-      })
+      });
 
       mapInstance.on("mouseleave", "travelTimeGrid", () => {
         if (popup) {
@@ -372,7 +369,6 @@ const Map: React.FC<MapProps> = ({
   // Update travel time overlay when mode or time changes
   useEffect(() => {
     async function updateTravelTimeData() {
-      console.log("function updateTravelTimeData");
       let travelTimeDataTemp: ILocation[] = travelTimeData;
 
       if (newTravelTimeData.length === 0) {
@@ -463,7 +459,6 @@ const Map: React.FC<MapProps> = ({
 
   useEffect(() => {
     async function updateTravelTimeData() {
-      console.log("function updateTravelTimeData 2");
       if (map && map.getSource("travelTimeData")) {
         if (mapVisualisationMode === "time") {
           travelTimeAndPriceData = (await fetchApartmentsPriceData(
@@ -776,7 +771,7 @@ const removeSquareAroundMaker = (map: any) => {
       map.removeLayer("square-fill");
       map.removeLayer("square-border");
     }
-  } catch (e) { }
+  } catch (e) {}
 };
 
 function doesLayerExist(layerId: string, map: any) {
@@ -824,5 +819,3 @@ function mapFilterBool(
 
   return isPriceInRange && isTimeInRange;
 }
-
-

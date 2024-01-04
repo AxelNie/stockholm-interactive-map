@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import "./Filter.scss";
 import { MdFilterListAlt } from "react-icons/md";
 import { MdOutlineClose } from "react-icons/md";
-import RangeSlider from 'react-range-slider-input';
+import RangeSlider from "react-range-slider-input";
 import "react-range-slider-input/dist/style.css";
 
 interface FilterComponentProps {
@@ -61,12 +61,12 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
   const enablePriceFilter = () => {
     setPriceState({ ...priceState, active: true });
     setIsChanged(true);
-  }
+  };
 
   const enableTimeFilter = () => {
     setTimeState({ ...timeState, active: true });
     setIsChanged(true);
-  }
+  };
 
   const handlePriceChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setPriceState({ ...priceState, active: e.target.checked });
@@ -78,13 +78,11 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
     setIsChanged(true);
   };
 
-  const handleRangeChange = (type: 'price' | 'time', values: number[]) => {
-    if (type === 'price') {
+  const handleRangeChange = (type: "price" | "time", values: number[]) => {
+    if (type === "price") {
       setPriceState({ ...priceState, range: values });
-      console.log(values);
-    } else if (type === 'time') {
+    } else if (type === "time") {
       setTimeState({ ...timeState, range: values });
-      console.log(values);
     }
     setIsChanged(true);
   };
@@ -128,17 +126,26 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
       count++;
     }
     return count;
-  }
+  };
 
   return (
-    <div className={isMobileDevice ? "filter-container mobile" : "filter-container"}>
+    <div
+      className={
+        isMobileDevice ? "filter-container mobile" : "filter-container"
+      }
+    >
       {(!isFilterExpanded || isMobileDevice) && (
-        <button onClick={() => setIsFilterExpanded(!isFilterExpanded)} className={isFilterExpanded ? "filter-button active" : "filter-button"}>
+        <button
+          onClick={() => setIsFilterExpanded(!isFilterExpanded)}
+          className={
+            isFilterExpanded ? "filter-button active" : "filter-button"
+          }
+        >
           <div className="filter-icon-wrapper">
             <MdFilterListAlt className="filter-icon" />
-            {timeState.active || priceState.active ?
+            {timeState.active || priceState.active ? (
               <div className="circle">{getNumberOfFiltersApplied()}</div>
-              : null}
+            ) : null}
           </div>
           <h1>Filter</h1>
         </button>
@@ -161,8 +168,14 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
               <label htmlFor="priceCheckbox">Price Per Square Meter</label>
             </div>
 
-            <div className={priceState.active ? "range-container active" : "range-container"}>
-              <p>{priceState.active ? formatNumber(priceState.range[0]) : "-"}</p>
+            <div
+              className={
+                priceState.active ? "range-container active" : "range-container"
+              }
+            >
+              <p>
+                {priceState.active ? formatNumber(priceState.range[0]) : "-"}
+              </p>
               <RangeSlider
                 className="range-slider"
                 min={minValuePrice}
@@ -170,15 +183,21 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
                 disabled={!priceState.active}
                 step={5000}
                 value={priceState.range}
-                onInput={(values: number[]) => handleRangeChange('price', values)}
-
+                onInput={(values: number[]) =>
+                  handleRangeChange("price", values)
+                }
               />
-              <p>{priceState.active ? formatNumber(priceState.range[1]) : "-"}</p>
-              {!priceState.active ?
-                <div className="filter-hover-overlay" onClick={() => enablePriceFilter()}>
+              <p>
+                {priceState.active ? formatNumber(priceState.range[1]) : "-"}
+              </p>
+              {!priceState.active ? (
+                <div
+                  className="filter-hover-overlay"
+                  onClick={() => enablePriceFilter()}
+                >
                   Click to enable filter
                 </div>
-                : null}
+              ) : null}
             </div>
           </div>
           <div className="slider-container">
@@ -189,12 +208,15 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
                 className="custom-checkbox"
                 checked={timeState.active}
                 onChange={handleTimeChange}
-
               />
               <label htmlFor="timeCheckbox">Travel Time</label>
             </div>
 
-            <div className={timeState.active ? "range-container active" : "range-container"}>
+            <div
+              className={
+                timeState.active ? "range-container active" : "range-container"
+              }
+            >
               <p>{timeState.active ? timeState.range[0] + "m" : "-"}</p>
               <RangeSlider
                 className="range-slider"
@@ -203,17 +225,27 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
                 disabled={!timeState.active}
                 step={5}
                 value={timeState.range}
-                onInput={(values: number[]) => handleRangeChange('time', values)}
+                onInput={(values: number[]) =>
+                  handleRangeChange("time", values)
+                }
               />
               <p>{timeState.active ? timeState.range[1] + "m" : "-"}</p>
-              {!timeState.active ?
-                <div className="filter-hover-overlay" onClick={() => enableTimeFilter()}>
+              {!timeState.active ? (
+                <div
+                  className="filter-hover-overlay"
+                  onClick={() => enableTimeFilter()}
+                >
                   Click to enable filter
                 </div>
-                : null}
+              ) : null}
             </div>
           </div>
-          <button className={isChanged ? "apply active" : "apply"} onClick={applyFilter}>Apply</button>
+          <button
+            className={isChanged ? "apply active" : "apply"}
+            onClick={applyFilter}
+          >
+            Apply
+          </button>
         </div>
       )}
     </div>
@@ -226,4 +258,4 @@ export default FilterComponent;
 // Example: 1000 -> 1k
 const formatNumber = (num: number) => {
   return num >= 1000 ? `${Math.round(num / 1000)}k` : num.toString();
-}
+};
