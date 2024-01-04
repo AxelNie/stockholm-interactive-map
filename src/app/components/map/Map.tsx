@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useMemo, useCallback } from "react";
 import mapboxgl, { LngLatLike, Popup } from "mapbox-gl";
 import { buffer, bbox, bboxPolygon, point } from "@turf/turf";
 import { getTravelTime } from "@/queries/getTravelTime";
@@ -85,6 +85,10 @@ const Map: React.FC<MapProps> = ({
   const [newTravelTimeData, setNewTravelTimeData] = useState<ILocation[]>([]);
   const [travelTimeData, setTravelTimeData] = useState<ILocation[]>([]);
 
+  const colors = useMemo(
+    () => ["#13C81A", "#C2D018", "#D1741F", "#BE3A1D"],
+    []
+  );
   let popup: Popup | null = null;
 
   let travelTimeAndPriceData: ILocation[] = [];
@@ -214,7 +218,6 @@ const Map: React.FC<MapProps> = ({
       mapInstance.on("mouseleave", "travelTimeGrid", () => {
         if (popup) {
           popup.remove();
-          popup = null;
         }
       });
 
@@ -225,7 +228,19 @@ const Map: React.FC<MapProps> = ({
     if (!map) {
       initializeMap();
     }
-  }, [map, onMapClick, selectedPopupMode]);
+  }, [
+    map,
+    onMapClick,
+    selectedPopupMode,
+    colors,
+    initiatedLoadingTravelTimeData,
+    limits,
+    mapTheme,
+    popup,
+    travelTime,
+    travelTimeMode,
+    updateLoadingStatus,
+  ]);
 
   useEffect(() => {
     if (map) {
@@ -312,7 +327,7 @@ const Map: React.FC<MapProps> = ({
         });
       });
     }
-  }, [map, selectedPopupMode]);
+  }, [map, selectedPopupMode, onMapClick]);
 
   // Update the useEffect to handle an array of polyline data
   useEffect(() => {
@@ -529,8 +544,6 @@ const Map: React.FC<MapProps> = ({
     mapVisualisationMode,
   ]);
 
-  const colors = ["#13C81A", "#C2D018", "#D1741F", "#BE3A1D"];
-
   // Update heatmap layer's paint property when Limits changes
   useEffect(() => {
     if (map && map.getLayer("travelTimeGrid")) {
@@ -566,6 +579,24 @@ const Map: React.FC<MapProps> = ({
     }
   }, [map, selectedPopupMode, housingPriceRadius, onMapClick, showInfoPopup]);
 
+  const hoverFeature = useCallback(
+    (e: mapboxgl.MapMouseEvent) => {
+      const features = e.target.queryRenderedFeatures(e.point);
+      if (features && features.length > 0) {
+        const legId = features[0].properties?.legId;
+        onLegHover(legId, true);
+      }
+    },
+    [onLegHover]
+  );
+
+  const unhoverFeature = useCallback(
+    (e: mapboxgl.MapMouseEvent) => {
+      onLegHover(null, false);
+    },
+    [onLegHover]
+  );
+
   useEffect(() => {
     if (map) {
       map.on("mousemove", "invisible-polyline-hover", hoverFeature);
@@ -576,7 +607,7 @@ const Map: React.FC<MapProps> = ({
         map.off("mouseleave", "invisible-polyline-hover", unhoverFeature);
       };
     }
-  }, [map]);
+  }, [map, hoverFeature, unhoverFeature]);
 
   const updateMap = () => {
     if (map) {
@@ -584,17 +615,17 @@ const Map: React.FC<MapProps> = ({
     }
   };
 
-  function hoverFeature(e: mapboxgl.MapMouseEvent) {
-    const features = e.target.queryRenderedFeatures(e.point);
-    if (features && features.length > 0) {
-      const legId = features[0].properties?.legId;
-      onLegHover(legId, true);
-    }
-  }
+  useEffect(() => {
+    if (map) {
+      map.on("mousemove", "invisible-polyline-hover", hoverFeature);
+      map.on("mouseleave", "invisible-polyline-hover", unhoverFeature);
 
-  function unhoverFeature(e: mapboxgl.MapMouseEvent) {
-    onLegHover(null, false);
-  }
+      return () => {
+        map.off("mousemove", "invisible-polyline-hover", hoverFeature);
+        map.off("mouseleave", "invisible-polyline-hover", unhoverFeature);
+      };
+    }
+  }, [map, onLegHover, hoverFeature, unhoverFeature]);
 
   return (
     <>

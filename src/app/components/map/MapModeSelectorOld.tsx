@@ -1,6 +1,7 @@
 "use client";
 import React, { useState, useCallback } from "react";
 import "./MapModeSelector.scss";
+import Image from "next/image";
 
 type MapMode = "light" | "dark";
 
@@ -50,8 +51,8 @@ const MapModeSelector: React.FC<MapModeSelectorProps> = ({ onChange }) => {
         onMouseLeave={handleMouseLeave}
       >
         <div className="current-mode">
-          <img
-            src={mapModes.find((m) => m.mode === currentMode)?.imgSrc}
+          <Image
+            src={mapModes.find((m) => m.mode === currentMode)?.imgSrc || ""}
             alt="Current mode"
           />
           <div className="label-mode-selector">
@@ -66,7 +67,7 @@ const MapModeSelector: React.FC<MapModeSelectorProps> = ({ onChange }) => {
                 className="menu-item"
                 onClick={() => handleModeChange(mapMode.mode)}
               >
-                <img src={mapMode.imgSrc} alt={mapMode.label} />
+                <Image src={mapMode.imgSrc} alt={mapMode.label} />
                 <div className="label">{mapMode.label}</div>
               </div>
             ))}
