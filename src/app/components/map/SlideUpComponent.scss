@@ -55,8 +55,8 @@
 [data-rsbs-overlay]:after {
   margin-right: 0px;
   margin-left: 0px;
+  background: $dark;
 }
-
 
 [data-rsbs-root]:after {
   max-width: var(--rsbs-max-w);
