@@ -12,6 +12,7 @@
   background-color: $dark;
   border-radius: 5px;
   color: white;
+  pointer-events: all;
 
   &.mobile{
     right: 0px;

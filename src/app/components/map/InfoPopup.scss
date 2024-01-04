@@ -2,7 +2,7 @@
 
 .info-popup-container{
     color: white;
-    position: relative;
+    position: absolute;
     display: flex;
     flex-direction: column;
     top: 0;
@@ -13,6 +13,7 @@
     z-index: 1000;
     border-radius: 5px;
     overflow: hidden; // Add this line to disable scrolling
+    pointer-events: all;
 }
 
 .travel-info-container {
