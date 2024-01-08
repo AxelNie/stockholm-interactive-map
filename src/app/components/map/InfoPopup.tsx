@@ -131,7 +131,7 @@ const InfoPopup: React.FC<InfoPopupProps> = ({
     };
 
     fetchData();
-  }, [coordinates, travelTime, onPolylineData]);
+  }, [coordinates, travelTime]);
 
   return (
     <>
