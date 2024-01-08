@@ -9,6 +9,7 @@ import "./MapContainer.scss";
 import TravelTimeModeSelector from "./TravelTimeModeSelector";
 import Filter from "./Filter";
 import MapModeSelector from "./MapModeSelector";
+import Navbar from "./Navbar";
 
 interface MapInstanceType extends mapboxgl.Map {
   currentMarker?: mapboxgl.Marker | null;
@@ -186,7 +187,7 @@ const MapContainer = () => {
 
   return (
     <div className="main-wrapper">
-      <div className="navbar"></div>
+      <Navbar isMobileDevice={isMobileDevice} />
       <div className="main-map-container">
         {/*displayLoading && <LoadingOverlay status={loadingStatus} />*/}
         <Map

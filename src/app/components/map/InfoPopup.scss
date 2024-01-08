@@ -12,7 +12,7 @@
     background-color: $dark;
     z-index: 1000;
     border-radius: 5px;
-    overflow: hidden; // Add this line to disable scrolling
+    overflow: hidden;
     pointer-events: all;
 }
 
@@ -23,7 +23,7 @@
 
 .travel-legs{
   overflow-y: auto;
-  max-height: calc(100vh - 294px)
+  max-height: calc(100vh - 346px); // Not the prettiest solution, depends on the height of the navbar
 }
 
 
