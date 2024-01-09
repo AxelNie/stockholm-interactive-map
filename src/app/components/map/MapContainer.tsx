@@ -9,7 +9,7 @@ import "./MapContainer.scss";
 import TravelTimeModeSelector from "./TravelTimeModeSelector";
 import Filter from "./Filter";
 import MapModeSelector from "./MapModeSelector";
-import Navbar from "./Navbar";
+import Navbar from "../smallComponents/Navbar";
 
 interface MapInstanceType extends mapboxgl.Map {
   currentMarker?: mapboxgl.Marker | null;
@@ -64,7 +64,7 @@ const MapContainer = () => {
     useState(false);
 
   useEffect(() => {
-    const onClick = (event: Event) => {};
+    const onClick = (event: Event) => { };
 
     document.addEventListener("click", onClick);
 

@@ -19,6 +19,7 @@
         // Add additional styles as needed
         overflow: auto; // If the content is too long
         position: relative; // to position the close icon absolutely within this container
+        width: 1000px;
     }
     
     
@@ -37,3 +38,11 @@
     }
 }
 
+// Mobile and tablet
+
+@media (max-width: 1050px) {
+    .popup-backdrop .popup-content {
+        width: calc(100% - 2rem);
+    }
+
+}
