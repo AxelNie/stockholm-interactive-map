@@ -1,0 +1,39 @@
+@import '@/app/variables.module.scss';
+
+.popup-backdrop {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 10;
+    flex-direction: column;
+
+
+    .popup-content {
+        // Centering the content inside the backdrop
+        // Add additional styles as needed
+        overflow: auto; // If the content is too long
+        position: relative; // to position the close icon absolutely within this container
+    }
+    
+    
+    .close-icon {
+        position: absolute;
+        top: 10px;  // Adjust as needed
+        right: 10px; // Adjust as needed
+        cursor: pointer;
+        font-size: 24px; // Adjust the size as needed
+        color: white; // Adjust the color as needed
+        z-index: 20;
+    }
+
+    .close-icon:hover{
+        color: $accent
+    }
+}
+

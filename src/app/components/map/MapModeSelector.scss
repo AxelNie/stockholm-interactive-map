@@ -67,21 +67,21 @@ position: absolute;
     font-size: 0.75rem;
     font-weight: 600;
     position: absolute;
-    bottom: 0px;
-    right: 0px;
+    bottom: -3px;
+    right: -3px;
   }
 
     button{
       font-size: 2rem;
-      padding: 0.5rem;
+      padding: 0.75rem 1rem;
       display: flex;
       justify-content: center;
       align-items: center;
       color: white;
 
       h1{
-        margin: 0 0 0 0.25rem;
-        font-size: 0.9rem;
+        margin: 0;
+        font-size: 1rem;
         font-weight: 400;
       }
 
@@ -93,7 +93,8 @@ position: absolute;
       }
 
       .map-icon{
-        margin: 0 0.5rem; // Fix for icon not having same margin as other icon
+        font-size: 1.25rem;
+        margin: 0 0.25rem 0 0.5rem;
       }
     }
 
