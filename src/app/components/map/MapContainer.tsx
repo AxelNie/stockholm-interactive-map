@@ -64,7 +64,7 @@ const MapContainer = () => {
     useState(false);
 
   useEffect(() => {
-    const onClick = (event: Event) => { };
+    const onClick = (event: Event) => {};
 
     document.addEventListener("click", onClick);
 
@@ -189,7 +189,7 @@ const MapContainer = () => {
     <div className="main-wrapper">
       <Navbar isMobileDevice={isMobileDevice} />
       <div className="main-map-container">
-        {/*displayLoading && <LoadingOverlay status={loadingStatus} />*/}
+        {displayLoading && <LoadingOverlay status={loadingStatus} />}
         <Map
           onMapClick={onMapClick}
           limits={limits}

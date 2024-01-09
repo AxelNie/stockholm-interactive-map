@@ -1,5 +1,4 @@
-// Assuming Popup.tsx is in the same directory
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import "./Navbar.scss";
 import Image from "next/image";
 import { AiFillInfoCircle } from "react-icons/ai";
@@ -11,9 +10,28 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ isMobileDevice }) => {
-  const [isPopupOpen, setIsPopupOpen] = useState(false);
+  const [isPopupOpen, setIsPopupOpen] = useState(true);
+
+  useEffect(() => {
+    const hasVisitedAndClosedPopup = localStorage.getItem(
+      "hasVisitedAndClosedPopup"
+    );
+    if (hasVisitedAndClosedPopup) {
+      setIsPopupOpen(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isPopupOpen) {
+      localStorage.setItem("hasVisitedAndClosedPopup", "true");
+    }
+  }, [isPopupOpen]);
 
   const togglePopup = () => setIsPopupOpen(!isPopupOpen);
+
+  const closePopup = () => {
+    setIsPopupOpen(false);
+  };
 
   return (
     <div className="navbar-container">
@@ -34,8 +52,11 @@ const Navbar: React.FC<NavbarProps> = ({ isMobileDevice }) => {
         <AiFillInfoCircle className="info-icon" />
       </div>
 
-      <Popup isOpen={isPopupOpen} onClose={() => setIsPopupOpen(false)}>
-        <PopupInfo isMobileDevice={isMobileDevice} onClose={() => setIsPopupOpen(false)} />
+      <Popup isOpen={isPopupOpen} onClose={() => closePopup()}>
+        <PopupInfo
+          isMobileDevice={isMobileDevice}
+          onClose={() => closePopup()}
+        />
       </Popup>
     </div>
   );
