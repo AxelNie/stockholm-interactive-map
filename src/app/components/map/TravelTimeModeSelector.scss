@@ -1,9 +1,7 @@
 @import '@/app/variables.module.scss';
 
 .full-site-width{
-    position: fixed;
-    top: 10px;
-    right: 10px;
+    position: relative;
     width: 100%;
     display: flex;
     justify-content: flex-end;
@@ -37,6 +35,11 @@
   font-family: 'Inter', sans-serif !important;
   color: white !important;
 }
+
+.css-kk1bwy-MuiButtonBase-root-MuiMenuItem-root:hover{
+  background-color: $semi-dark-hover;
+}
+
 
 .dropdown-container{
   margin-right: 2rem;
@@ -79,6 +82,7 @@
     flex-direction: row;
     align-items: center;
     justify-content: space-between;
+    pointer-events: all;
     p{
       color: $grey;
       font-size: 0.9rem;
@@ -96,6 +100,10 @@
   .MuiSelect-icon {
     color: white;
   }
+  }
+
+  .custom-select:hover {
+    background: $semi-dark-hover;
   }
 
   .custom-list {

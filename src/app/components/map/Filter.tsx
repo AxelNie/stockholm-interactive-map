@@ -141,13 +141,13 @@ const FilterComponent: React.FC<FilterComponentProps> = ({
             isFilterExpanded ? "filter-button active" : "filter-button"
           }
         >
+          <h1>Filter</h1>
           <div className="filter-icon-wrapper">
             <MdFilterListAlt className="filter-icon" />
             {timeState.active || priceState.active ? (
               <div className="circle">{getNumberOfFiltersApplied()}</div>
             ) : null}
           </div>
-          <h1>Filter</h1>
         </button>
       )}
       {isFilterExpanded && (

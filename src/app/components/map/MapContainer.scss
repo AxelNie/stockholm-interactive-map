@@ -1,8 +1,27 @@
-.main-map-container{
-position: fixed;
+@import '@/app/variables.module.scss';
+
+.main-wrapper{
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.main-map-container {
+  position: relative;
+  width: 100%;
+  flex-grow: 1; 
+  overflow: hidden; 
+}
+
+
+.main-map-overlay {
+  position: absolute; 
   top: 8px;
   left: 8px;
   right: 8px;
   bottom: 8px;
-  overflow: auto;
+  overflow: auto; 
+  pointer-events: none;
+  z-index: 2;
 }

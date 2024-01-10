@@ -327,7 +327,7 @@ const Map: React.FC<MapProps> = ({
         });
       });
     }
-  }, [map, selectedPopupMode, onMapClick]);
+  }, [map, selectedPopupMode]);
 
   // Update the useEffect to handle an array of polyline data
   useEffect(() => {

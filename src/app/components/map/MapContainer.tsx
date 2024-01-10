@@ -9,6 +9,7 @@ import "./MapContainer.scss";
 import TravelTimeModeSelector from "./TravelTimeModeSelector";
 import Filter from "./Filter";
 import MapModeSelector from "./MapModeSelector";
+import Navbar from "../smallComponents/Navbar";
 
 interface MapInstanceType extends mapboxgl.Map {
   currentMarker?: mapboxgl.Marker | null;
@@ -59,10 +60,11 @@ const MapContainer = () => {
     savedRange: [minValueTime, maxValueTime],
   });
   const [isFilterExpanded, setIsFilterExpanded] = useState(false);
-  const [isMapModeSelectorExpanded, setIsMapModeSelectorExpanded] = useState(false);
+  const [isMapModeSelectorExpanded, setIsMapModeSelectorExpanded] =
+    useState(false);
 
   useEffect(() => {
-    const onClick = (event: Event) => { };
+    const onClick = (event: Event) => {};
 
     document.addEventListener("click", onClick);
 
@@ -184,79 +186,84 @@ const MapContainer = () => {
   };
 
   return (
-    <div className="main-map-container">
-      {displayLoading && <LoadingOverlay status={loadingStatus} />}
-      <Map
-        onMapClick={onMapClick}
-        limits={limits}
-        polyline={polyline}
-        hoveredLegId={hoveredLegId}
-        onLegHover={handleLegHover}
-        housingPriceRadius={housingPriceRadius}
-        selectedPopupMode={selectedOption}
-        showInfoPopup={showInfoPopup}
-        updateLoadingStatus={onUpdateMapLoadingStatus}
-        loadingStatus={loadingStatus}
-        travelTimeMode={travelTimeMode}
-        travelTime={travelTime}
-        mapVisualisationMode={mapVisualisationMode}
-        priceState={priceState}
-        timeState={timeState}
-      />
-      {showInfoPopup && (
-        <InfoPopup
-          coordinates={clickedCoordinates}
-          onClose={handleInfoPopupClose}
-          onPolylineData={handlePolylineData}
+    <div className="main-wrapper">
+      <Navbar isMobileDevice={isMobileDevice} />
+      <div className="main-map-container">
+        {displayLoading && <LoadingOverlay status={loadingStatus} />}
+        <Map
+          onMapClick={onMapClick}
+          limits={limits}
+          polyline={polyline}
           hoveredLegId={hoveredLegId}
           onLegHover={handleLegHover}
-          onToggle={handleInfoPopupModeToggle}
-          selectedOption={selectedOption}
           housingPriceRadius={housingPriceRadius}
-          handleSliderChange={handleSliderChange}
-          travelTime={travelTime}
-          isMobileDevice={isMobileDevice}
-        />
-      )}
-      <OverlayControls
-        limits={limits}
-        setLimits={setLimits}
-        isMobileDevice={isMobileDevice}
-        mapVisualisationMode={mapVisualisationMode}
-      />
-      {mapVisualisationMode === "time" ?
-        <TravelTimeModeSelector
+          selectedPopupMode={selectedOption}
+          showInfoPopup={showInfoPopup}
+          updateLoadingStatus={onUpdateMapLoadingStatus}
+          loadingStatus={loadingStatus}
           travelTimeMode={travelTimeMode}
-          setTravelTimeMode={setTravelTimeMode}
           travelTime={travelTime}
-          setTravelTime={setTravelTime}
-          isMobileDevice={isMobileDevice}
+          mapVisualisationMode={mapVisualisationMode}
+          priceState={priceState}
+          timeState={timeState}
         />
-        : null}
-      <MapModeSelector
-        priceState={priceState}
-        setPriceState={setPriceState}
-        timeState={timeState}
-        setTimeState={setTimeState}
-        isMobileDevice={isMobileDevice}
-        mapVisualisationMode={mapVisualisationMode}
-        setMapVisualisationMode={setMapVisualisationMode}
-        isMapModeSelectorExpanded={isMapModeSelectorExpanded}
-        setIsMapModeSelectorExpanded={setIsMapModeSelectorExpanded}
-      />
-      <Filter
-        priceState={priceState}
-        setPriceState={setPriceState}
-        timeState={timeState}
-        setTimeState={setTimeState}
-        minValuePrice={minValuePrice}
-        maxValuePrice={maxValuePrice}
-        minValueTime={minValueTime}
-        maxValueTime={maxValueTime}
-        isMobileDevice={isMobileDevice}
-        isFilterExpanded={isFilterExpanded}
-        setIsFilterExpanded={setIsFilterExpanded}
-      />
+        <div className="main-map-overlay">
+          {showInfoPopup && (
+            <InfoPopup
+              coordinates={clickedCoordinates}
+              onClose={handleInfoPopupClose}
+              onPolylineData={handlePolylineData}
+              hoveredLegId={hoveredLegId}
+              onLegHover={handleLegHover}
+              onToggle={handleInfoPopupModeToggle}
+              selectedOption={selectedOption}
+              housingPriceRadius={housingPriceRadius}
+              handleSliderChange={handleSliderChange}
+              travelTime={travelTime}
+              isMobileDevice={isMobileDevice}
+            />
+          )}
+          <OverlayControls
+            limits={limits}
+            setLimits={setLimits}
+            isMobileDevice={isMobileDevice}
+            mapVisualisationMode={mapVisualisationMode}
+          />
+          {mapVisualisationMode === "time" ? (
+            <TravelTimeModeSelector
+              travelTimeMode={travelTimeMode}
+              setTravelTimeMode={setTravelTimeMode}
+              travelTime={travelTime}
+              setTravelTime={setTravelTime}
+              isMobileDevice={isMobileDevice}
+            />
+          ) : null}
+          <MapModeSelector
+            priceState={priceState}
+            setPriceState={setPriceState}
+            timeState={timeState}
+            setTimeState={setTimeState}
+            isMobileDevice={isMobileDevice}
+            mapVisualisationMode={mapVisualisationMode}
+            setMapVisualisationMode={setMapVisualisationMode}
+            isMapModeSelectorExpanded={isMapModeSelectorExpanded}
+            setIsMapModeSelectorExpanded={setIsMapModeSelectorExpanded}
+          />
+          <Filter
+            priceState={priceState}
+            setPriceState={setPriceState}
+            timeState={timeState}
+            setTimeState={setTimeState}
+            minValuePrice={minValuePrice}
+            maxValuePrice={maxValuePrice}
+            minValueTime={minValueTime}
+            maxValueTime={maxValueTime}
+            isMobileDevice={isMobileDevice}
+            isFilterExpanded={isFilterExpanded}
+            setIsFilterExpanded={setIsFilterExpanded}
+          />
+        </div>
+      </div>
     </div>
   );
 };

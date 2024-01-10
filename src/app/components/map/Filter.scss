@@ -12,10 +12,11 @@
   background-color: $dark;
   border-radius: 5px;
   color: white;
+  pointer-events: all;
 
   &.mobile{
     right: 0px;
-    top: 55px;
+    top: 50px;
     bottom: unset;
 }
 
@@ -58,8 +59,8 @@
   .circle{
     background-color: $accent;
     border-radius: 20px;
-    width: 16px;
-    height: 16px;
+    width: 14px;
+    height: 14px;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -67,21 +68,21 @@
     font-size: 0.75rem;
     font-weight: 600;
     position: absolute;
-    top: 0px;
-    right: 0px;
+    top: -5px;
+    right: -5px;
   }
 
     button{
         font-size: 2rem;
-        padding: 0.5rem;
+        padding: 0.75rem 1rem;
         display: flex;
         justify-content: center;
         align-items: center;
         color: white;   
         
         h1{
-          margin: 0 0 0 0.25rem;
-          font-size: 0.9rem;
+          margin: 0;
+          font-size: 1rem;
           font-weight: 400;
         }
 
@@ -90,6 +91,11 @@
           display: flex;
           justify-content: center;
           align-items: center;
+        }
+
+        .filter-icon{
+          font-size: 1.25rem;
+          margin-left: 0.25rem;
         }
     }
 
