@@ -60,26 +60,18 @@ const PopupInfo = ({
   )})`;
 
   const increasePage = () => {
-    console.log(page);
     if (page < pages.length - 1) {
       setPage(page + 1);
     }
   };
 
   const decreasePage = () => {
-    console.log(page);
     if (page > 0) {
       setPage(page - 1);
     }
   };
 
   useEffect(() => {
-    console.log("ismobiledevice", isMobileDevice);
-    console.log("page", page);
-    console.log(
-      "lastpageonmobile",
-      isMobileDevice && page === pages.length - 1
-    );
     setLastPageOnMobile(isMobileDevice && page === pages.length - 1);
   }, [page, isMobileDevice]);
 

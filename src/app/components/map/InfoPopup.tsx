@@ -91,7 +91,6 @@ const InfoPopup: React.FC<InfoPopupProps> = ({
 
   useEffect(() => {
     const fetchData = async () => {
-      console.log("fetching data");
       try {
         const response = await fetch(
           `/api/getLocationData?coordinates=${encodeURIComponent(
