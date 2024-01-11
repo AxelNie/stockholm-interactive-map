@@ -23,7 +23,7 @@ const pages = [
   {
     topTitle: "Prices",
     title: "Housing Price Insights",
-    text: "Access up-to-date housing price data for various Stockholm areas. Our app integrates the latest apartment sales information, displaying historical price trends for informed decisions.",
+    text: "Dive into the real estate market with our latest feature - visualizing housing prices. By switching the 'Map mode' to 'Price per Square Meter', you can now see color-coded housing prices in various areas, making it easier to compare and contrast different neighborhoods.",
   },
   {
     topTitle: "Customize",
