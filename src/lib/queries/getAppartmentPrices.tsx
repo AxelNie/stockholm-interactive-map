@@ -14,12 +14,12 @@ export async function getPricesWithLocations() {
   };
 
   try {
-    // const apiUrl =
-    //   "https://24yq2sx3n3.execute-api.eu-north-1.amazonaws.com/test/prices";
-    // const response = await fetch(apiUrl);
-    // const prices = await response.json();
+    const apiUrl =
+      "https://24yq2sx3n3.execute-api.eu-north-1.amazonaws.com/test/prices";
+    const response = await fetch(apiUrl);
+    const prices = await response.json();
 
-    const prices = [
+    const prices3 = [
       20192,
       59.38154699011102,
       17.582701318684553,

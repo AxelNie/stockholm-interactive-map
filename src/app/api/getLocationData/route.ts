@@ -28,7 +28,7 @@ async function getTravelTime(
   const [originLng, originLat] = originCoordinates;
 
   try {
-    const apiUrl = `https://api.sl.se/api2/TravelplannerV3_1/trip.json?key=${process.env.NEXT_PUBLIC_SL_TRAVELPLANNER_API_KEY}&originCoordLat=${originLat}&originCoordLong=${originLng}&destExtId=${destExtId}&date=${date}&time=${time}&poly=1`;
+    const apiUrl = `https://journeyplanner.integration.sl.se/v1/TravelplannerV3_1/trip.json?key=${process.env.NEXT_PUBLIC_SL_TRAVELPLANNER_API_KEY}&originCoordLat=${originLat}&originCoordLong=${originLng}&destExtId=${destExtId}&date=${date}&time=${time}&poly=1`;
     const response = await fetch(apiUrl);
     const data = await response.json();
 
@@ -86,7 +86,7 @@ export async function GET(request: Request) {
       );
     }
 
-    const tCentralenDestId = 9001; // T-Centralen station coordinates
+    const tCentralenDestId = 300109001; // T-Centralen station coordinates
 
     const travelInfo: any = await getTravelTime(
       parsedCoordinates,
