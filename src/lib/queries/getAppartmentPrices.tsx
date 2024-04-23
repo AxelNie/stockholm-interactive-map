@@ -14,10 +14,10 @@ export async function getPricesWithLocations() {
   };
 
   try {
-    const apiUrl =
-      "https://24yq2sx3n3.execute-api.eu-north-1.amazonaws.com/test/prices";
-    const response = await fetch(apiUrl);
-    const prices = await response.json();
+    // const apiUrl =
+    //   "https://24yq2sx3n3.execute-api.eu-north-1.amazonaws.com/test/prices";
+    // const response = await fetch(apiUrl);
+    // const prices = await response.json();
 
     const prices3 = [
       20192,
@@ -5506,7 +5506,7 @@ export async function getPricesWithLocations() {
       18.357874616131607,
     ];
 
-    return getListOfLocationsWithPrices(prices);
+    return getListOfLocationsWithPrices(prices3);
   } catch (error: any) {
     console.error(error);
     const sanitizedError = new Error("Failed to retrieve data");
