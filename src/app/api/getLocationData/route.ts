@@ -155,10 +155,7 @@ export async function GET(request: Request) {
       legs[0].time
     );
 
-    const totalTravelTime = addMinutesToTimeString(
-      travelInfo.duration,
-      walkTimeToFirstStation
-    );
+    const totalTravelTime = travelInfo.duration;
 
     const responseData = {
       startAddress,
